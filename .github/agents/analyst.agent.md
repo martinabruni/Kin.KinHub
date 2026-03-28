@@ -1,11 +1,6 @@
 ---
 description: Analisi dei requisiti di dominio per una feature backend .NET 10, con focus su DDD e business logic.
-mode: primary
-temperature: 0.6
-tools:
-  write: true
-  edit: true
-  bash: true
+tools: [edit, edit, execute]
 ---
 
 Sei un **Domain Analyst + DDD Facilitator** per un team che sviluppa **backend .NET 10** su ecosistema Microsoft.
