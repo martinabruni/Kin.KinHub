@@ -1,0 +1,376 @@
+name: CI CD
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend_ci:
+    name: Backend Build And Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore .NET solution
+        run: dotnet restore Kin.KinHub.CI.slnx
+
+      - name: Build .NET solution
+        run: dotnet build Kin.KinHub.CI.slnx --configuration Release --no-restore
+
+      - name: Run business tests
+        run: dotnet test "src/Tests/Kin.KinHub.Business.Tests/Kin.KinHub.Business.Tests.csproj" --configuration Release --no-build
+
+      - name: Run function tests
+        run: dotnet test "src/Tests/Kin.KinHub.Function.Tests/Kin.KinHub.Function.Tests.csproj" --configuration Release --no-build
+
+  frontend_ci:
+    name: Frontend Build And Test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: src/Presentations/Kin.KinHub.React
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/Presentations/Kin.KinHub.React/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run frontend tests
+        run: npm run test
+
+      - name: Prepare Static Web App artifact
+        shell: bash
+        run: |
+          rm -rf ../../../artifacts/staticwebapp
+          mkdir -p ../../../artifacts/staticwebapp
+          cp -R dist/. ../../../artifacts/staticwebapp/
+          cp staticwebapp.config.json ../../../artifacts/staticwebapp/staticwebapp.config.json
+
+      - name: Upload Static Web App artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: staticwebapp-package
+          path: artifacts/staticwebapp
+          if-no-files-found: error
+
+  package_function:
+    name: Package Function App
+    runs-on: ubuntu-latest
+    needs:
+      - backend_ci
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish function app
+        run: dotnet publish "src/Presentations/Kin.KinHub.Function/Kin.KinHub.Function.csproj" --configuration Release --output artifacts/function
+
+      - name: Upload function package
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-package
+          path: artifacts/function
+          if-no-files-found: error
+
+  validate_bicep:
+    name: Validate Bicep
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build Bicep template
+        run: az bicep build --file infra/main.bicep
+
+  deploy_dev:
+    name: Deploy Dev
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: dev
+    needs:
+      - backend_ci
+      - frontend_ci
+      - package_function
+      - validate_bicep
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download function package
+        uses: actions/download-artifact@v4
+        with:
+          name: function-package
+          path: function-package
+
+      - name: Download Static Web App artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: staticwebapp-package
+          path: staticwebapp-package
+
+      - name: Deploy infrastructure
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file infra/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
+              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              iftttWebhookUrl="${{ secrets.IFTTT_WEBHOOK_URL }}"
+
+          az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file infra/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
+              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              iftttWebhookUrl="${{ secrets.IFTTT_WEBHOOK_URL }}"
+
+      - name: Deploy function app
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.FUNCTION_APP_NAME }}
+          package: function-package
+
+      - name: Deploy Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: staticwebapp-package
+          output_location: ""
+          skip_app_build: true
+
+  deploy_test:
+    name: Deploy Test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: test
+    needs:
+      - deploy_dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download function package
+        uses: actions/download-artifact@v4
+        with:
+          name: function-package
+          path: function-package
+
+      - name: Download Static Web App artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: staticwebapp-package
+          path: staticwebapp-package
+
+      - name: Deploy infrastructure
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file infra/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
+              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              iftttWebhookUrl="${{ secrets.IFTTT_WEBHOOK_URL }}"
+
+          az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file infra/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
+              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              iftttWebhookUrl="${{ secrets.IFTTT_WEBHOOK_URL }}"
+
+      - name: Deploy function app
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.FUNCTION_APP_NAME }}
+          package: function-package
+
+      - name: Deploy Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: staticwebapp-package
+          output_location: ""
+          skip_app_build: true
+
+  deploy_prod:
+    name: Deploy Prod
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: prod
+    needs:
+      - deploy_test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download function package
+        uses: actions/download-artifact@v4
+        with:
+          name: function-package
+          path: function-package
+
+      - name: Download Static Web App artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: staticwebapp-package
+          path: staticwebapp-package
+
+      - name: Deploy infrastructure
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file infra/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
+              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              iftttWebhookUrl="${{ secrets.IFTTT_WEBHOOK_URL }}"
+
+          az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file infra/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
+              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              iftttWebhookUrl="${{ secrets.IFTTT_WEBHOOK_URL }}"
+
+      - name: Deploy function app
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.FUNCTION_APP_NAME }}
+          package: function-package
+
+      - name: Deploy Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: staticwebapp-package
+          output_location: ""
+          skip_app_build: true
