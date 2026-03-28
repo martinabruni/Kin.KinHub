@@ -127,7 +127,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Build Bicep template
-        run: az bicep build --file infra/main.bicep
+        run: az bicep build --file ops/iac/main.bicep
 
   deploy_dev:
     name: Deploy Dev
@@ -167,7 +167,7 @@ jobs:
         run: |
           az deployment group what-if \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --template-file infra/main.bicep \
+            --template-file ops/iac/main.bicep \
             --parameters \
               location="${{ vars.AZURE_LOCATION }}" \
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
@@ -183,7 +183,7 @@ jobs:
 
           az deployment group create \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --template-file infra/main.bicep \
+            --template-file ops/iac/main.bicep \
             --parameters \
               location="${{ vars.AZURE_LOCATION }}" \
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
@@ -248,7 +248,7 @@ jobs:
   #       run: |
   #         az deployment group what-if \
   #           --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-  #           --template-file infra/main.bicep \
+  #           --template-file ops/iac/main.bicep \
   #           --parameters \
   #             location="${{ vars.AZURE_LOCATION }}" \
   #             staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
@@ -264,7 +264,7 @@ jobs:
 
   #         az deployment group create \
   #           --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-  #           --template-file infra/main.bicep \
+  #           --template-file ops/iac/main.bicep \
   #           --parameters \
   #             location="${{ vars.AZURE_LOCATION }}" \
   #             staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
@@ -329,7 +329,7 @@ jobs:
         run: |
           az deployment group what-if \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --template-file infra/main.bicep \
+            --template-file ops/iac/main.bicep \
             --parameters \
               location="${{ vars.AZURE_LOCATION }}" \
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
@@ -345,7 +345,7 @@ jobs:
 
           az deployment group create \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --template-file infra/main.bicep \
+            --template-file ops/iac/main.bicep \
             --parameters \
               location="${{ vars.AZURE_LOCATION }}" \
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
