@@ -1,0 +1,84 @@
+// === IDENTITY ===
+
+Table IdentityUserEntity {
+  Id uuid [primary key]
+  Email varchar [unique, not null]
+  DisplayName varchar
+  IsEmailVerified boolean [default: false]
+  IsDeleted boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
+
+Table IdentityProviderEntity {
+  Id int [primary key] // Enum: 1=KinHub, 2=Google, 3=GitHub...
+  Name varchar [unique, not null] // "google", "github", "microsoft"
+  Label varchar [not null] // "Accedi con Google", "Accedi con GitHub"
+  IsActive boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
+
+Table IdentityUserProviderEntity {
+  Id uuid [primary key]
+  UserId uuid [not null, ref: > IdentityUserEntity.Id]
+  ProviderId int [not null, ref: > IdentityProviderEntity.Id]
+  ProviderUserId varchar [not null]
+  IsDeleted boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+  
+  Indexes {
+    (UserId, ProviderId) [unique]
+    (ProviderId, ProviderUserId) [unique]
+  }
+}
+
+Table UserSessionEntity {
+  Id uuid [primary key]
+  UserId uuid [not null, ref: > IdentityUserEntity.Id]
+  ProviderId int [not null, ref: > IdentityProviderEntity.Id]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
+
+// === FAMILY ===
+
+Table FamilyEntity {
+  Id uuid [primary key]
+  Name varchar [not null]
+  IsDeleted boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
+
+Table RoleEntity {
+  Id int [primary key] // Enum: 1=Admin, 2=Member
+  Name varchar [unique, not null] // "admin", "member"
+  IsActive boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
+
+Table FamilyMemberEntity {
+  Id uuid [primary key]
+  FamilyId uuid [not null, ref: > FamilyEntity.Id]
+  UserId uuid [not null, ref: > IdentityUserEntity.Id]
+  RoleId int [not null, ref: > RoleEntity.Id]
+  IsDeleted boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+  
+  Indexes {
+    (FamilyId, UserId) [unique]
+  }
+}
+
+Table IdentityUserCredentialEntity {
+    Id uuid [primary key]
+  UserId uuid [not null, ref: > IdentityUserEntity.Id, unique]
+  PasswordHash varchar [not null] // hash bcrypt/argon2
+  IsDeleted boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
