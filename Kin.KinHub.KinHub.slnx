@@ -21,17 +21,17 @@
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Businesses/">
-    <Project Path="src\Businesses\Kin.KinHub.KinHub.Business\Kin.KinHub.KinHub.Business.csproj" Type="C#" />
+    <Project Path="src\Businesses\Kin.KinHub.KinHub.Business\Kin.KinHub.KinHub.Business.csproj" />
   </Folder>
   <Folder Name="/src/Domains/">
-    <Project Path="src\Domains\Kin.KinHub.KinHub.Domain\Kin.KinHub.KinHub.Domain.csproj" Type="C#" />
+    <Project Path="src\Domains\Kin.KinHub.KinHub.Domain\Kin.KinHub.KinHub.Domain.csproj" />
   </Folder>
   <Folder Name="/src/Infrastructures/">
     <Project Path="src/Infrastructures/Kin.KinHub.KinHub.Json/Kin.KinHub.KinHub.Json.csproj" />
-    <Project Path="src\Infrastructures\Kin.KinHub.KinHub.BlobStorage\Kin.KinHub.KinHub.BlobStorage.csproj" Type="C#" />
-    <Project Path="src\Infrastructures\Kin.KinHub.KinHub.SqlServer\Kin.KinHub.KinHub.SqlServer.csproj" Type="C#" />
+    <Project Path="src\Infrastructures\Kin.KinHub.KinHub.BlobStorage\Kin.KinHub.KinHub.BlobStorage.csproj" />
+    <Project Path="src\Infrastructures\Kin.KinHub.KinHub.SqlServer\Kin.KinHub.KinHub.SqlServer.csproj" />
   </Folder>
   <Folder Name="/src/Presentations/">
-    <Project Path="src\Presentations\Kin.KinHub.KinHub.Function\Kin.KinHub.KinHub.Function.csproj" Type="C#" />
+    <Project Path="src/Presentations/Kin.KinHub.KinHub.Function/Kin.KinHub.KinHub.Function.csproj" />
   </Folder>
 </Solution>
