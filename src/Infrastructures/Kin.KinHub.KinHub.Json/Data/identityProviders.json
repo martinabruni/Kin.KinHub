@@ -1,0 +1,10 @@
+[
+    {
+        "Id": 1,
+        "Name": "kinhub",
+        "Label": "Accedi con KinHub",
+        "IsActive": true,
+        "CreatedAt": "2026-01-01T00:00:00Z",
+        "UpdatedAt": "2026-01-01T00:00:00Z"
+    }
+]
