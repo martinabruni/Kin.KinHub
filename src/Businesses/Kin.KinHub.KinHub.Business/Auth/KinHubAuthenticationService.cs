@@ -73,7 +73,7 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
                 Id = Guid.NewGuid(),
                 UserId = created.Id,
                 ProviderId = KinHubProviderId,
-                ProviderUserId = created.Email,
+                ProviderUserId = created.Id.ToString(),
                 CreatedAt = now,
                 UpdatedAt = now,
             };
