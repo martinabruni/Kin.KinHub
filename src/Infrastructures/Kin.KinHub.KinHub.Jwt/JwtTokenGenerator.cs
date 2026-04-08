@@ -1,10 +1,10 @@
+using Kin.KinHub.KinHub.Domain.Common;
+using Kin.KinHub.KinHub.Domain.Models;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Kin.KinHub.KinHub.Domain.Common;
-using Kin.KinHub.KinHub.Domain.Models;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Kin.KinHub.KinHub.Jwt;
 

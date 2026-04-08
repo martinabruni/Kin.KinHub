@@ -1,6 +1,6 @@
-using System.Text.Json;
 using Kin.KinHub.KinHub.Domain;
 using Kin.KinHub.KinHub.Domain.Common;
+using System.Text.Json;
 
 namespace Kin.KinHub.KinHub.Json;
 

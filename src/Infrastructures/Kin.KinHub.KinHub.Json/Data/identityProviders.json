@@ -6,5 +6,29 @@
         "IsActive": true,
         "CreatedAt": "2026-01-01T00:00:00Z",
         "UpdatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+        "Id": 2,
+        "Name": "google",
+        "Label": "Accedi con Google",
+        "IsActive": false,
+        "CreatedAt": "2026-01-01T00:00:00Z",
+        "UpdatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+        "Id": 3,
+        "Name": "github",
+        "Label": "Accedi con GitHub",
+        "IsActive": false,
+        "CreatedAt": "2026-01-01T00:00:00Z",
+        "UpdatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+        "Id": 4,
+        "Name": "microsoft",
+        "Label": "Accedi con Microsoft",
+        "IsActive": false,
+        "CreatedAt": "2026-01-01T00:00:00Z",
+        "UpdatedAt": "2026-01-01T00:00:00Z"
     }
 ]

@@ -1,3 +1,4 @@
+using Kin.KinHub.KinHub.Domain;
 using Kin.KinHub.KinHub.Domain.Common;
 using Kin.KinHub.KinHub.Domain.Interfaces;
 using Kin.KinHub.KinHub.Json;
@@ -9,7 +10,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers the JSON-based infrastructure repositories.
     /// </summary>
-    public static IServiceCollection AddJsonInfrastructure(
+    public static IServiceCollection AddKinHubJsonInfrastructure(
         this IServiceCollection services,
         Action<JsonInfrastructureOptions> configure)
     {
@@ -33,6 +34,9 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IRefreshTokenRepository>(_ =>
             new RefreshTokenJsonRepository(options.DataDirectory));
+
+        services.AddSingleton<IRoleRepository>(_ =>
+            new RoleJsonRepository(options.DataDirectory));
 
         return services;
     }

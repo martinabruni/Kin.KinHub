@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers JWT token generation and validation services.
     /// </summary>
-    public static IServiceCollection AddJwtInfrastructure(
+    public static IServiceCollection AddKinHubJwtInfrastructure(
         this IServiceCollection services,
         Action<JwtOptions> configure)
     {
