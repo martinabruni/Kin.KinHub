@@ -5,18 +5,18 @@ using Microsoft.Azure.Functions.Worker;
 
 namespace Kin.KinHub.KinHub.Function;
 
-public sealed class LogoutFunction
+public sealed class RefreshFunction
 {
     private readonly IAuthenticationService _authService;
 
-    public LogoutFunction(IAuthenticationService authService)
+    public RefreshFunction(IAuthenticationService authService)
     {
         _authService = authService;
     }
 
-    [Function(nameof(LogoutFunction))]
+    [Function(nameof(RefreshFunction))]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/logout")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/refresh")] HttpRequest req,
         CancellationToken cancellationToken)
     {
         var request = await req.ReadFromJsonAsync<RefreshRequest>(cancellationToken);
@@ -24,7 +24,7 @@ public sealed class LogoutFunction
         if (request is null)
             return new BadRequestObjectResult(new { message = "Invalid request body." });
 
-        var result = await _authService.LogoutAsync(request.RefreshToken, cancellationToken);
+        var result = await _authService.RefreshTokenAsync(request.RefreshToken, cancellationToken);
 
         return HttpResultMapper.ToActionResult(result);
     }

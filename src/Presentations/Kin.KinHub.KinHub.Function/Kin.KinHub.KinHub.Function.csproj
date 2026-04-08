@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Businesses\Kin.KinHub.KinHub.Business\Kin.KinHub.KinHub.Business.csproj" />
     <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.KinHub.Json\Kin.KinHub.KinHub.Json.csproj" />
+    <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.KinHub.Jwt\Kin.KinHub.KinHub.Jwt.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

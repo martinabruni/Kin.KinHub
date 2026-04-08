@@ -9,8 +9,19 @@ builder.ConfigureFunctionsWebApplication();
 var dataDirectory = builder.Configuration["JsonDataDirectory"]
     ?? Path.Combine(AppContext.BaseDirectory, "Data");
 
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? "CHANGE-ME-use-a-long-random-secret-at-least-32-chars!";
+
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? "kinhub";
+
 builder.Services
     .AddJsonInfrastructure(o => o.DataDirectory = dataDirectory)
+    .AddJwtInfrastructure(o =>
+    {
+        o.Secret = jwtSecret;
+        o.Issuer = jwtIssuer;
+    })
     .AddKinHubBusiness(_ => { });
 
 builder.Build().Run();
