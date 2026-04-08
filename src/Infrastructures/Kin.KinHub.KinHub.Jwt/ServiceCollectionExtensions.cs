@@ -21,6 +21,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITokenGenerator>(generator);
         services.AddSingleton<ITokenValidator>(generator);
 
+        services.AddScoped<CurrentUser>();
+        services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<CurrentUser>());
+
         return services;
     }
 }

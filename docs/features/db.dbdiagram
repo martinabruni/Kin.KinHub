@@ -5,14 +5,16 @@ Table IdentityUserEntity {
   Email varchar [unique, not null]
   DisplayName varchar
   IsEmailVerified boolean [default: false]
+  Status varchar [not null, default: 'Active'] // Active, Locked, Suspended
+  Roles varchar [not null, default: '[]'] // JSON array: ["user"]
   IsDeleted boolean [default: false]
   CreatedAt datetime [not null]
   UpdatedAt datetime [not null]
 }
 
 Table IdentityProviderEntity {
-  Id int [primary key] // Enum: 1=KinHub, 2=Google, 3=GitHub...
-  Name varchar [unique, not null] // "google", "github", "microsoft"
+  Id int [primary key] // Enum: 1=KinHub, 2=Google, 3=GitHub, 4=Microsoft (config table — pre-popolata)
+  Name varchar [unique, not null] // "kinhub", "google", "github", "microsoft"
   Label varchar [not null] // "Accedi con Google", "Accedi con GitHub"
   IsActive boolean [default: false]
   CreatedAt datetime [not null]
@@ -34,10 +36,12 @@ Table IdentityUserProviderEntity {
   }
 }
 
-Table UserSessionEntity {
+Table RefreshTokenEntity {
   Id uuid [primary key]
   UserId uuid [not null, ref: > IdentityUserEntity.Id]
-  ProviderId int [not null, ref: > IdentityProviderEntity.Id]
+  Token varchar [unique, not null]
+  ExpiresAtUtc datetime [not null]
+  Revoked boolean [default: false]
   CreatedAt datetime [not null]
   UpdatedAt datetime [not null]
 }
@@ -53,7 +57,7 @@ Table FamilyEntity {
 }
 
 Table RoleEntity {
-  Id int [primary key] // Enum: 1=Admin, 2=Member
+  Id int [primary key] // Enum: 1=Admin, 2=Member (config table — pre-popolata)
   Name varchar [unique, not null] // "admin", "member"
   IsActive boolean [default: false]
   CreatedAt datetime [not null]

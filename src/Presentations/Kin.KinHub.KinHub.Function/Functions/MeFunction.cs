@@ -9,14 +9,14 @@ namespace Kin.KinHub.KinHub.Function;
 public sealed class MeFunction
 {
     private readonly IAuthenticationService _authService;
-    private readonly ITokenValidator _tokenValidator;
+    private readonly ICurrentUser _currentUser;
 
     public MeFunction(
         IAuthenticationService authService,
-        ITokenValidator tokenValidator)
+        ICurrentUser currentUser)
     {
         _authService = authService;
-        _tokenValidator = tokenValidator;
+        _currentUser = currentUser;
     }
 
     [Function(nameof(MeFunction))]
@@ -24,18 +24,10 @@ public sealed class MeFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "auth/me")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        var authHeader = req.Headers.Authorization.ToString();
-
-        if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        if (!_currentUser.IsAuthenticated)
             return new UnauthorizedObjectResult(new { message = "Missing or invalid Authorization header." });
 
-        var token = authHeader["Bearer ".Length..].Trim();
-        var claims = _tokenValidator.ValidateAccessToken(token);
-
-        if (claims is null)
-            return new UnauthorizedObjectResult(new { message = "Invalid or expired token." });
-
-        var result = await _authService.GetCurrentUserAsync(claims.UserId, cancellationToken);
+        var result = await _authService.GetCurrentUserAsync(_currentUser.UserId, cancellationToken);
 
         return HttpResultMapper.ToActionResult(result);
     }

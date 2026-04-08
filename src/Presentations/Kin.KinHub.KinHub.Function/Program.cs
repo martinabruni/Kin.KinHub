@@ -1,4 +1,5 @@
 using FluentValidation;
+using Kin.KinHub.KinHub.Function.Middleware;
 using Kin.KinHub.KinHub.Function.Validators;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,8 @@ using Microsoft.Extensions.Hosting;
 var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
+
+builder.UseMiddleware<JwtAuthenticationMiddleware>();
 
 var dataDirectory = builder.Configuration["JsonDataDirectory"]
     ?? Path.Combine(AppContext.BaseDirectory, "Data");
