@@ -2,8 +2,9 @@ namespace Kin.KinHub.KinHub.Business.Auth;
 
 public sealed class LoginResponse
 {
-    public required Guid SessionId { get; init; }
-    public required Guid UserId { get; init; }
+    public required string AccessToken { get; init; }
+    public required string RefreshToken { get; init; }
+    public required int ExpiresIn { get; init; }
     public required string Email { get; init; }
-    public required string? DisplayName { get; init; }
+    public string? DisplayName { get; init; }
 }

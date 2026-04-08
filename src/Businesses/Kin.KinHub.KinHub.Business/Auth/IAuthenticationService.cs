@@ -12,23 +12,30 @@ public interface IAuthenticationService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Authenticates a user with email and password, returning a new session.
+    /// Authenticates a user with email and password, returning JWT access and refresh tokens.
     /// </summary>
     Task<Result<LoginResponse>> LoginAsync(
         LoginRequest request,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Terminates an active session.
+    /// Exchanges a valid refresh token for a new access/refresh token pair.
     /// </summary>
-    Task<Result<bool>> LogoutAsync(
-        Guid sessionId,
+    Task<Result<LoginResponse>> RefreshTokenAsync(
+        string refreshToken,
         CancellationToken cancellationToken = default);
 
-    // TODO: implement email verification
-    // Task<Result<bool>> VerifyEmailAsync(string token, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Revokes the given refresh token (logout).
+    /// </summary>
+    Task<Result<bool>> LogoutAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default);
 
-    // TODO: implement password reset
-    // Task<Result<bool>> RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default);
-    // Task<Result<bool>> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Returns the profile of the authenticated user.
+    /// </summary>
+    Task<Result<UserProfileResponse>> GetCurrentUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }
