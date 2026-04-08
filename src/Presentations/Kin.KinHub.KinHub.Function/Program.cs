@@ -1,3 +1,5 @@
+using FluentValidation;
+using Kin.KinHub.KinHub.Function.Validators;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,8 +18,10 @@ var jwtIssuer = builder.Configuration["Jwt:Issuer"]
     ?? "kinhub";
 
 builder.Services
-    .AddJsonInfrastructure(o => o.DataDirectory = dataDirectory)
-    .AddJwtInfrastructure(o =>
+    .AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Scoped, includeInternalTypes: true)
+    .AddScoped(typeof(IRequestValidator<>), typeof(FluentRequestValidator<>))
+    .AddKinHubJsonInfrastructure(o => o.DataDirectory = dataDirectory)
+    .AddKinHubJwtInfrastructure(o =>
     {
         o.Secret = jwtSecret;
         o.Issuer = jwtIssuer;

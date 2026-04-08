@@ -1,17 +1,23 @@
 using Kin.KinHub.KinHub.Business.Auth;
+using Kin.KinHub.KinHub.Function.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using System.Text.Json;
 
 namespace Kin.KinHub.KinHub.Function;
 
 public sealed class LogoutFunction
 {
     private readonly IAuthenticationService _authService;
+    private readonly IRequestValidator<RefreshRequest> _validator;
 
-    public LogoutFunction(IAuthenticationService authService)
+    public LogoutFunction(
+        IAuthenticationService authService,
+        IRequestValidator<RefreshRequest> validator)
     {
         _authService = authService;
+        _validator = validator;
     }
 
     [Function(nameof(LogoutFunction))]
@@ -19,13 +25,25 @@ public sealed class LogoutFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/logout")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        var request = await req.ReadFromJsonAsync<RefreshRequest>(cancellationToken);
+        try
+        {
+            var request = await req.ReadFromJsonAsync<RefreshRequest>(cancellationToken);
 
-        if (request is null)
-            return new BadRequestObjectResult(new { message = "Invalid request body." });
+            if (request is null)
+                return new BadRequestObjectResult(new { message = "Invalid request body." });
 
-        var result = await _authService.LogoutAsync(request.RefreshToken, cancellationToken);
+            var validation = await _validator.ValidateAsync(request, cancellationToken);
 
-        return HttpResultMapper.ToActionResult(result);
+            if (!validation.IsValid)
+                return new BadRequestObjectResult(new { errors = validation.Errors });
+
+            var result = await _authService.LogoutAsync(request.RefreshToken, cancellationToken);
+
+            return HttpResultMapper.ToActionResult(result);
+        }
+        catch (JsonException)
+        {
+            return new BadRequestObjectResult(new { errors = new[] { "Malformed JSON in request body." } });
+        }
     }
 }
