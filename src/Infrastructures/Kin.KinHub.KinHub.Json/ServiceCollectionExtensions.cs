@@ -1,3 +1,4 @@
+using Kin.KinHub.KinHub.Domain.Common;
 using Kin.KinHub.KinHub.Domain.Interfaces;
 using Kin.KinHub.KinHub.Json;
 
@@ -16,6 +17,8 @@ public static class ServiceCollectionExtensions
         configure(options);
         options.Validate();
 
+        services.AddSingleton<IPasswordHasher, IdentityPasswordHasher>();
+
         services.AddSingleton<IIdentityUserRepository>(_ =>
             new IdentityUserJsonRepository(options.DataDirectory));
 
@@ -28,8 +31,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IIdentityUserCredentialRepository>(_ =>
             new IdentityUserCredentialJsonRepository(options.DataDirectory));
 
-        services.AddSingleton<IUserSessionRepository>(_ =>
-            new UserSessionJsonRepository(options.DataDirectory));
+        services.AddSingleton<IRefreshTokenRepository>(_ =>
+            new RefreshTokenJsonRepository(options.DataDirectory));
 
         return services;
     }
