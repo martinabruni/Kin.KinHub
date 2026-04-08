@@ -8,8 +8,6 @@ namespace Kin.KinHub.KinHub.Business.Auth;
 
 public sealed class KinHubAuthenticationService : IAuthenticationService
 {
-    private const int KinHubProviderId = 1;
-
     private readonly IIdentityUserRepository _userRepository;
     private readonly IIdentityUserCredentialRepository _credentialRepository;
     private readonly IIdentityUserProviderRepository _userProviderRepository;
@@ -73,7 +71,7 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
             {
                 Id = Guid.NewGuid(),
                 UserId = created.Id,
-                ProviderId = KinHubProviderId,
+                ProviderId = (int)IdentityProviderType.KinHub,
                 ProviderUserId = created.Id.ToString(),
                 CreatedAt = now,
                 UpdatedAt = now,
