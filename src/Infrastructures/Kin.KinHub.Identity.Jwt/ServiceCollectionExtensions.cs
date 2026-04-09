@@ -1,5 +1,5 @@
 using Kin.KinHub.Identity.Domain.Interfaces;
-using Kin.KinHub.Identity.Domain.ModelInterfaces;
+using Kin.KinHub.Identity.Domain.Models.Interfaces;
 using Kin.KinHub.Identity.Jwt;
 
 namespace Microsoft.Extensions.DependencyInjection;

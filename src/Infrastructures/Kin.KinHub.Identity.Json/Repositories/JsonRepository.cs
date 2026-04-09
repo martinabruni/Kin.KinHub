@@ -1,5 +1,5 @@
-using Kin.KinHub.Identity.Domain;
-using Kin.KinHub.Identity.Domain.ModelInterfaces;
+using Kin.KinHub.Identity.Domain.Exceptions;
+using Kin.KinHub.Identity.Domain.Models.Interfaces;
 using System.Text.Json;
 
 namespace Kin.KinHub.Identity.Json;

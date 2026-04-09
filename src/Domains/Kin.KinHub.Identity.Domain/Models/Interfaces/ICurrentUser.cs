@@ -1,4 +1,4 @@
-namespace Kin.KinHub.Identity.Domain.ModelInterfaces;
+namespace Kin.KinHub.Identity.Domain.Models.Interfaces;
 
 /// <summary>
 /// Represents the authenticated user context for the current request.

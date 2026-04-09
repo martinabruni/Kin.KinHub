@@ -1,4 +1,4 @@
-using Kin.KinHub.Identity.Domain;
+using Kin.KinHub.Identity.Domain.Exceptions;
 using Kin.KinHub.Identity.Domain.Interfaces;
 using Kin.KinHub.Identity.Domain.Models;
 

@@ -1,5 +1,5 @@
 using Kin.KinHub.Identity.Business.Interfaces;
-using Kin.KinHub.Identity.Domain.ModelInterfaces;
+using Kin.KinHub.Identity.Domain.Models.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
