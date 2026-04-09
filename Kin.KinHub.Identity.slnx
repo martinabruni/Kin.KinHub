@@ -1,0 +1,36 @@
+<Solution>
+  <Folder Name="/docs/" />
+  <Folder Name="/docs/artifacts/">
+    <File Path="docs\artifacts\.gitkeep" />
+  </Folder>
+  <Folder Name="/docs/features/">
+    <File Path="docs\features\.gitkeep" />
+  </Folder>
+  <Folder Name="/docs/onboarding/">
+    <File Path="docs\onboarding\.gitkeep" />
+  </Folder>
+  <Folder Name="/docs/shared/">
+    <File Path="docs\shared\.gitkeep" />
+  </Folder>
+  <Folder Name="/ops/" />
+  <Folder Name="/ops/iac/">
+    <File Path="ops\iac\.gitkeep" />
+  </Folder>
+  <Folder Name="/ops/pipelines/">
+    <File Path="ops\pipelines\.gitkeep" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Businesses/">
+    <Project Path="src\Businesses\Kin.KinHub.Identity.Business\Kin.KinHub.Identity.Business.csproj" />
+  </Folder>
+  <Folder Name="/src/Domains/">
+    <Project Path="src\Domains\Kin.KinHub.Identity.Domain\Kin.KinHub.Identity.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructures/">
+    <Project Path="src/Infrastructures/Kin.KinHub.Identity.Json/Kin.KinHub.Identity.Json.csproj" />
+    <Project Path="src/Infrastructures/Kin.KinHub.Identity.Jwt/Kin.KinHub.Identity.Jwt.csproj" />
+  </Folder>
+  <Folder Name="/src/Presentations/">
+    <Project Path="src/Presentations/Kin.KinHub.Identity.Function/Kin.KinHub.Identity.Function.csproj" />
+  </Folder>
+</Solution>
