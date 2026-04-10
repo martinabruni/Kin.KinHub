@@ -17,7 +17,7 @@ permissions:
 # Project-specific configuration — change these to reuse in other projects
 # -----------------------------------------------------------------------
 env:
-  DOTNET_VERSION: 10.0.x
+  DOTNET_VERSION: 8.0.x
   DOTNET_SOLUTION: Kin.KinHub.Core.slnx
   CORE_FUNCTION_PROJECT: src/Presentations/Kin.KinHub.Core.Function/Kin.KinHub.Core.Function.csproj
   IDENTITY_FUNCTION_PROJECT: src/Presentations/Kin.KinHub.Identity.Function/Kin.KinHub.Identity.Function.csproj
