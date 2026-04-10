@@ -85,13 +85,14 @@ Table dbo.FamilyEntity {
 
 Table dbo.FamilyMemberEntity {
   Id uuid [primary key]
+  Name varchar [not null]
   FamilyId uuid [not null, ref: > dbo.FamilyEntity.Id]
   IsDeleted boolean [default: false]
   CreatedAt datetime [not null]
   UpdatedAt datetime [not null]
   
   Indexes {
-    (FamilyId) [unique]
+    (FamilyId, Name) [unique]
   }
 }
 
@@ -105,13 +106,13 @@ Table dbo.FamilyRoleEntity {
 
 Table dbo.MemberRoleEntity {
   Id uuid [primary key]
-  UserId uuid [not null, ref: > identity.UserEntity.Id]
+  MemberId uuid [not null, ref: > dbo.FamilyMemberEntity.Id]
   RoleId int [not null, ref: > dbo.FamilyRoleEntity.Id]
   IsActive boolean [default: false]
   CreatedAt datetime [not null]
   UpdatedAt datetime [not null]
   
   Indexes {
-    (UserId, RoleId) [unique]
+    (MemberId, RoleId) [unique]
   }
 }

@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Kin.KinHub.KinConsole.Business</RootNamespace>
-    <AssemblyName>Kin.KinHub.KinConsole.Business</AssemblyName>
-  </PropertyGroup>
-</Project>
