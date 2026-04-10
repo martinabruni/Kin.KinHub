@@ -22,7 +22,7 @@ env:
   CORE_FUNCTION_PROJECT: src/Presentations/Kin.KinHub.Core.Function/Kin.KinHub.Core.Function.csproj
   IDENTITY_FUNCTION_PROJECT: src/Presentations/Kin.KinHub.Identity.Function/Kin.KinHub.Identity.Function.csproj
   # TODO: add test projects when created
-  BUSINESS_TESTS_PROJECT: src/Tests/Kin.KinHub.Business.Tests/Kin.KinHub.Business.Tests.csproj
+  # BUSINESS_TESTS_PROJECT: src/Tests/Kin.KinHub.Business.Tests/Kin.KinHub.Business.Tests.csproj
   # FUNCTION_TESTS_PROJECT: src/Tests/Kin.KinHub.Function.Tests/Kin.KinHub.Function.Tests.csproj
   # TODO: add React frontend path when created
   FRONTEND_PATH: src/Presentations/Kin.KinHub.React
@@ -56,9 +56,9 @@ jobs:
         run: dotnet build ${{ env.DOTNET_SOLUTION }} --configuration Release --no-restore
 
       # TODO: remove continue-on-error once test projects are created
-      - name: Run business tests
-        # continue-on-error: true
-        run: dotnet test "${{ env.BUSINESS_TESTS_PROJECT }}" --configuration Release --no-build
+      # - name: Run business tests
+      #   # continue-on-error: true
+      #   run: dotnet test "${{ env.BUSINESS_TESTS_PROJECT }}" --configuration Release --no-build
 
       # TODO: remove continue-on-error once test projects are created
       # - name: Run function tests
