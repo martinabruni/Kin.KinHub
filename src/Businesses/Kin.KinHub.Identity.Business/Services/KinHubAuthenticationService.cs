@@ -1,7 +1,6 @@
 using Kin.KinHub.Identity.Business.Enums;
 using Kin.KinHub.Identity.Business.Interfaces;
 using Kin.KinHub.Identity.Business.Models;
-using Kin.KinHub.Identity.Domain;
 using Kin.KinHub.Identity.Domain.Enums;
 using Kin.KinHub.Identity.Domain.Exceptions;
 using Kin.KinHub.Identity.Domain.Interfaces;
@@ -49,7 +48,6 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
                 Email = request.Email,
                 DisplayName = request.DisplayName,
                 IsEmailVerified = false,
-                Roles = ["user"],
                 Status = UserStatus.Active,
                 CreatedAt = now,
                 UpdatedAt = now,
@@ -198,7 +196,6 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
                 UserId = user.Id,
                 Email = user.Email,
                 DisplayName = user.DisplayName,
-                Roles = user.Roles,
             });
         }
         catch (EntityNotFoundException)
@@ -213,7 +210,7 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
 
     private async Task<LoginResponse> GenerateTokenResponseAsync(IdentityUser user)
     {
-        var accessToken = _tokenGenerator.GenerateAccessToken(user);
+        var accessToken = _tokenGenerator.GenerateAccessToken(user, []);
         var rawRefreshToken = _tokenGenerator.GenerateRefreshToken();
 
         var now = DateTime.UtcNow;

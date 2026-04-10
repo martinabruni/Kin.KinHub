@@ -1,4 +1,3 @@
-using Kin.KinHub.Identity.Domain;
 using Kin.KinHub.Identity.Domain.Interfaces;
 using Kin.KinHub.Identity.Json;
 using Kin.KinHub.Identity.Json.Models;
@@ -35,9 +34,6 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IRefreshTokenRepository>(_ =>
             new RefreshTokenJsonRepository(options.DataDirectory));
-
-        services.AddSingleton<IRoleRepository>(_ =>
-            new RoleJsonRepository(options.DataDirectory));
 
         return services;
     }

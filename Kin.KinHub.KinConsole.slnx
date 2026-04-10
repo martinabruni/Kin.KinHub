@@ -1,0 +1,43 @@
+<Solution>
+  <Folder Name="/docs/artifacts/">
+    <File Path="docs\artifacts\.gitkeep" />
+  </Folder>
+  <Folder Name="/docs/features/">
+    <File Path="docs\features\.gitkeep" />
+    <File Path="docs\features\db.dbdiagram" />
+  </Folder>
+  <Folder Name="/docs/onboarding/">
+    <File Path="docs\onboarding\.gitkeep" />
+  </Folder>
+  <Folder Name="/docs/shared/">
+    <File Path="docs\shared\.gitkeep" />
+  </Folder>
+  <Folder Name="/ops/iac/">
+    <File Path="ops\iac\.gitkeep" />
+    <File Path="ops\iac\main.bicep" />
+    <File Path="ops\iac\main.bicepparam" />
+  </Folder>
+  <Folder Name="/ops/pipelines/">
+    <File Path="ops\pipelines\.gitkeep" />
+  </Folder>
+  <Folder Name="/src/Businesses/">
+    <Project Path="src\Businesses\Kin.KinHub.Identity.Business\Kin.KinHub.Identity.Business.csproj" Type="Classic C#" />
+    <Project Path="src\Businesses\Kin.KinHub.KinConsole.Business\Kin.KinHub.KinConsole.Business.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/src/Domains/">
+    <Project Path="src\Domains\Kin.KinHub.Identity.Domain\Kin.KinHub.Identity.Domain.csproj" Type="Classic C#" />
+    <Project Path="src\Domains\Kin.KinHub.KinConsole.Domain\Kin.KinHub.KinConsole.Domain.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/src/Infrastructures/">
+    <Project Path="src\Infrastructures\Kin.KinHub.Identity.Json\Kin.KinHub.Identity.Json.csproj" Type="Classic C#" />
+    <Project Path="src\Infrastructures\Kin.KinHub.Identity.Jwt\Kin.KinHub.Identity.Jwt.csproj" Type="Classic C#" />
+    <Project Path="src\Infrastructures\Kin.KinHub.KinConsole.Json\Kin.KinHub.KinConsole.Json.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/src/Presentations/">
+    <Project Path="src\Presentations\Kin.KinHub.Identity.Function\Kin.KinHub.Identity.Function.csproj" Type="Classic C#" />
+    <Project Path="src\Presentations\Kin.KinHub.KinConsole.Function\Kin.KinHub.KinConsole.Function.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/src/Presentations/Kin.KinHub.Identity.Function/obj/Debug/net8.0/">
+    <Project Path="src\Presentations\Kin.KinHub.Identity.Function\obj\Debug\net8.0\WorkerExtensions\WorkerExtensions.csproj" Type="Classic C#" />
+  </Folder>
+</Solution>

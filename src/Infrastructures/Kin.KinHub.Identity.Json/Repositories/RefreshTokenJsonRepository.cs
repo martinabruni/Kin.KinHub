@@ -1,5 +1,5 @@
-using Kin.KinHub.Identity.Domain;
 using Kin.KinHub.Identity.Domain.Interfaces;
+using Kin.KinHub.Identity.Domain.Models;
 
 namespace Kin.KinHub.Identity.Json;
 

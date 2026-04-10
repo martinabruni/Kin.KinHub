@@ -1,18 +1,17 @@
 // === IDENTITY ===
 
-Table IdentityUserEntity {
+Table identity.UserEntity {
   Id uuid [primary key]
   Email varchar [unique, not null]
   DisplayName varchar
   IsEmailVerified boolean [default: false]
   Status varchar [not null, default: 'Active'] // Active, Locked, Suspended
-  Roles varchar [not null, default: '[]'] // JSON array: ["user"]
   IsDeleted boolean [default: false]
   CreatedAt datetime [not null]
   UpdatedAt datetime [not null]
 }
 
-Table IdentityProviderEntity {
+Table identity.ProviderEntity {
   Id int [primary key] // Enum: 1=KinHub, 2=Google, 3=GitHub, 4=Microsoft (config table — pre-popolata)
   Name varchar [unique, not null] // "kinhub", "google", "github", "microsoft"
   Label varchar [not null] // "Accedi con Google", "Accedi con GitHub"
@@ -21,10 +20,19 @@ Table IdentityProviderEntity {
   UpdatedAt datetime [not null]
 }
 
-Table IdentityUserProviderEntity {
+Table identity.UserCredentialEntity {
+    Id uuid [primary key]
+  UserId uuid [not null, ref: > identity.UserEntity.Id, unique]
+  PasswordHash varchar [not null] // hash bcrypt/argon2
+  IsDeleted boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
+
+Table identity.UserProviderEntity {
   Id uuid [primary key]
-  UserId uuid [not null, ref: > IdentityUserEntity.Id]
-  ProviderId int [not null, ref: > IdentityProviderEntity.Id]
+  UserId uuid [not null, ref: > identity.UserEntity.Id]
+  ProviderId int [not null, ref: > identity.ProviderEntity.Id]
   ProviderUserId varchar [not null]
   IsDeleted boolean [default: false]
   CreatedAt datetime [not null]
@@ -36,9 +44,9 @@ Table IdentityUserProviderEntity {
   }
 }
 
-Table RefreshTokenEntity {
+Table identity.RefreshTokenEntity {
   Id uuid [primary key]
-  UserId uuid [not null, ref: > IdentityUserEntity.Id]
+  UserId uuid [not null, ref: > identity.UserEntity.Id]
   Token varchar [unique, not null]
   ExpiresAtUtc datetime [not null]
   Revoked boolean [default: false]
@@ -48,15 +56,46 @@ Table RefreshTokenEntity {
 
 // === FAMILY ===
 
-Table FamilyEntity {
+Table dbo.KinHubService {
+  Id int [primary key]
+  Name varchar [not null]
+  BaseUrl varchar [not null]
+  IsActive boolean [default: true]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
+
+Table dbo.FamilyService {
+  Id uuid [primary key]
+  FamilyId uui [not null, ref: > dbo.FamilyEntity.Id]
+  ServiceId int [not null, ref: > dbo.KinHubService.Id]
+  IsActive boolean [default: true]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+}
+
+Table dbo.FamilyEntity {
   Id uuid [primary key]
   Name varchar [not null]
+  UserId uuid [not null, ref: > identity.UserEntity.Id]
   IsDeleted boolean [default: false]
   CreatedAt datetime [not null]
   UpdatedAt datetime [not null]
 }
 
-Table RoleEntity {
+Table dbo.FamilyMemberEntity {
+  Id uuid [primary key]
+  FamilyId uuid [not null, ref: > dbo.FamilyEntity.Id]
+  IsDeleted boolean [default: false]
+  CreatedAt datetime [not null]
+  UpdatedAt datetime [not null]
+  
+  Indexes {
+    (FamilyId) [unique]
+  }
+}
+
+Table dbo.FamilyRoleEntity {
   Id int [primary key] // Enum: 1=Admin, 2=Member (config table — pre-popolata)
   Name varchar [unique, not null] // "admin", "member"
   IsActive boolean [default: false]
@@ -64,25 +103,15 @@ Table RoleEntity {
   UpdatedAt datetime [not null]
 }
 
-Table FamilyMemberEntity {
+Table dbo.MemberRoleEntity {
   Id uuid [primary key]
-  FamilyId uuid [not null, ref: > FamilyEntity.Id]
-  UserId uuid [not null, ref: > IdentityUserEntity.Id]
-  RoleId int [not null, ref: > RoleEntity.Id]
-  IsDeleted boolean [default: false]
+  UserId uuid [not null, ref: > identity.UserEntity.Id]
+  RoleId int [not null, ref: > dbo.FamilyRoleEntity.Id]
+  IsActive boolean [default: false]
   CreatedAt datetime [not null]
   UpdatedAt datetime [not null]
   
   Indexes {
-    (FamilyId, UserId) [unique]
+    (UserId, RoleId) [unique]
   }
-}
-
-Table IdentityUserCredentialEntity {
-    Id uuid [primary key]
-  UserId uuid [not null, ref: > IdentityUserEntity.Id, unique]
-  PasswordHash varchar [not null] // hash bcrypt/argon2
-  IsDeleted boolean [default: false]
-  CreatedAt datetime [not null]
-  UpdatedAt datetime [not null]
 }

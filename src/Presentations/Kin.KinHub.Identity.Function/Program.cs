@@ -26,6 +26,6 @@ builder.Services
         o.Issuer = builder.Configuration["Jwt:Issuer"]
             ?? "kinhub";
     })
-    .AddKinHubBusiness(_ => { });
+    .AddKinHubBusiness();
 
 builder.Build().Run();

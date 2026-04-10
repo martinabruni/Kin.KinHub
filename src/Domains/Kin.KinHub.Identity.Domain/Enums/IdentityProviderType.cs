@@ -1,4 +1,4 @@
-namespace Kin.KinHub.Identity.Domain;
+namespace Kin.KinHub.Identity.Domain.Enums;
 
 public enum IdentityProviderType
 {

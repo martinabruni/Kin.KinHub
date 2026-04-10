@@ -1,6 +1,4 @@
-using Kin.KinHub.Identity.Domain.Models;
-
-namespace Kin.KinHub.Identity.Domain;
+namespace Kin.KinHub.Identity.Domain.Models;
 
 public sealed class RefreshToken : BaseEntity<Guid>
 {

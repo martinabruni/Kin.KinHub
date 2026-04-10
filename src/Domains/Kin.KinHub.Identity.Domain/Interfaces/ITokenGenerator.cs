@@ -10,7 +10,7 @@ public interface ITokenGenerator
     /// <summary>
     /// Generates a signed JWT access token containing standard claims (sub, email, roles, iss, exp).
     /// </summary>
-    string GenerateAccessToken(IdentityUser user);
+    string GenerateAccessToken(IdentityUser user, IReadOnlyList<string> roles);
 
     /// <summary>
     /// Generates a cryptographically-random opaque refresh token.
