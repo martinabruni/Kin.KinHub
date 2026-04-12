@@ -58,7 +58,7 @@ Table identity.RefreshTokenEntity {
 
 Table dbo.KinHubService {
   Id int [primary key]
-  Name varchar [not null]
+  Name varchar [not null] //(config table — pre-popolata) 
   BaseUrl varchar [not null]
   IsActive boolean [default: true]
   CreatedAt datetime [not null]
