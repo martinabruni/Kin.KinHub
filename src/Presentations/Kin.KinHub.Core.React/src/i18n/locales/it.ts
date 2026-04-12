@@ -1,0 +1,78 @@
+export const it = {
+  nav: {
+    dashboard: "Dashboard",
+    family: "Famiglia",
+    profile: "Profilo",
+    logout: "Esci",
+  },
+  theme: {
+    toggleDark: "Modalità scura",
+    toggleLight: "Modalità chiara",
+  },
+  language: {
+    en: "Inglese",
+    it: "Italiano",
+  },
+  auth: {
+    login: {
+      title: "Accedi",
+      email: "Email",
+      password: "Password",
+      submit: "Accedi",
+      noAccount: "Non hai un account?",
+      register: "Registrati",
+    },
+    register: {
+      title: "Crea account",
+      email: "Email",
+      password: "Password",
+      displayName: "Nome visualizzato (opzionale)",
+      submit: "Crea account",
+      haveAccount: "Hai già un account?",
+      login: "Accedi",
+    },
+  },
+  app: {
+    dashboard: {
+      title: "Dashboard",
+      welcome: "Benvenuto, {{name}}!",
+      noFamily: "Nessuna famiglia",
+      noFamilyHint: "Crea la tua famiglia per iniziare.",
+      createFamily: "Crea famiglia",
+      familySummary: "La tua famiglia",
+      members: "{{count}} membro",
+      members_other: "{{count}} membri",
+      viewFamily: "Vedi famiglia",
+    },
+    family: {
+      title: "Famiglia",
+      members: "Membri",
+      addMember: "Aggiungi membro",
+      memberName: "Nome membro",
+      addMemberSubmit: "Aggiungi",
+      cancel: "Annulla",
+      roleAdmin: "Admin",
+      roleMember: "Membro",
+      createTitle: "Crea la tua famiglia",
+      familyName: "Nome famiglia",
+      ownerName: "Il tuo nome profilo",
+      createSubmit: "Crea famiglia",
+    },
+    profile: {
+      title: "Profilo",
+      email: "Email",
+      displayName: "Nome visualizzato",
+      userId: "ID utente",
+      noDisplayName: "Non impostato",
+    },
+  },
+  errors: {
+    generic: "Qualcosa è andato storto. Riprova.",
+    unauthorized: "Sessione scaduta. Effettua nuovamente il login.",
+    notFound: "Non trovato.",
+    conflict: "Esiste già.",
+    validation: "Controlla il modulo e riprova.",
+    networkError:
+      "Impossibile raggiungere il server. Controlla la connessione.",
+  },
+};
