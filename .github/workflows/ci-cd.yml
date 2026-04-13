@@ -1,0 +1,391 @@
+name: CI CD
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+# -----------------------------------------------------------------------
+# Project-specific configuration — change these to reuse in other projects
+# -----------------------------------------------------------------------
+env:
+  DOTNET_VERSION: 10.0.x
+  DOTNET_SOLUTION: Kin.KinHub.Core.slnx
+  CORE_API_PROJECT: src/Presentations/Kin.KinHub.Core.Api/Kin.KinHub.Core.Api.csproj
+  IDENTITY_API_PROJECT: src/Presentations/Kin.KinHub.Identity.Api/Kin.KinHub.Identity.Api.csproj
+  # TODO: add test projects when created
+  # BUSINESS_TESTS_PROJECT: src/Tests/Kin.KinHub.Business.Tests/Kin.KinHub.Business.Tests.csproj
+  # API_TESTS_PROJECT: src/Tests/Kin.KinHub.Api.Tests/Kin.KinHub.Api.Tests.csproj
+  # TODO: add React frontend path when created
+  FRONTEND_PATH: src/Presentations/Kin.KinHub.Core.React
+  BICEP_FILE: ops/iac/main.bicep
+  API_ARTIFACT_DIR: artifacts/webapp
+  FRONTEND_ARTIFACT_DIR: artifacts/staticwebapp
+# -----------------------------------------------------------------------
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend_ci:
+    name: Backend Build And Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore .NET solution
+        run: dotnet restore ${{ env.DOTNET_SOLUTION }}
+
+      - name: Build .NET solution
+        run: dotnet build ${{ env.DOTNET_SOLUTION }} --configuration Release --no-restore
+
+      # TODO: remove continue-on-error once test projects are created
+      # - name: Run business tests
+      #   # continue-on-error: true
+      #   run: dotnet test "${{ env.BUSINESS_TESTS_PROJECT }}" --configuration Release --no-build
+
+      # TODO: remove continue-on-error once test projects are created
+      # - name: Run api tests
+      #   continue-on-error: true
+      #   run: dotnet test "${{ env.API_TESTS_PROJECT }}" --configuration Release --no-build
+
+  frontend_ci:
+    name: Frontend Build
+    # name: Frontend Build And Test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_PATH }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ env.FRONTEND_PATH }}/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci --include=optional
+
+      - name: Build frontend
+        run: npm run build
+
+      # - name: Run frontend tests
+      #   run: npm run test
+
+      - name: Prepare Static Web App artifact
+        shell: bash
+        run: |
+          rm -rf ../../../${{ env.FRONTEND_ARTIFACT_DIR }}
+          mkdir -p ../../../${{ env.FRONTEND_ARTIFACT_DIR }}
+          cp -R dist/. ../../../${{ env.FRONTEND_ARTIFACT_DIR }}/
+          cp staticwebapp.config.json ../../../${{ env.FRONTEND_ARTIFACT_DIR }}/staticwebapp.config.json
+
+      - name: Upload Static Web App artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: staticwebapp-package
+          path: ${{ env.FRONTEND_ARTIFACT_DIR }}
+          if-no-files-found: error
+
+  package_webapp:
+    name: Package Web App
+    runs-on: ubuntu-latest
+    needs:
+      - backend_ci
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish Core API
+        run: dotnet publish "${{ env.CORE_API_PROJECT }}" --configuration Release --output ${{ env.API_ARTIFACT_DIR }}
+
+      - name: Publish Identity API
+        run: dotnet publish "${{ env.IDENTITY_API_PROJECT }}" --configuration Release --output ${{ env.API_ARTIFACT_DIR }}
+
+      - name: Upload Web App package
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-package
+          path: ${{ env.API_ARTIFACT_DIR }}
+          if-no-files-found: error
+
+  validate_bicep:
+    name: Validate Bicep
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build Bicep template
+        run: az bicep build --file ${{ env.BICEP_FILE }}
+
+  deploy_dev:
+    name: Deploy Dev
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: dev
+    needs:
+      - backend_ci
+      - frontend_ci
+      - package_webapp
+      - validate_bicep
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          allow-no-subscription: true
+
+      - name: Download Web App package
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp-package
+          path: webapp-package
+
+      - name: Download Static Web App artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: staticwebapp-package
+          path: staticwebapp-package
+
+      - name: Deploy infrastructure
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file ops/iac/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              webAppName="${{ vars.WEB_APP_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+              
+          az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file ops/iac/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              webAppName="${{ vars.WEB_APP_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+
+      - name: Deploy Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.WEB_APP_NAME }}
+          package: webapp-package
+
+      - name: Deploy Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: staticwebapp-package
+          output_location: ""
+          skip_app_build: true
+
+  # deploy_test:
+  #   name: Deploy Test
+  #   if: github.event_name != 'pull_request'
+  #   runs-on: ubuntu-latest
+  #   environment: test
+  #   needs:
+  #     - deploy_dev
+  #
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Azure login
+  #       uses: azure/login@v2
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  #
+  #     - name: Download Web App package
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: webapp-package
+  #         path: webapp-package
+  #
+  #     - name: Download Static Web App artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: staticwebapp-package
+  #         path: staticwebapp-package
+  #
+  #     - name: Deploy infrastructure
+  #       run: |
+  #         az deployment group what-if \
+  #           --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+  #           --template-file ops/iac/main.bicep \
+  #           --parameters \
+  #             location="${{ vars.AZURE_LOCATION }}" \
+  #             staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+  #             staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+  #             webAppName="${{ vars.WEB_APP_NAME }}" \
+  #             keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+  #             sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+  #             sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+  #             sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+  #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+  #
+  #         az deployment group create \
+  #           --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+  #           --template-file ops/iac/main.bicep \
+  #           --parameters \
+  #             location="${{ vars.AZURE_LOCATION }}" \
+  #             staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+  #             staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+  #             webAppName="${{ vars.WEB_APP_NAME }}" \
+  #             keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+  #             sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+  #             sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+  #             sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+  #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+  #
+  #     - name: Deploy Web App
+  #       uses: azure/webapps-deploy@v3
+  #       with:
+  #         app-name: ${{ vars.WEB_APP_NAME }}
+  #         package: webapp-package
+  #
+  #     - name: Deploy Static Web App
+  #       uses: Azure/static-web-apps-deploy@v1
+  #       with:
+  #         azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+  #         repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #         action: upload
+  #         app_location: staticwebapp-package
+  #         output_location: ""
+  #         skip_app_build: true
+
+  deploy_prod:
+    name: Deploy Prod
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: prod
+    needs:
+      - deploy_dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download Web App package
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp-package
+          path: webapp-package
+
+      - name: Download Static Web App artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: staticwebapp-package
+          path: staticwebapp-package
+
+      - name: Deploy infrastructure
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file ops/iac/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              webAppName="${{ vars.WEB_APP_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+              
+          az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file ops/iac/main.bicep \
+            --parameters \
+              location="${{ vars.AZURE_LOCATION }}" \
+              staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
+              staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
+              webAppName="${{ vars.WEB_APP_NAME }}" \
+              keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
+              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
+              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
+              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+
+      - name: Deploy Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.WEB_APP_NAME }}
+          package: webapp-package
+
+      - name: Deploy Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: staticwebapp-package
+          output_location: ""
+          skip_app_build: true
