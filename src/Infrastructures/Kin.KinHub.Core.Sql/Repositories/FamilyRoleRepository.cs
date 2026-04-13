@@ -1,4 +1,5 @@
 using Kin.KinHub.Core.Domain;
+using Kin.KinHub.Core.Sql.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Core.Sql;

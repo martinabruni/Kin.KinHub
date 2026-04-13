@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="LocalDb\**" />
+    <Content Remove="LocalDb\**" />
+    <EmbeddedResource Remove="LocalDb\**" />
+    <None Remove="LocalDb\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.4" />
@@ -20,10 +27,6 @@
     <ProjectReference Include="..\..\Businesses\Kin.KinHub.Identity.Business\Kin.KinHub.Identity.Business.csproj" />
     <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.Sql\Kin.KinHub.Identity.Sql.csproj" />
     <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.Jwt\Kin.KinHub.Identity.Jwt.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="LocalDb\" />
   </ItemGroup>
 
 </Project>
