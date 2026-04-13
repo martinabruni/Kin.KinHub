@@ -27,7 +27,7 @@
     <Project Path="src\Domains\Kin.KinHub.Identity.Domain\Kin.KinHub.Identity.Domain.csproj" />
   </Folder>
   <Folder Name="/src/Infrastructures/">
-    <Project Path="src/Infrastructures/Kin.KinHub.Identity.Json/Kin.KinHub.Identity.Json.csproj" />
+    <Project Path="src/Infrastructures/Kin.KinHub.Identity.Sql/Kin.KinHub.Identity.Sql.csproj" />
     <Project Path="src/Infrastructures/Kin.KinHub.Identity.Jwt/Kin.KinHub.Identity.Jwt.csproj" />
   </Folder>
   <Folder Name="/src/Presentations/">
