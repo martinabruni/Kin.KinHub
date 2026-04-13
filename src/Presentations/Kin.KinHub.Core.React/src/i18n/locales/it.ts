@@ -3,6 +3,7 @@ export const it = {
     dashboard: "Dashboard",
     family: "Famiglia",
     profile: "Profilo",
+    profileSettings: "Impostazioni Profilo",
     logout: "Esci",
   },
   theme: {
@@ -43,6 +44,8 @@ export const it = {
       members: "{{count}} membro",
       members_other: "{{count}} membri",
       viewFamily: "Vedi famiglia",
+      services: "Servizi KinHub",
+      noServices: "Nessun servizio disponibile.",
     },
     family: {
       title: "Famiglia",
@@ -64,6 +67,27 @@ export const it = {
       displayName: "Nome visualizzato",
       userId: "ID utente",
       noDisplayName: "Non impostato",
+      menu: {
+        information: "Informazioni",
+        account: "Account",
+        changeProfile: "Cambia Profilo",
+      },
+      information: {
+        profileName: "Nome Profilo",
+        familyName: "Nome Famiglia",
+        edit: "Modifica",
+        save: "Salva",
+        cancel: "Annulla",
+      },
+      account: {
+        changeEmail: "Cambia email",
+        changePassword: "Cambia password",
+        deleteAccount: "Elimina account",
+        comingSoon: "Questa funzionalità sarà disponibile a breve.",
+      },
+    },
+    services: {
+      comingSoon: "Questo servizio è in arrivo.",
     },
   },
   errors: {

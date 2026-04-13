@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
-import { NavBar } from './NavBar'
+import type { ReactNode } from "react";
+import { NavBar } from "./NavBar";
+import { Snackbar } from "@/components/ui/Snackbar";
 
 interface AppLayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -10,6 +11,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen bg-[var(--bg)]">
       <NavBar />
       <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+      <Snackbar />
     </div>
-  )
+  );
 }

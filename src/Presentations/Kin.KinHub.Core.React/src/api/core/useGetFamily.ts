@@ -8,6 +8,7 @@ export function useGetFamily() {
   return useQuery({
     queryKey: familyQueryKey,
     queryFn: () => coreClient.get<FamilyDetailResponse>("/api/families", true),
+    staleTime: 30_000,
     retry: (failureCount, error) => {
       // Don't retry on 404 — means family doesn't exist yet
       if (
