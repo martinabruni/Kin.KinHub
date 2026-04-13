@@ -34,12 +34,23 @@ param sqlAdministratorLogin string
 @secure()
 param sqlAdministratorPassword string
 
+@description('JWT secret key.')
+@secure()
+param jwtSecret string
+
+@description('JWT issuer.')
+param jwtIssuer string = 'kinhub'
+
+@description('JWT access token expiry in minutes.')
+param jwtAccessTokenExpiryMinutes string = '15'
+
 @description('Business timezone identifier.')
 param businessTimeZoneId string = 'Europe/Rome'
 
 var sqlServerFullyQualifiedDomainName = '${sqlServer.name}${environment().suffixes.sqlServerHostname}'
 var sqlConnectionString = 'Server=tcp:${sqlServerFullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabase.name};Persist Security Info=False;User ID=${sqlAdministratorLogin};Password=${sqlAdministratorPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 var sqlConnectionStringSecretName = 'sql-connection-string'
+var jwtSecretSecretName = 'jwt-secret'
 var keyVaultSecretsUserRoleDefinitionId = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
   '4633458b-17de-408a-b874-0445c86b69e6'
@@ -54,8 +65,20 @@ var webAppSettings = [
     value: businessTimeZoneId
   }
   {
-    name: 'SqlServer__ConnectionString'
+    name: 'ConnectionStrings__KinHub'
     value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=${sqlConnectionStringSecretName})'
+  }
+  {
+    name: 'Jwt__Secret'
+    value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=${jwtSecretSecretName})'
+  }
+  {
+    name: 'Jwt__Issuer'
+    value: jwtIssuer
+  }
+  {
+    name: 'Jwt__AccessTokenExpiryMinutes'
+    value: jwtAccessTokenExpiryMinutes
   }
 ]
 
@@ -117,6 +140,14 @@ resource sqlConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01
   name: sqlConnectionStringSecretName
   properties: {
     value: sqlConnectionString
+  }
+}
+
+resource jwtSecretKvSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: jwtSecretSecretName
+  properties: {
+    value: jwtSecret
   }
 }
 

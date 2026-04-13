@@ -10,3 +10,4 @@ param sqlDatabaseName = 'sql-db-kinhub-dev'
 // Fill secure values before deployment.
 param sqlAdministratorLogin = ''
 param sqlAdministratorPassword = ''
+param jwtSecret = ''
