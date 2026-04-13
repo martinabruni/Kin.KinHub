@@ -204,7 +204,8 @@ jobs:
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
               sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              jwtSecret="${{ secrets.JWT_SECRET }}"
               
           az deployment group create \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
@@ -218,7 +219,8 @@ jobs:
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
               sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              jwtSecret="${{ secrets.JWT_SECRET }}"
 
       - name: Deploy Web App
         uses: azure/webapps-deploy@v3
@@ -358,7 +360,8 @@ jobs:
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
               sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              jwtSecret="${{ secrets.JWT_SECRET }}"
               
           az deployment group create \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
@@ -372,7 +375,8 @@ jobs:
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
               sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              jwtSecret="${{ secrets.JWT_SECRET }}"
 
       - name: Deploy Web App
         uses: azure/webapps-deploy@v3
