@@ -17,17 +17,17 @@ permissions:
 # Project-specific configuration — change these to reuse in other projects
 # -----------------------------------------------------------------------
 env:
-  DOTNET_VERSION: 8.0.x
+  DOTNET_VERSION: 10.0.x
   DOTNET_SOLUTION: Kin.KinHub.Core.slnx
-  CORE_FUNCTION_PROJECT: src/Presentations/Kin.KinHub.Core.Function/Kin.KinHub.Core.Function.csproj
-  IDENTITY_FUNCTION_PROJECT: src/Presentations/Kin.KinHub.Identity.Function/Kin.KinHub.Identity.Function.csproj
+  CORE_API_PROJECT: src/Presentations/Kin.KinHub.Core.Api/Kin.KinHub.Core.Api.csproj
+  IDENTITY_API_PROJECT: src/Presentations/Kin.KinHub.Identity.Api/Kin.KinHub.Identity.Api.csproj
   # TODO: add test projects when created
   # BUSINESS_TESTS_PROJECT: src/Tests/Kin.KinHub.Business.Tests/Kin.KinHub.Business.Tests.csproj
-  # FUNCTION_TESTS_PROJECT: src/Tests/Kin.KinHub.Function.Tests/Kin.KinHub.Function.Tests.csproj
+  # API_TESTS_PROJECT: src/Tests/Kin.KinHub.Api.Tests/Kin.KinHub.Api.Tests.csproj
   # TODO: add React frontend path when created
   FRONTEND_PATH: src/Presentations/Kin.KinHub.React
   BICEP_FILE: ops/iac/main.bicep
-  FUNCTION_ARTIFACT_DIR: artifacts/function
+  API_ARTIFACT_DIR: artifacts/webapp
   FRONTEND_ARTIFACT_DIR: artifacts/staticwebapp
 # -----------------------------------------------------------------------
 
@@ -61,9 +61,9 @@ jobs:
       #   run: dotnet test "${{ env.BUSINESS_TESTS_PROJECT }}" --configuration Release --no-build
 
       # TODO: remove continue-on-error once test projects are created
-      # - name: Run function tests
+      # - name: Run api tests
       #   continue-on-error: true
-      #   run: dotnet test "${{ env.FUNCTION_TESTS_PROJECT }}" --configuration Release --no-build
+      #   run: dotnet test "${{ env.API_TESTS_PROJECT }}" --configuration Release --no-build
 
   frontend_ci:
     name: Frontend Build And Test
@@ -108,8 +108,8 @@ jobs:
           path: ${{ env.FRONTEND_ARTIFACT_DIR }}
           if-no-files-found: error
 
-  package_function:
-    name: Package Function App
+  package_webapp:
+    name: Package Web App
     runs-on: ubuntu-latest
     needs:
       - backend_ci
@@ -123,17 +123,17 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Publish Core function app
-        run: dotnet publish "${{ env.CORE_FUNCTION_PROJECT }}" --configuration Release --output ${{ env.FUNCTION_ARTIFACT_DIR }}
+      - name: Publish Core API
+        run: dotnet publish "${{ env.CORE_API_PROJECT }}" --configuration Release --output ${{ env.API_ARTIFACT_DIR }}
 
-      - name: Publish Identity function app
-        run: dotnet publish "${{ env.IDENTITY_FUNCTION_PROJECT }}" --configuration Release --output ${{ env.FUNCTION_ARTIFACT_DIR }}
+      - name: Publish Identity API
+        run: dotnet publish "${{ env.IDENTITY_API_PROJECT }}" --configuration Release --output ${{ env.API_ARTIFACT_DIR }}
 
-      - name: Upload function package
+      - name: Upload Web App package
         uses: actions/upload-artifact@v4
         with:
-          name: function-package
-          path: ${{ env.FUNCTION_ARTIFACT_DIR }}
+          name: webapp-package
+          path: ${{ env.API_ARTIFACT_DIR }}
           if-no-files-found: error
 
   validate_bicep:
@@ -162,7 +162,7 @@ jobs:
     needs:
       - backend_ci
       - frontend_ci
-      - package_function
+      - package_webapp
       - validate_bicep
 
     steps:
@@ -176,11 +176,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Download function package
+      - name: Download Web App package
         uses: actions/download-artifact@v4
         with:
-          name: function-package
-          path: function-package
+          name: webapp-package
+          path: webapp-package
 
       - name: Download Static Web App artifact
         uses: actions/download-artifact@v4
@@ -197,8 +197,7 @@ jobs:
               location="${{ vars.AZURE_LOCATION }}" \
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
-              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
-              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              webAppName="${{ vars.WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
@@ -212,19 +211,18 @@ jobs:
               location="${{ vars.AZURE_LOCATION }}" \
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
-              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
-              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              webAppName="${{ vars.WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
               sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
               sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
 
-      - name: Deploy function app
-        uses: Azure/functions-action@v1
+      - name: Deploy Web App
+        uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ vars.FUNCTION_APP_NAME }}
-          package: function-package
+          app-name: ${{ vars.WEB_APP_NAME }}
+          package: webapp-package
 
       - name: Deploy Static Web App
         uses: Azure/static-web-apps-deploy@v1
@@ -243,30 +241,30 @@ jobs:
   #   environment: test
   #   needs:
   #     - deploy_dev
-
+  #
   #   steps:
   #     - name: Checkout repository
   #       uses: actions/checkout@v4
-
+  #
   #     - name: Azure login
   #       uses: azure/login@v2
   #       with:
   #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
   #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
   #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-  #     - name: Download function package
+  #
+  #     - name: Download Web App package
   #       uses: actions/download-artifact@v4
   #       with:
-  #         name: function-package
-  #         path: function-package
-
+  #         name: webapp-package
+  #         path: webapp-package
+  #
   #     - name: Download Static Web App artifact
   #       uses: actions/download-artifact@v4
   #       with:
   #         name: staticwebapp-package
   #         path: staticwebapp-package
-
+  #
   #     - name: Deploy infrastructure
   #       run: |
   #         az deployment group what-if \
@@ -276,14 +274,13 @@ jobs:
   #             location="${{ vars.AZURE_LOCATION }}" \
   #             staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
   #             staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
-  #             functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
-  #             storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+  #             webAppName="${{ vars.WEB_APP_NAME }}" \
   #             keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
   #             sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
   #             sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
   #             sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
   #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
-
+  #
   #         az deployment group create \
   #           --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
   #           --template-file ops/iac/main.bicep \
@@ -291,20 +288,19 @@ jobs:
   #             location="${{ vars.AZURE_LOCATION }}" \
   #             staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
   #             staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
-  #             functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
-  #             storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+  #             webAppName="${{ vars.WEB_APP_NAME }}" \
   #             keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
   #             sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
   #             sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
   #             sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
   #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
-
-  #     - name: Deploy function app
-  #       uses: Azure/functions-action@v1
+  #
+  #     - name: Deploy Web App
+  #       uses: azure/webapps-deploy@v3
   #       with:
-  #         app-name: ${{ vars.FUNCTION_APP_NAME }}
-  #         package: function-package
-
+  #         app-name: ${{ vars.WEB_APP_NAME }}
+  #         package: webapp-package
+  #
   #     - name: Deploy Static Web App
   #       uses: Azure/static-web-apps-deploy@v1
   #       with:
@@ -334,11 +330,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Download function package
+      - name: Download Web App package
         uses: actions/download-artifact@v4
         with:
-          name: function-package
-          path: function-package
+          name: webapp-package
+          path: webapp-package
 
       - name: Download Static Web App artifact
         uses: actions/download-artifact@v4
@@ -355,8 +351,7 @@ jobs:
               location="${{ vars.AZURE_LOCATION }}" \
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
-              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
-              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              webAppName="${{ vars.WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
@@ -370,19 +365,18 @@ jobs:
               location="${{ vars.AZURE_LOCATION }}" \
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
-              functionAppName="${{ vars.FUNCTION_APP_NAME }}" \
-              storageAccountName="${{ vars.STORAGE_ACCOUNT_NAME }}" \
+              webAppName="${{ vars.WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
               sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
               sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
 
-      - name: Deploy function app
-        uses: Azure/functions-action@v1
+      - name: Deploy Web App
+        uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ vars.FUNCTION_APP_NAME }}
-          package: function-package
+          app-name: ${{ vars.WEB_APP_NAME }}
+          package: webapp-package
 
       - name: Deploy Static Web App
         uses: Azure/static-web-apps-deploy@v1
