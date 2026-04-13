@@ -10,11 +10,15 @@
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Businesses\Kin.KinHub.Identity.Business\Kin.KinHub.Identity.Business.csproj" />
-    <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.Json\Kin.KinHub.Identity.Json.csproj" />
+    <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.Sql\Kin.KinHub.Identity.Sql.csproj" />
     <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.Jwt\Kin.KinHub.Identity.Jwt.csproj" />
   </ItemGroup>
 

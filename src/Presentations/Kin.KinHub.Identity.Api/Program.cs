@@ -5,13 +5,10 @@ using Kin.KinHub.Identity.Api.Validators.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var dataDirectory = builder.Configuration["JsonDataDirectory"]
-    ?? Path.Combine(AppContext.BaseDirectory, "Data");
-
 builder.Services
     .AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Scoped, includeInternalTypes: true)
     .AddScoped(typeof(IRequestValidator<>), typeof(FluentRequestValidator<>))
-    .AddKinHubJsonInfrastructure(o => o.DataDirectory = dataDirectory)
+    .AddKinHubIdentitySqlInfrastructure(o => o.ConnectionString = builder.Configuration.GetConnectionString("KinHub")!)
     .AddKinHubJwtInfrastructure(o =>
     {
         o.Secret = builder.Configuration["Jwt:Secret"]
