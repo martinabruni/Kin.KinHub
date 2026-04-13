@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+// import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +12,7 @@ import type { KinHubServiceDto } from "@/types/core";
 const KIN_CONSOLE_SERVICE_ID = 1;
 
 export function KinConsolePage() {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { selectedProfile } = useProfileStore();
   const familyId = selectedProfile!.familyId;
 
