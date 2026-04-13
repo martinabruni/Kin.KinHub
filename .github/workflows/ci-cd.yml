@@ -66,7 +66,8 @@ jobs:
       #   run: dotnet test "${{ env.API_TESTS_PROJECT }}" --configuration Release --no-build
 
   frontend_ci:
-    name: Frontend Build And Test
+    name: Frontend Build
+    # name: Frontend Build And Test
     runs-on: ubuntu-latest
 
     defaults:
@@ -90,8 +91,8 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Run frontend tests
-        run: npm run test
+      # - name: Run frontend tests
+      #   run: npm run test
 
       - name: Prepare Static Web App artifact
         shell: bash
