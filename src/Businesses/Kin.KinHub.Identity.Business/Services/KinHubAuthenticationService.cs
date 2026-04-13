@@ -236,4 +236,91 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
             DisplayName = user.DisplayName,
         };
     }
+
+    /// <inheritdoc/>
+    public async Task<Result<bool>> UpdateUserEmailAsync(
+        Guid userId,
+        UpdateUserEmailRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var user = await _userRepository.GetAsync(userId);
+
+            var existing = await _userRepository.FindByEmailAsync(request.NewEmail);
+            if (existing is not null && existing.Id != userId)
+                return Result<bool>.Conflict("Email already in use.");
+
+            user.Email = request.NewEmail;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user.Id, user);
+
+            return Result<bool>.Success(true);
+        }
+        catch (EntityNotFoundException)
+        {
+            return Result<bool>.NotFound("User not found.");
+        }
+        catch (DomainException)
+        {
+            return Result<bool>.UnexpectedError("Failed to update email.");
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<bool>> UpdateUserPasswordAsync(
+        Guid userId,
+        UpdateUserPasswordRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var credential = await _credentialRepository.GetByUserIdAsync(userId);
+
+            if (credential?.PasswordHash is null)
+                return Result<bool>.Unauthorized("Invalid current password.");
+
+            if (!_passwordHasher.Verify(request.CurrentPassword, credential.PasswordHash))
+                return Result<bool>.Unauthorized("Invalid current password.");
+
+            credential.PasswordHash = _passwordHasher.Hash(request.NewPassword);
+            credential.UpdatedAt = DateTime.UtcNow;
+            await _credentialRepository.UpdateAsync(credential.Id, credential);
+
+            return Result<bool>.Success(true);
+        }
+        catch (EntityNotFoundException)
+        {
+            return Result<bool>.NotFound("User not found.");
+        }
+        catch (DomainException)
+        {
+            return Result<bool>.UnexpectedError("Failed to update password.");
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<bool>> DeleteUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var user = await _userRepository.GetAsync(userId);
+
+            user.IsDeleted = true;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user.Id, user);
+
+            return Result<bool>.Success(true);
+        }
+        catch (EntityNotFoundException)
+        {
+            return Result<bool>.NotFound("User not found.");
+        }
+        catch (DomainException)
+        {
+            return Result<bool>.UnexpectedError("Failed to delete account.");
+        }
+    }
 }

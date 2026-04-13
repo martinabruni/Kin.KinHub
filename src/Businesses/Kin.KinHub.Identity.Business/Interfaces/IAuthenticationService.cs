@@ -39,4 +39,27 @@ public interface IAuthenticationService
     Task<Result<UserProfileResponse>> GetCurrentUserAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the email address of the authenticated user.
+    /// </summary>
+    Task<Result<bool>> UpdateUserEmailAsync(
+        Guid userId,
+        UpdateUserEmailRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the password of the authenticated user after verifying the current password.
+    /// </summary>
+    Task<Result<bool>> UpdateUserPasswordAsync(
+        Guid userId,
+        UpdateUserPasswordRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Soft-deletes the authenticated user account.
+    /// </summary>
+    Task<Result<bool>> DeleteUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

@@ -254,4 +254,87 @@ public sealed class KinHubFamilyService : IFamilyService
             return Result<bool>.UnexpectedError(ex.Message);
         }
     }
+
+    /// <inheritdoc/>
+    public async Task<Result<bool>> DeleteFamilyMemberAsync(
+        Guid familyId,
+        Guid memberId,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var family = await _familyRepository.FindByUserIdAsync(userId, cancellationToken);
+            if (family is null)
+                return Result<bool>.NotFound("Family not found for this user.");
+
+            if (family.Id != familyId)
+                return Result<bool>.Unauthorized("You do not own this family.");
+
+            var member = await _familyMemberRepository.GetAsync(memberId);
+
+            if (member.FamilyId != familyId)
+                return Result<bool>.NotFound("Member not found in this family.");
+
+            member.IsDeleted = true;
+            member.UpdatedAt = DateTime.UtcNow;
+            await _familyMemberRepository.UpdateAsync(member.Id, member);
+
+            return Result<bool>.Success(true);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Result<bool>.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.UnexpectedError(ex.Message);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<UpdateFamilyMemberResponse>> UpdateFamilyMemberAsync(
+        Guid familyId,
+        Guid memberId,
+        UpdateFamilyMemberRequest request,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var family = await _familyRepository.FindByUserIdAsync(userId, cancellationToken);
+            if (family is null)
+                return Result<UpdateFamilyMemberResponse>.NotFound("Family not found for this user.");
+
+            if (family.Id != familyId)
+                return Result<UpdateFamilyMemberResponse>.Unauthorized("You do not own this family.");
+
+            var member = await _familyMemberRepository.GetAsync(memberId);
+
+            if (member.FamilyId != familyId || member.IsDeleted)
+                return Result<UpdateFamilyMemberResponse>.NotFound("Member not found in this family.");
+
+            var existing = await _familyMemberRepository.FindByNameAsync(familyId, request.Name, cancellationToken);
+            if (existing is not null && existing.Id != memberId)
+                return Result<UpdateFamilyMemberResponse>.Conflict("A member with this name already exists in the family.");
+
+            member.Name = request.Name;
+            member.UpdatedAt = DateTime.UtcNow;
+            await _familyMemberRepository.UpdateAsync(member.Id, member);
+
+            return Result<UpdateFamilyMemberResponse>.Success(new UpdateFamilyMemberResponse
+            {
+                Id = member.Id,
+                Name = member.Name,
+            });
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Result<UpdateFamilyMemberResponse>.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result<UpdateFamilyMemberResponse>.UnexpectedError(ex.Message);
+        }
+    }
 }

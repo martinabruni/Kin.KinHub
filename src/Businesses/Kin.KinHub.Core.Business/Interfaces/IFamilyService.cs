@@ -38,4 +38,23 @@ public interface IFamilyService
     Task<Result<FamilyDetailResponse>> GetFamilyAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Soft-deletes a family member by the given user (ownership validated).
+    /// </summary>
+    Task<Result<bool>> DeleteFamilyMemberAsync(
+        Guid familyId,
+        Guid memberId,
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the name of a family member (ownership and uniqueness validated).
+    /// </summary>
+    Task<Result<UpdateFamilyMemberResponse>> UpdateFamilyMemberAsync(
+        Guid familyId,
+        Guid memberId,
+        UpdateFamilyMemberRequest request,
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }
