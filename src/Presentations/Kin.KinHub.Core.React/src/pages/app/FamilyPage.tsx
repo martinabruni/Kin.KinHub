@@ -18,6 +18,8 @@ export function FamilyPage() {
   const is404 = error instanceof ApiError && error.status === 404;
   const { selectedProfile: profile } = useProfileStore();
   const isAdmin = profile?.role === "admin";
+  const adminCount =
+    family?.members.filter((m) => m.role.toLowerCase() === "admin").length ?? 0;
 
   const addMember = useAddFamilyMember(family?.familyId ?? "");
   const deleteMember = useDeleteFamilyMember(family?.familyId ?? "");
@@ -86,26 +88,27 @@ export function FamilyPage() {
                       : t("app.family.roleMember")
                   }
                 />
-                {isAdmin && (
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    loading={deleteMember.isPending}
-                    onClick={() =>
-                      deleteMember.mutate(
-                        { memberId: m.id },
-                        {
-                          onSuccess: () =>
-                            showSnackbar(t("app.family.deleteMemberSuccess")),
-                          onError: () =>
-                            showSnackbar(t("app.family.deleteMemberError")),
-                        },
-                      )
-                    }
-                  >
-                    {t("app.family.deleteMember")}
-                  </Button>
-                )}
+                {isAdmin &&
+                  !(m.role.toLowerCase() === "admin" && adminCount <= 1) && (
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      loading={deleteMember.isPending}
+                      onClick={() =>
+                        deleteMember.mutate(
+                          { memberId: m.id },
+                          {
+                            onSuccess: () =>
+                              showSnackbar(t("app.family.deleteMemberSuccess")),
+                            onError: () =>
+                              showSnackbar(t("app.family.deleteMemberError")),
+                          },
+                        )
+                      }
+                    >
+                      {t("app.family.deleteMember")}
+                    </Button>
+                  )}
               </div>
             </li>
           ))}

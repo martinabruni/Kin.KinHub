@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useLogin } from "@/api/identity/useLogin";
 import { useAuthStore } from "@/stores/authStore";
+import { useProfileStore } from "@/stores/profileStore";
 
 export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
+  const clearProfile = useProfileStore((s) => s.clearProfile);
   const loginMutation = useLogin();
 
   const [email, setEmail] = useState("");
@@ -26,6 +28,7 @@ export function LoginPage() {
       { email, password },
       {
         onSuccess: (data) => {
+          clearProfile();
           login(data);
           navigate("/select-profile", { replace: true });
         },

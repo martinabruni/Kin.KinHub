@@ -6,7 +6,7 @@ export function useUpdateFamilyName() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ familyId, name }: { familyId: string; name: string }) =>
-      coreClient.patch(`/api/families/${familyId}/name`, { name }, true),
+      coreClient.patch(`/api/families/${familyId}`, { name }, true),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: familyQueryKey });
     },

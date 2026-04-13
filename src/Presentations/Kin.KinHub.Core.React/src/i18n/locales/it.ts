@@ -78,6 +78,10 @@ export const it = {
       information: {
         profileName: "Nome Profilo",
         familyName: "Nome Famiglia",
+        adminCode: "Codice Admin",
+        currentAdminCode: "Codice admin attuale",
+        newAdminCode: "Nuovo codice admin",
+        changeAdminCodeSuccess: "Codice admin aggiornato con successo.",
         edit: "Modifica",
         save: "Salva",
         cancel: "Annulla",

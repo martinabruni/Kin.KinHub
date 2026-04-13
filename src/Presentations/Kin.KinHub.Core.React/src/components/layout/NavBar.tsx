@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/stores/authStore";
+import { useProfileStore } from "@/stores/profileStore";
 import { useUiStore } from "@/stores/uiStore";
 import { useLogout } from "@/api/identity/useLogout";
 import { Button } from "@/components/ui/Button";
@@ -12,6 +13,7 @@ export function NavBar() {
   const user = useAuthStore((s) => s.user);
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const logout = useAuthStore((s) => s.logout);
+  const clearProfile = useProfileStore((s) => s.clearProfile);
   const { theme, toggleTheme, setLanguage } = useUiStore();
   const navigate = useNavigate();
   const logoutMutation = useLogout();
@@ -24,12 +26,14 @@ export function NavBar() {
         { refreshToken },
         {
           onSettled: () => {
+            clearProfile();
             logout();
             navigate("/login", { replace: true });
           },
         },
       );
     } else {
+      clearProfile();
       logout();
       navigate("/login", { replace: true });
     }

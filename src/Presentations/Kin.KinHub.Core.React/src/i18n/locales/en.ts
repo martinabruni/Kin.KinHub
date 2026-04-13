@@ -78,6 +78,10 @@ export const en = {
       information: {
         profileName: "Profile Name",
         familyName: "Family Name",
+        adminCode: "Admin Code",
+        currentAdminCode: "Current admin code",
+        newAdminCode: "New admin code",
+        changeAdminCodeSuccess: "Admin code updated successfully.",
         edit: "Edit",
         save: "Save",
         cancel: "Cancel",
