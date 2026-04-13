@@ -24,7 +24,7 @@ export function ProfilePage() {
 
       <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
         {/* Side menu (desktop) / Tab bar (mobile) */}
-        <nav className="flex shrink-0 flex-row gap-1 overflow-x-auto sm:w-48 sm:flex-col">
+        <nav className="flex shrink-0 flex-row gap-1 overflow-x-auto rounded-xl border border-[var(--border)] p-2 sm:w-48 sm:flex-col">
           <NavLink to="/profile" end className={linkClass}>
             {t("app.profile.menu.information")}
           </NavLink>
@@ -42,7 +42,7 @@ export function ProfilePage() {
         </nav>
 
         {/* Content */}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 rounded-xl border border-[var(--border)] p-4">
           <Outlet />
         </div>
       </div>

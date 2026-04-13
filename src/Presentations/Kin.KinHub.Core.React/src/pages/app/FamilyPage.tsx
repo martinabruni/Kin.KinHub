@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/Spinner";
 import { useGetFamily } from "@/api/core/useGetFamily";
 import { useAddFamilyMember } from "@/api/core/useAddFamilyMember";
+import { useDeleteFamilyMember } from "@/api/core/useDeleteFamilyMember";
 import { ApiError } from "@/lib/http/httpClient";
 import { useProfileStore } from "@/stores/profileStore";
+import { useUiStore } from "@/stores/uiStore";
 
 export function FamilyPage() {
   const { t } = useTranslation();
@@ -18,6 +20,8 @@ export function FamilyPage() {
   const isAdmin = profile?.role === "admin";
 
   const addMember = useAddFamilyMember(family?.familyId ?? "");
+  const deleteMember = useDeleteFamilyMember(family?.familyId ?? "");
+  const showSnackbar = useUiStore((s) => s.showSnackbar);
   const [showForm, setShowForm] = useState(false);
   const [memberName, setMemberName] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
@@ -71,14 +75,38 @@ export function FamilyPage() {
               <span className="text-sm font-medium text-[var(--fg)]">
                 {m.name}
               </span>
-              <Badge
-                variant={m.role.toLowerCase() === "admin" ? "admin" : "member"}
-                label={
-                  m.role.toLowerCase() === "admin"
-                    ? t("app.family.roleAdmin")
-                    : t("app.family.roleMember")
-                }
-              />
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant={
+                    m.role.toLowerCase() === "admin" ? "admin" : "member"
+                  }
+                  label={
+                    m.role.toLowerCase() === "admin"
+                      ? t("app.family.roleAdmin")
+                      : t("app.family.roleMember")
+                  }
+                />
+                {isAdmin && (
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    loading={deleteMember.isPending}
+                    onClick={() =>
+                      deleteMember.mutate(
+                        { memberId: m.id },
+                        {
+                          onSuccess: () =>
+                            showSnackbar(t("app.family.deleteMemberSuccess")),
+                          onError: () =>
+                            showSnackbar(t("app.family.deleteMemberError")),
+                        },
+                      )
+                    }
+                  >
+                    {t("app.family.deleteMember")}
+                  </Button>
+                )}
+              </div>
             </li>
           ))}
         </ul>

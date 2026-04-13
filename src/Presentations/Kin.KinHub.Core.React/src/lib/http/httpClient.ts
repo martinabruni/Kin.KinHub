@@ -151,4 +151,34 @@ export class HttpClient {
       requiresAuth,
     );
   }
+
+  async put<T>(path: string, body?: unknown, requiresAuth = false): Promise<T> {
+    return this.withRefreshRetry<T>(
+      (token) =>
+        fetch(`${this.baseUrl}${path}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: body !== undefined ? JSON.stringify(body) : undefined,
+        }),
+      requiresAuth,
+    );
+  }
+
+  async delete<T>(path: string, requiresAuth = false): Promise<T> {
+    return this.withRefreshRetry<T>(
+      (token) =>
+        fetch(`${this.baseUrl}${path}`, {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        }),
+      requiresAuth,
+    );
+  }
 }

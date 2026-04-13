@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/stores/authStore";
 import { useUiStore } from "@/stores/uiStore";
 import { useLogout } from "@/api/identity/useLogout";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/cn";
 
 export function NavBar() {
   const { t, i18n } = useTranslation();
@@ -40,29 +41,38 @@ export function NavBar() {
     setLanguage(next);
   }
 
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      "rounded-md px-3 py-1.5 text-sm transition-colors",
+      isActive
+        ? "bg-[var(--border)] text-[var(--fg)] font-semibold"
+        : "text-[var(--fg)] hover:bg-[var(--border)]",
+    );
+
   const navLinks = (
     <>
-      <Link
+      <NavLink
         to="/"
+        end
         onClick={() => setMenuOpen(false)}
-        className="rounded-md px-3 py-1.5 text-sm text-[var(--fg)] hover:bg-[var(--border)]"
+        className={navLinkClass}
       >
         {t("nav.dashboard")}
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/family"
         onClick={() => setMenuOpen(false)}
-        className="rounded-md px-3 py-1.5 text-sm text-[var(--fg)] hover:bg-[var(--border)]"
+        className={navLinkClass}
       >
         {t("nav.family")}
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/profile"
         onClick={() => setMenuOpen(false)}
-        className="rounded-md px-3 py-1.5 text-sm text-[var(--fg)] hover:bg-[var(--border)]"
+        className={navLinkClass}
       >
         {t("nav.profileSettings")}
-      </Link>
+      </NavLink>
     </>
   );
 

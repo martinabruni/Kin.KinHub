@@ -15,6 +15,8 @@ public sealed class AuthController : ControllerBase
     private readonly IRequestValidator<LoginRequest> _loginValidator;
     private readonly IRequestValidator<RegisterRequest> _registerValidator;
     private readonly IRequestValidator<RefreshRequest> _refreshValidator;
+    private readonly IRequestValidator<UpdateUserEmailRequest> _updateEmailValidator;
+    private readonly IRequestValidator<UpdateUserPasswordRequest> _updatePasswordValidator;
     private readonly ICurrentUser _currentUser;
 
     public AuthController(
@@ -22,12 +24,16 @@ public sealed class AuthController : ControllerBase
         IRequestValidator<LoginRequest> loginValidator,
         IRequestValidator<RegisterRequest> registerValidator,
         IRequestValidator<RefreshRequest> refreshValidator,
+        IRequestValidator<UpdateUserEmailRequest> updateEmailValidator,
+        IRequestValidator<UpdateUserPasswordRequest> updatePasswordValidator,
         ICurrentUser currentUser)
     {
         _authService = authService;
         _loginValidator = loginValidator;
         _registerValidator = registerValidator;
         _refreshValidator = refreshValidator;
+        _updateEmailValidator = updateEmailValidator;
+        _updatePasswordValidator = updatePasswordValidator;
         _currentUser = currentUser;
     }
 
@@ -113,6 +119,59 @@ public sealed class AuthController : ControllerBase
             return BadRequest(new { errors = validation.Errors });
 
         var result = await _authService.RefreshTokenAsync(request.RefreshToken, cancellationToken);
+
+        return HttpResultMapper.ToActionResult(result);
+    }
+
+    [HttpPut("me/email")]
+    public async Task<IActionResult> UpdateEmailAsync(
+        [FromBody] UpdateUserEmailRequest? request,
+        CancellationToken cancellationToken)
+    {
+        if (!_currentUser.IsAuthenticated)
+            return Unauthorized(new { message = "Missing or invalid Authorization header." });
+
+        if (request is null)
+            return BadRequest(new { message = "Invalid request body." });
+
+        var validation = await _updateEmailValidator.ValidateAsync(request, cancellationToken);
+
+        if (!validation.IsValid)
+            return BadRequest(new { errors = validation.Errors });
+
+        var result = await _authService.UpdateUserEmailAsync(_currentUser.UserId, request, cancellationToken);
+
+        return HttpResultMapper.ToActionResult(result);
+    }
+
+    [HttpPut("me/password")]
+    public async Task<IActionResult> UpdatePasswordAsync(
+        [FromBody] UpdateUserPasswordRequest? request,
+        CancellationToken cancellationToken)
+    {
+        if (!_currentUser.IsAuthenticated)
+            return Unauthorized(new { message = "Missing or invalid Authorization header." });
+
+        if (request is null)
+            return BadRequest(new { message = "Invalid request body." });
+
+        var validation = await _updatePasswordValidator.ValidateAsync(request, cancellationToken);
+
+        if (!validation.IsValid)
+            return BadRequest(new { errors = validation.Errors });
+
+        var result = await _authService.UpdateUserPasswordAsync(_currentUser.UserId, request, cancellationToken);
+
+        return HttpResultMapper.ToActionResult(result);
+    }
+
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteAccountAsync(CancellationToken cancellationToken)
+    {
+        if (!_currentUser.IsAuthenticated)
+            return Unauthorized(new { message = "Missing or invalid Authorization header." });
+
+        var result = await _authService.DeleteUserAsync(_currentUser.UserId, cancellationToken);
 
         return HttpResultMapper.ToActionResult(result);
     }
