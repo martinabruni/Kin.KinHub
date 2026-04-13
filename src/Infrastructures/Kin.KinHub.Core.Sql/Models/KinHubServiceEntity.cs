@@ -5,21 +5,21 @@ using System.Collections.Generic;
 
 namespace Kin.KinHub.Core.Sql.Models;
 
-public partial class FamilyService
+public partial class KinHubServiceEntity
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public Guid FamilyId { get; set; }
+    public string Name { get; set; }
 
-    public int ServiceId { get; set; }
+    public string BaseUrl { get; set; }
 
     public bool IsActive { get; set; }
+
+    public bool IsAdminOnly { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
 
-    public virtual FamilyEntity Family { get; set; }
-
-    public virtual KinHubService Service { get; set; }
+    public virtual ICollection<FamilyServiceEntity> FamilyService { get; set; } = new List<FamilyServiceEntity>();
 }

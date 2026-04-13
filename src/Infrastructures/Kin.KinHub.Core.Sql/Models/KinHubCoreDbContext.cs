@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Core.Sql.Models;
 
-public partial class CoreDbContext : DbContext
+public partial class KinHubCoreDbContext : DbContext
 {
-    public CoreDbContext(DbContextOptions<CoreDbContext> options)
+    public KinHubCoreDbContext(DbContextOptions<KinHubCoreDbContext> options)
         : base(options)
     {
     }
@@ -19,9 +19,9 @@ public partial class CoreDbContext : DbContext
 
     public virtual DbSet<FamilyRoleEntity> FamilyRoleEntity { get; set; }
 
-    public virtual DbSet<FamilyService> FamilyService { get; set; }
+    public virtual DbSet<FamilyServiceEntity> FamilyService { get; set; }
 
-    public virtual DbSet<KinHubService> KinHubService { get; set; }
+    public virtual DbSet<KinHubServiceEntity> KinHubService { get; set; }
 
     public virtual DbSet<MemberRoleEntity> MemberRoleEntity { get; set; }
 
@@ -77,7 +77,7 @@ public partial class CoreDbContext : DbContext
                 .HasMaxLength(100);
         });
 
-        modelBuilder.Entity<FamilyService>(entity =>
+        modelBuilder.Entity<FamilyServiceEntity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_core_FamilyService");
 
@@ -101,7 +101,7 @@ public partial class CoreDbContext : DbContext
                 .HasConstraintName("FK_core_FamilyService_ServiceId");
         });
 
-        modelBuilder.Entity<KinHubService>(entity =>
+        modelBuilder.Entity<KinHubServiceEntity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_core_KinHubService");
 

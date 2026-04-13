@@ -1,6 +1,7 @@
 using Kin.KinHub.Identity.Domain.Exceptions;
 using Kin.KinHub.Identity.Domain.Interfaces;
 using Kin.KinHub.Identity.Domain.Models;
+using Kin.KinHub.Identity.Sql.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Identity.Sql;

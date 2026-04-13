@@ -1,5 +1,6 @@
 using Kin.KinHub.Core.Domain;
 using Kin.KinHub.Core.Sql;
+using Kin.KinHub.Core.Sql.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.DependencyInjection;
