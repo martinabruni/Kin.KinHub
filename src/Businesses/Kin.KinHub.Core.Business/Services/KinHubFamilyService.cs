@@ -1,3 +1,4 @@
+using BCrypt.Net;
 using Kin.KinHub.Core.Business.Common;
 using Kin.KinHub.Core.Domain;
 
@@ -41,6 +42,7 @@ public sealed class KinHubFamilyService : IFamilyService
                 Id = Guid.NewGuid(),
                 Name = request.FamilyName,
                 UserId = userId,
+                AdminCodeHash = BCrypt.Net.BCrypt.HashPassword(request.AdminCode),
                 CreatedAt = now,
                 UpdatedAt = now,
             };
@@ -226,6 +228,30 @@ public sealed class KinHubFamilyService : IFamilyService
         catch (Exception ex)
         {
             return Result<FamilyDetailResponse>.UnexpectedError(ex.Message);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<bool>> VerifyAdminCodeAsync(
+        Guid familyId,
+        string adminCode,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var family = await _familyRepository.GetAsync(familyId);
+            if (!BCrypt.Net.BCrypt.Verify(adminCode, family.AdminCodeHash))
+                return Result<bool>.ValidationError("Codice admin non corretto.");
+
+            return Result<bool>.Success(true);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Result<bool>.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.UnexpectedError(ex.Message);
         }
     }
 }

@@ -1,10 +1,11 @@
 [
   {
     "Name": "Piffosi",
-    "UserId": "8f36c1d4-8abf-40b4-ac5f-d62b2167ecb5",
+    "UserId": "2fd9bbe9-5741-425e-bcd9-7a9faaafbdcf",
+    "AdminCodeHash": "$2a$11$K/paphFPmKdS53olxEvhP.29vRz8CGKGimwq6FjezlJNvDljIvhdG",
     "IsDeleted": false,
-    "Id": "46fcab63-2f7e-4ae5-b247-f25bbf12cfe3",
-    "CreatedAt": "2026-04-13T09:25:15.7660346Z",
-    "UpdatedAt": "2026-04-13T09:25:15.7660346Z"
+    "Id": "5e46999e-21b9-4aa0-9b38-7ae89929c218",
+    "CreatedAt": "2026-04-13T12:03:12.8824436Z",
+    "UpdatedAt": "2026-04-13T12:03:12.8824436Z"
   }
 ]

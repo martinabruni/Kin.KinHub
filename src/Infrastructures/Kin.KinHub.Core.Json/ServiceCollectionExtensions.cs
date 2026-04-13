@@ -28,6 +28,12 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMemberRoleRepository>(_ =>
             new MemberRoleJsonRepository(options.DataDirectory));
 
+        services.AddSingleton<IKinHubServiceRepository>(_ =>
+            new KinHubServiceJsonRepository(options.DataDirectory));
+
+        services.AddSingleton<IFamilyServiceRepository>(_ =>
+            new FamilyServiceJsonRepository(options.DataDirectory));
+
         return services;
     }
 }

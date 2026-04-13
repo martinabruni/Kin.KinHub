@@ -25,6 +25,14 @@ public interface IFamilyService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Verifies the admin code for the given family.
+    /// </summary>
+    Task<Result<bool>> VerifyAdminCodeAsync(
+        Guid familyId,
+        string adminCode,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Returns the family and its members for the given user.
     /// </summary>
     Task<Result<FamilyDetailResponse>> GetFamilyAsync(

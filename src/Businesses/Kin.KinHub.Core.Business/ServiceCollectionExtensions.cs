@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
         options.Validate();
 
         services.AddScoped<IFamilyService, KinHubFamilyService>();
+        services.AddScoped<IKinHubServiceService, KinHubServiceService>();
 
         return services;
     }

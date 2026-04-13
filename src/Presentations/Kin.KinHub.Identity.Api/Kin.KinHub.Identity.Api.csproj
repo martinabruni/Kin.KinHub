@@ -18,4 +18,8 @@
     <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.Jwt\Kin.KinHub.Identity.Jwt.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="LocalDb\" />
+  </ItemGroup>
+
 </Project>

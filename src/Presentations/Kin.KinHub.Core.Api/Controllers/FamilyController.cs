@@ -2,7 +2,6 @@ using Kin.KinHub.Core.Api.Validators.Interfaces;
 using Kin.KinHub.Core.Business;
 using Kin.KinHub.Identity.Domain.Models.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Kin.KinHub.Core.Api.Controllers;
 
@@ -13,17 +12,20 @@ public sealed class FamilyController : ControllerBase
     private readonly IFamilyService _familyService;
     private readonly IRequestValidator<CreateFamilyRequest> _createValidator;
     private readonly IRequestValidator<AddFamilyMemberRequest> _addMemberValidator;
+    private readonly IRequestValidator<VerifyAdminCodeRequest> _verifyAdminCodeValidator;
     private readonly ICurrentUser _currentUser;
 
     public FamilyController(
         IFamilyService familyService,
         IRequestValidator<CreateFamilyRequest> createValidator,
         IRequestValidator<AddFamilyMemberRequest> addMemberValidator,
+        IRequestValidator<VerifyAdminCodeRequest> verifyAdminCodeValidator,
         ICurrentUser currentUser)
     {
         _familyService = familyService;
         _createValidator = createValidator;
         _addMemberValidator = addMemberValidator;
+        _verifyAdminCodeValidator = verifyAdminCodeValidator;
         _currentUser = currentUser;
     }
 
@@ -79,5 +81,27 @@ public sealed class FamilyController : ControllerBase
         var result = await _familyService.AddFamilyMemberAsync(familyId, request, _currentUser.UserId, cancellationToken);
 
         return HttpResultMapper.ToCreatedActionResult(result);
+    }
+
+    [HttpPost("{familyId:guid}/verify-admin-code")]
+    public async Task<IActionResult> VerifyAdminCodeAsync(
+        Guid familyId,
+        [FromBody] VerifyAdminCodeRequest? request,
+        CancellationToken cancellationToken)
+    {
+        if (!_currentUser.IsAuthenticated)
+            return Unauthorized(new { message = "Missing or invalid Authorization header." });
+
+        if (request is null)
+            return BadRequest(new { message = "Invalid request body." });
+
+        var validation = await _verifyAdminCodeValidator.ValidateAsync(request, cancellationToken);
+
+        if (!validation.IsValid)
+            return BadRequest(new { errors = validation.Errors });
+
+        var result = await _familyService.VerifyAdminCodeAsync(familyId, request.AdminCode, cancellationToken);
+
+        return HttpResultMapper.ToActionResult(result);
     }
 }
