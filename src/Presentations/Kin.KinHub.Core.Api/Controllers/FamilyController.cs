@@ -14,6 +14,8 @@ public sealed class FamilyController : ControllerBase
     private readonly IRequestValidator<AddFamilyMemberRequest> _addMemberValidator;
     private readonly IRequestValidator<UpdateFamilyMemberRequest> _updateMemberValidator;
     private readonly IRequestValidator<VerifyAdminCodeRequest> _verifyAdminCodeValidator;
+    private readonly IRequestValidator<UpdateFamilyRequest> _updateFamilyValidator;
+    private readonly IRequestValidator<UpdateAdminCodeRequest> _updateAdminCodeValidator;
     private readonly ICurrentUser _currentUser;
 
     public FamilyController(
@@ -22,6 +24,8 @@ public sealed class FamilyController : ControllerBase
         IRequestValidator<AddFamilyMemberRequest> addMemberValidator,
         IRequestValidator<UpdateFamilyMemberRequest> updateMemberValidator,
         IRequestValidator<VerifyAdminCodeRequest> verifyAdminCodeValidator,
+        IRequestValidator<UpdateFamilyRequest> updateFamilyValidator,
+        IRequestValidator<UpdateAdminCodeRequest> updateAdminCodeValidator,
         ICurrentUser currentUser)
     {
         _familyService = familyService;
@@ -29,6 +33,8 @@ public sealed class FamilyController : ControllerBase
         _addMemberValidator = addMemberValidator;
         _updateMemberValidator = updateMemberValidator;
         _verifyAdminCodeValidator = verifyAdminCodeValidator;
+        _updateFamilyValidator = updateFamilyValidator;
+        _updateAdminCodeValidator = updateAdminCodeValidator;
         _currentUser = currentUser;
     }
 
@@ -141,6 +147,50 @@ public sealed class FamilyController : ControllerBase
             return BadRequest(new { errors = validation.Errors });
 
         var result = await _familyService.UpdateFamilyMemberAsync(familyId, memberId, request, _currentUser.UserId, cancellationToken);
+
+        return HttpResultMapper.ToActionResult(result);
+    }
+
+    [HttpPatch("{familyId:guid}")]
+    public async Task<IActionResult> UpdateFamilyAsync(
+        Guid familyId,
+        [FromBody] UpdateFamilyRequest? request,
+        CancellationToken cancellationToken)
+    {
+        if (!_currentUser.IsAuthenticated)
+            return Unauthorized(new { message = "Missing or invalid Authorization header." });
+
+        if (request is null)
+            return BadRequest(new { message = "Invalid request body." });
+
+        var validation = await _updateFamilyValidator.ValidateAsync(request, cancellationToken);
+
+        if (!validation.IsValid)
+            return BadRequest(new { errors = validation.Errors });
+
+        var result = await _familyService.UpdateFamilyAsync(familyId, request, _currentUser.UserId, cancellationToken);
+
+        return HttpResultMapper.ToActionResult(result);
+    }
+
+    [HttpPatch("{familyId:guid}/admin-code")]
+    public async Task<IActionResult> UpdateAdminCodeAsync(
+        Guid familyId,
+        [FromBody] UpdateAdminCodeRequest? request,
+        CancellationToken cancellationToken)
+    {
+        if (!_currentUser.IsAuthenticated)
+            return Unauthorized(new { message = "Missing or invalid Authorization header." });
+
+        if (request is null)
+            return BadRequest(new { message = "Invalid request body." });
+
+        var validation = await _updateAdminCodeValidator.ValidateAsync(request, cancellationToken);
+
+        if (!validation.IsValid)
+            return BadRequest(new { errors = validation.Errors });
+
+        var result = await _familyService.UpdateAdminCodeAsync(familyId, request, _currentUser.UserId, cancellationToken);
 
         return HttpResultMapper.ToActionResult(result);
     }

@@ -57,4 +57,22 @@ public interface IFamilyService
         UpdateFamilyMemberRequest request,
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the name of a family (ownership validated).
+    /// </summary>
+    Task<Result<UpdateFamilyResponse>> UpdateFamilyAsync(
+        Guid familyId,
+        UpdateFamilyRequest request,
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the admin code of a family (ownership and current code validated).
+    /// </summary>
+    Task<Result<bool>> UpdateAdminCodeAsync(
+        Guid familyId,
+        UpdateAdminCodeRequest request,
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

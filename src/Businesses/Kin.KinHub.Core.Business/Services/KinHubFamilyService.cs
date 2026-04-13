@@ -276,6 +276,28 @@ public sealed class KinHubFamilyService : IFamilyService
             if (member.FamilyId != familyId)
                 return Result<bool>.NotFound("Member not found in this family.");
 
+            var adminRole = await _familyRoleRepository.FindByRoleTypeAsync(FamilyRoleType.Admin, cancellationToken);
+            if (adminRole is not null)
+            {
+                var memberRoles = await _memberRoleRepository.GetByMemberIdAsync(memberId, cancellationToken);
+                bool memberIsAdmin = memberRoles.Any(r => r.RoleId == adminRole.Id && r.IsActive);
+
+                if (memberIsAdmin)
+                {
+                    var allMembers = await _familyMemberRepository.GetByFamilyIdAsync(familyId, cancellationToken);
+                    int adminCount = 0;
+                    foreach (var fm in allMembers)
+                    {
+                        var fmRoles = await _memberRoleRepository.GetByMemberIdAsync(fm.Id, cancellationToken);
+                        if (fmRoles.Any(r => r.RoleId == adminRole.Id && r.IsActive))
+                            adminCount++;
+                    }
+
+                    if (adminCount <= 1)
+                        return Result<bool>.Conflict("Cannot remove the last admin of a family.");
+                }
+            }
+
             member.IsDeleted = true;
             member.UpdatedAt = DateTime.UtcNow;
             await _familyMemberRepository.UpdateAsync(member.Id, member);
@@ -335,6 +357,77 @@ public sealed class KinHubFamilyService : IFamilyService
         catch (Exception ex)
         {
             return Result<UpdateFamilyMemberResponse>.UnexpectedError(ex.Message);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<UpdateFamilyResponse>> UpdateFamilyAsync(
+        Guid familyId,
+        UpdateFamilyRequest request,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var family = await _familyRepository.FindByUserIdAsync(userId, cancellationToken);
+            if (family is null)
+                return Result<UpdateFamilyResponse>.NotFound("Family not found for this user.");
+
+            if (family.Id != familyId)
+                return Result<UpdateFamilyResponse>.Unauthorized("You do not own this family.");
+
+            family.Name = request.Name;
+            family.UpdatedAt = DateTime.UtcNow;
+            await _familyRepository.UpdateAsync(family.Id, family);
+
+            return Result<UpdateFamilyResponse>.Success(new UpdateFamilyResponse
+            {
+                FamilyId = family.Id,
+                Name = family.Name,
+            });
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Result<UpdateFamilyResponse>.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result<UpdateFamilyResponse>.UnexpectedError(ex.Message);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<bool>> UpdateAdminCodeAsync(
+        Guid familyId,
+        UpdateAdminCodeRequest request,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var family = await _familyRepository.FindByUserIdAsync(userId, cancellationToken);
+            if (family is null)
+                return Result<bool>.NotFound("Family not found for this user.");
+
+            if (family.Id != familyId)
+                return Result<bool>.Unauthorized("You do not own this family.");
+
+            if (!BCrypt.Net.BCrypt.Verify(request.CurrentCode, family.AdminCodeHash))
+                return Result<bool>.ValidationError("Current admin code is incorrect.");
+
+            family.AdminCodeHash = BCrypt.Net.BCrypt.HashPassword(request.NewCode);
+            family.UpdatedAt = DateTime.UtcNow;
+            await _familyRepository.UpdateAsync(family.Id, family);
+
+            return Result<bool>.Success(true);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Result<bool>.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.UnexpectedError(ex.Message);
         }
     }
 }
