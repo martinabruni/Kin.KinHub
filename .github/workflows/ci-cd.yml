@@ -25,7 +25,7 @@ env:
   # BUSINESS_TESTS_PROJECT: src/Tests/Kin.KinHub.Business.Tests/Kin.KinHub.Business.Tests.csproj
   # API_TESTS_PROJECT: src/Tests/Kin.KinHub.Api.Tests/Kin.KinHub.Api.Tests.csproj
   # TODO: add React frontend path when created
-  FRONTEND_PATH: src/Presentations/Kin.KinHub.React
+  FRONTEND_PATH: src/Presentations/Kin.KinHub.Core.React
   BICEP_FILE: ops/iac/main.bicep
   API_ARTIFACT_DIR: artifacts/webapp
   FRONTEND_ARTIFACT_DIR: artifacts/staticwebapp
@@ -175,6 +175,7 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          allow-no-subscription: true
 
       - name: Download Web App package
         uses: actions/download-artifact@v4
