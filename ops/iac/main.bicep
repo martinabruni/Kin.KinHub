@@ -268,15 +268,6 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   }
 }
 
-resource staticWebAppSettings 'Microsoft.Web/staticSites/config@2024-04-01' = {
-  parent: staticWebApp
-  name: 'appsettings'
-  properties: {
-    VITE_CORE_URL: 'https://${webApp.properties.defaultHostName}'
-    VITE_IDENTITY_URL: 'https://${identityWebApp.properties.defaultHostName}'
-  }
-}
-
 output webAppDefaultHostname string = webApp.properties.defaultHostName
 output identityWebAppDefaultHostname string = identityWebApp.properties.defaultHostName
 output staticWebAppDefaultHostname string = staticWebApp.properties.defaultHostname

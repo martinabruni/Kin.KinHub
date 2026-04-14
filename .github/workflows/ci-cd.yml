@@ -90,6 +90,9 @@ jobs:
         run: npm ci --include=optional
 
       - name: Build frontend
+        env:
+          VITE_CORE_URL: ${{ vars.VITE_CORE_URL }}
+          VITE_IDENTITY_URL: ${{ vars.VITE_IDENTITY_URL }}
         run: npm run build
 
       # - name: Run frontend tests
