@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using FluentValidation;
 using Kin.KinHub.Core.Api.Middlewares;
 using Kin.KinHub.Core.Api.Validators;
@@ -18,6 +19,11 @@ builder.Services
             ?? "kinhub";
     })
     .AddKinHubCoreBusiness();
+
+builder.Services.AddOpenTelemetry().UseAzureMonitor();
+builder.Services
+    .AddHealthChecks()
+    .AddSqlServer(builder.Configuration.GetConnectionString("KinHub")!);
 
 builder.Services.AddScoped<JwtAuthenticationMiddleware>();
 builder.Services.AddControllers();
@@ -40,5 +46,6 @@ app.UseCors("AllowAll");
 app.UseMiddleware<JwtAuthenticationMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

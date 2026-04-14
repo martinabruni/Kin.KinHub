@@ -194,6 +194,7 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
     siteConfig: {
       appSettings: webAppSettings
       ftpsState: 'Disabled'
+      healthCheckPath: '/health'
       http20Enabled: true
       linuxFxVersion: 'DOTNETCORE|10.0'
       minTlsVersion: '1.2'
@@ -237,6 +238,7 @@ resource identityWebApp 'Microsoft.Web/sites@2024-04-01' = {
     siteConfig: {
       appSettings: identityWebAppSettings
       ftpsState: 'Disabled'
+      healthCheckPath: '/health'
       http20Enabled: true
       linuxFxVersion: 'DOTNETCORE|10.0'
       minTlsVersion: '1.2'
