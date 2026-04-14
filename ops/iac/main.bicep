@@ -195,7 +195,7 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
       appSettings: webAppSettings
       ftpsState: 'Disabled'
       http20Enabled: true
-      linuxFxVersion: 'DOTNETCORE|8.0'
+      linuxFxVersion: 'DOTNETCORE|10.0'
       minTlsVersion: '1.2'
     }
   }
@@ -238,7 +238,7 @@ resource identityWebApp 'Microsoft.Web/sites@2024-04-01' = {
       appSettings: identityWebAppSettings
       ftpsState: 'Disabled'
       http20Enabled: true
-      linuxFxVersion: 'DOTNETCORE|8.0'
+      linuxFxVersion: 'DOTNETCORE|10.0'
       minTlsVersion: '1.2'
     }
   }
