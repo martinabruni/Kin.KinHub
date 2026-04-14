@@ -161,10 +161,11 @@ jobs:
               webAppName="${{ vars.WEB_APP_NAME }}" \
               identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
-              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
-              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
-              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
+              postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
+              postgresAdministratorLogin="${{ secrets.POSTGRES_ADMINISTRATOR_LOGIN }}" \
+              postgresAdministratorPassword="${{ secrets.POSTGRES_ADMINISTRATOR_PASSWORD }}" \
+              openAiAccountName="${{ vars.OPEN_AI_ACCOUNT_NAME }}" \
               jwtSecret="${{ secrets.JWT_SECRET }}"
 
           az deployment group create \
@@ -177,10 +178,11 @@ jobs:
               webAppName="${{ vars.WEB_APP_NAME }}" \
               identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
-              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
-              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
-              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
+              postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
+              postgresAdministratorLogin="${{ secrets.POSTGRES_ADMINISTRATOR_LOGIN }}" \
+              postgresAdministratorPassword="${{ secrets.POSTGRES_ADMINISTRATOR_PASSWORD }}" \
+              openAiAccountName="${{ vars.OPEN_AI_ACCOUNT_NAME }}" \
               jwtSecret="${{ secrets.JWT_SECRET }}"
 
       - name: Deploy Web App
@@ -238,10 +240,11 @@ jobs:
   #             webAppName="${{ vars.WEB_APP_NAME }}" \
   #             identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
   #             keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
-  #             sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
-  #             sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
-  #             sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-  #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+  #             postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
+  #             postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
+  #             postgresAdministratorLogin="${{ secrets.POSTGRES_ADMINISTRATOR_LOGIN }}" \
+  #             postgresAdministratorPassword="${{ secrets.POSTGRES_ADMINISTRATOR_PASSWORD }}" \
+  #             openAiAccountName="${{ vars.OPEN_AI_ACCOUNT_NAME }}" \
   #             jwtSecret="${{ secrets.JWT_SECRET }}"
   #
   #         az deployment group create \
@@ -254,10 +257,11 @@ jobs:
   #             webAppName="${{ vars.WEB_APP_NAME }}" \
   #             identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
   #             keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
-  #             sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
-  #             sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
-  #             sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-  #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+  #             postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
+  #             postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
+  #             postgresAdministratorLogin="${{ secrets.POSTGRES_ADMINISTRATOR_LOGIN }}" \
+  #             postgresAdministratorPassword="${{ secrets.POSTGRES_ADMINISTRATOR_PASSWORD }}" \
+  #             openAiAccountName="${{ vars.OPEN_AI_ACCOUNT_NAME }}" \
   #             jwtSecret="${{ secrets.JWT_SECRET }}"
   #
   #     - name: Deploy Web App
@@ -315,10 +319,11 @@ jobs:
               webAppName="${{ vars.WEB_APP_NAME }}" \
               identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
-              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
-              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
-              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
+              postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
+              postgresAdministratorLogin="${{ secrets.POSTGRES_ADMINISTRATOR_LOGIN }}" \
+              postgresAdministratorPassword="${{ secrets.POSTGRES_ADMINISTRATOR_PASSWORD }}" \
+              openAiAccountName="${{ vars.OPEN_AI_ACCOUNT_NAME }}" \
               jwtSecret="${{ secrets.JWT_SECRET }}"
 
           az deployment group create \
@@ -331,10 +336,11 @@ jobs:
               webAppName="${{ vars.WEB_APP_NAME }}" \
               identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
-              sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
-              sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
-              sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-              sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+              postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
+              postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
+              postgresAdministratorLogin="${{ secrets.POSTGRES_ADMINISTRATOR_LOGIN }}" \
+              postgresAdministratorPassword="${{ secrets.POSTGRES_ADMINISTRATOR_PASSWORD }}" \
+              openAiAccountName="${{ vars.OPEN_AI_ACCOUNT_NAME }}" \
               jwtSecret="${{ secrets.JWT_SECRET }}"
 
       - name: Deploy Web App
