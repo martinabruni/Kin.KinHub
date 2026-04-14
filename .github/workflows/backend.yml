@@ -1,4 +1,4 @@
-name: CI CD
+name: Backend CI CD
 
 on:
   pull_request:
@@ -24,16 +24,13 @@ env:
   # TODO: add test projects when created
   # BUSINESS_TESTS_PROJECT: src/Tests/Kin.KinHub.Business.Tests/Kin.KinHub.Business.Tests.csproj
   # API_TESTS_PROJECT: src/Tests/Kin.KinHub.Api.Tests/Kin.KinHub.Api.Tests.csproj
-  # TODO: add React frontend path when created
-  FRONTEND_PATH: src/Presentations/Kin.KinHub.Core.React
   BICEP_FILE: ops/iac/main.bicep
   API_ARTIFACT_DIR: artifacts/webapp
   IDENTITY_API_ARTIFACT_DIR: artifacts/identity-webapp
-  FRONTEND_ARTIFACT_DIR: artifacts/staticwebapp
 # -----------------------------------------------------------------------
 
 concurrency:
-  group: ci-cd-${{ github.ref }}
+  group: backend-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -65,53 +62,6 @@ jobs:
       # - name: Run api tests
       #   continue-on-error: true
       #   run: dotnet test "${{ env.API_TESTS_PROJECT }}" --configuration Release --no-build
-
-  frontend_ci:
-    name: Frontend Build
-    # name: Frontend Build And Test
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ${{ env.FRONTEND_PATH }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: ${{ env.FRONTEND_PATH }}/package-lock.json
-
-      - name: Install frontend dependencies
-        run: npm ci --include=optional
-
-      - name: Build frontend
-        env:
-          VITE_CORE_URL: ${{ vars.VITE_CORE_URL }}
-          VITE_IDENTITY_URL: ${{ vars.VITE_IDENTITY_URL }}
-        run: npm run build
-
-      # - name: Run frontend tests
-      #   run: npm run test
-
-      - name: Prepare Static Web App artifact
-        shell: bash
-        run: |
-          rm -rf ../../../${{ env.FRONTEND_ARTIFACT_DIR }}
-          mkdir -p ../../../${{ env.FRONTEND_ARTIFACT_DIR }}
-          cp -R dist/. ../../../${{ env.FRONTEND_ARTIFACT_DIR }}/
-          cp staticwebapp.config.json ../../../${{ env.FRONTEND_ARTIFACT_DIR }}/staticwebapp.config.json
-
-      - name: Upload Static Web App artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: staticwebapp-package
-          path: ${{ env.FRONTEND_ARTIFACT_DIR }}
-          if-no-files-found: error
 
   package_webapp:
     name: Package Web App
@@ -173,7 +123,6 @@ jobs:
     environment: dev
     needs:
       - backend_ci
-      - frontend_ci
       - package_webapp
       - validate_bicep
 
@@ -187,7 +136,6 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          allow-no-subscription: true
 
       - name: Download Web App package
         uses: actions/download-artifact@v4
@@ -200,12 +148,6 @@ jobs:
         with:
           name: identity-webapp-package
           path: identity-webapp-package
-
-      - name: Download Static Web App artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: staticwebapp-package
-          path: staticwebapp-package
 
       - name: Deploy infrastructure
         run: |
@@ -224,7 +166,7 @@ jobs:
               sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
               sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
               jwtSecret="${{ secrets.JWT_SECRET }}"
-              
+
           az deployment group create \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
             --template-file ops/iac/main.bicep \
@@ -253,16 +195,6 @@ jobs:
           app-name: ${{ vars.IDENTITY_WEB_APP_NAME }}
           package: identity-webapp-package
 
-      - name: Deploy Static Web App
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: upload
-          app_location: staticwebapp-package
-          output_location: ""
-          skip_app_build: true
-
   # deploy_test:
   #   name: Deploy Test
   #   if: github.event_name != 'pull_request'
@@ -288,11 +220,11 @@ jobs:
   #         name: webapp-package
   #         path: webapp-package
   #
-  #     - name: Download Static Web App artifact
+  #     - name: Download Identity Web App package
   #       uses: actions/download-artifact@v4
   #       with:
-  #         name: staticwebapp-package
-  #         path: staticwebapp-package
+  #         name: identity-webapp-package
+  #         path: identity-webapp-package
   #
   #     - name: Deploy infrastructure
   #       run: |
@@ -304,11 +236,13 @@ jobs:
   #             staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
   #             staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
   #             webAppName="${{ vars.WEB_APP_NAME }}" \
+  #             identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
   #             keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
   #             sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
   #             sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
   #             sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-  #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+  #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+  #             jwtSecret="${{ secrets.JWT_SECRET }}"
   #
   #         az deployment group create \
   #           --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
@@ -318,11 +252,13 @@ jobs:
   #             staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
   #             staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
   #             webAppName="${{ vars.WEB_APP_NAME }}" \
+  #             identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
   #             keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
   #             sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
   #             sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
   #             sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
-  #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}"
+  #             sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
+  #             jwtSecret="${{ secrets.JWT_SECRET }}"
   #
   #     - name: Deploy Web App
   #       uses: azure/webapps-deploy@v3
@@ -330,15 +266,11 @@ jobs:
   #         app-name: ${{ vars.WEB_APP_NAME }}
   #         package: webapp-package
   #
-  #     - name: Deploy Static Web App
-  #       uses: Azure/static-web-apps-deploy@v1
+  #     - name: Deploy Identity Web App
+  #       uses: azure/webapps-deploy@v3
   #       with:
-  #         azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-  #         repo_token: ${{ secrets.GITHUB_TOKEN }}
-  #         action: upload
-  #         app_location: staticwebapp-package
-  #         output_location: ""
-  #         skip_app_build: true
+  #         app-name: ${{ vars.IDENTITY_WEB_APP_NAME }}
+  #         package: identity-webapp-package
 
   deploy_prod:
     name: Deploy Prod
@@ -371,12 +303,6 @@ jobs:
           name: identity-webapp-package
           path: identity-webapp-package
 
-      - name: Download Static Web App artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: staticwebapp-package
-          path: staticwebapp-package
-
       - name: Deploy infrastructure
         run: |
           az deployment group what-if \
@@ -394,7 +320,7 @@ jobs:
               sqlAdministratorLogin="${{ secrets.SQL_ADMINISTRATOR_LOGIN }}" \
               sqlAdministratorPassword="${{ secrets.SQL_ADMINISTRATOR_PASSWORD }}" \
               jwtSecret="${{ secrets.JWT_SECRET }}"
-              
+
           az deployment group create \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
             --template-file ops/iac/main.bicep \
@@ -422,13 +348,3 @@ jobs:
         with:
           app-name: ${{ vars.IDENTITY_WEB_APP_NAME }}
           package: identity-webapp-package
-
-      - name: Deploy Static Web App
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: upload
-          app_location: staticwebapp-package
-          output_location: ""
-          skip_app_build: true
