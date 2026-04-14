@@ -21,5 +21,5 @@ public partial class RefreshTokenEntity
 
     public DateTime UpdatedAt { get; set; }
 
-    public virtual UserEntity User { get; set; }
+    public virtual KinUserEntity User { get; set; }
 }

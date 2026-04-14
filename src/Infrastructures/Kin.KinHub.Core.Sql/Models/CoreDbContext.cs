@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Core.Sql.Models;
 
-public partial class KinHubCoreDbContext : DbContext
+public partial class CoreDbContext : DbContext
 {
-    public KinHubCoreDbContext(DbContextOptions<KinHubCoreDbContext> options)
+    public CoreDbContext(DbContextOptions<CoreDbContext> options)
         : base(options)
     {
     }

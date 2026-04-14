@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Kin.KinHub.Identity.Sql.Models;
 
-public partial class UserEntity
+public partial class KinUserEntity
 {
     public Guid Id { get; set; }
 

@@ -38,7 +38,7 @@ public sealed class JwtTokenGenerator : ITokenGenerator, ITokenValidator
     public int AccessTokenExpirySeconds => _options.AccessTokenExpiryMinutes * 60;
 
     /// <inheritdoc/>
-    public string GenerateAccessToken(IdentityUser user, IReadOnlyList<string> roles)
+    public string GenerateAccessToken(KinUser user, IReadOnlyList<string> roles)
     {
         var claims = new List<Claim>
         {

@@ -6,27 +6,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Identity.Sql;
 
-public sealed class IdentityUserCredentialRepository
-    : SqlRepository<IdentityUserCredential, Guid>, IIdentityUserCredentialRepository
+public sealed class UserCredentialRepository
+    : SqlRepository<UserCredential, Guid>, IUserCredentialRepository
 {
-    public IdentityUserCredentialRepository(KinHubIdentityDbContext context)
+    public UserCredentialRepository(IdentityDbContext context)
         : base(context) { }
 
     /// <inheritdoc/>
-    public async Task<IdentityUserCredential?> GetByUserIdAsync(Guid userId)
+    public async Task<UserCredential?> GetByUserIdAsync(Guid userId)
     {
         return await Set.FirstOrDefaultAsync(x => x.UserId == userId);
     }
 
     /// <inheritdoc/>
-    protected override async Task OnBeforeCreateAsync(IdentityUserCredential model)
+    protected override async Task OnBeforeCreateAsync(UserCredential model)
     {
         var duplicate = await Set.AnyAsync(x => x.UserId == model.UserId);
 
         if (duplicate)
             throw new DuplicateEntityException(
-                nameof(IdentityUserCredential),
-                nameof(IdentityUserCredential.UserId),
+                nameof(UserCredential),
+                nameof(UserCredential.UserId),
                 model.UserId);
     }
 }

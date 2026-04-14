@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 namespace Kin.KinHub.Identity.Sql;
 
 /// <inheritdoc/>
-public sealed class IdentityPasswordHasher : IPasswordHasher
+public sealed class PasswordHasher : IPasswordHasher
 {
     private static readonly PasswordHasher<object> _inner = new();
     private static readonly object _dummy = new();

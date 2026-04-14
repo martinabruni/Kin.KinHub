@@ -7,7 +7,7 @@ namespace Kin.KinHub.Identity.Sql;
 
 public sealed class RefreshTokenRepository : SqlRepository<RefreshToken, Guid>, IRefreshTokenRepository
 {
-    public RefreshTokenRepository(KinHubIdentityDbContext context)
+    public RefreshTokenRepository(IdentityDbContext context)
         : base(context) { }
 
     /// <inheritdoc/>

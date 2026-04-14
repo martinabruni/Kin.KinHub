@@ -6,7 +6,7 @@ namespace Kin.KinHub.Core.Sql;
 
 public sealed class FamilyServiceRepository : SqlRepository<FamilyService, Guid>, IFamilyServiceRepository
 {
-    public FamilyServiceRepository(KinHubCoreDbContext context)
+    public FamilyServiceRepository(CoreDbContext context)
         : base(context) { }
 
     /// <inheritdoc/>

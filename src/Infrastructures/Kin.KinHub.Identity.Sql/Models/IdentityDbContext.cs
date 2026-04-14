@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Identity.Sql.Models;
 
-public partial class KinHubIdentityDbContext : DbContext
+public partial class IdentityDbContext : DbContext
 {
-    public KinHubIdentityDbContext(DbContextOptions<KinHubIdentityDbContext> options)
+    public IdentityDbContext(DbContextOptions<IdentityDbContext> options)
         : base(options)
     {
     }
@@ -19,7 +19,7 @@ public partial class KinHubIdentityDbContext : DbContext
 
     public virtual DbSet<UserCredentialEntity> UserCredentialEntity { get; set; }
 
-    public virtual DbSet<UserEntity> UserEntity { get; set; }
+    public virtual DbSet<KinUserEntity> UserEntity { get; set; }
 
     public virtual DbSet<UserProviderEntity> UserProviderEntity { get; set; }
 
@@ -80,7 +80,7 @@ public partial class KinHubIdentityDbContext : DbContext
                 .HasConstraintName("FK_identity_UserCredentialEntity_UserId");
         });
 
-        modelBuilder.Entity<UserEntity>(entity =>
+        modelBuilder.Entity<KinUserEntity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_identity_UserEntity");
 

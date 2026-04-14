@@ -6,25 +6,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Identity.Sql;
 
-public sealed class IdentityUserRepository : SqlRepository<IdentityUser, Guid>, IIdentityUserRepository
+public sealed class KinUserRepository : SqlRepository<KinUser, Guid>, IKinUserRepository
 {
-    public IdentityUserRepository(KinHubIdentityDbContext context)
+    public KinUserRepository(IdentityDbContext context)
         : base(context) { }
 
     /// <inheritdoc/>
-    public async Task<IdentityUser?> FindByEmailAsync(string email)
+    public async Task<KinUser?> FindByEmailAsync(string email)
     {
         return await Set
             .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
     }
 
     /// <inheritdoc/>
-    protected override async Task OnBeforeCreateAsync(IdentityUser model)
+    protected override async Task OnBeforeCreateAsync(KinUser model)
     {
         var duplicate = await Set
             .AnyAsync(u => u.Email.ToLower() == model.Email.ToLower());
 
         if (duplicate)
-            throw new DuplicateEntityException(nameof(IdentityUser), nameof(IdentityUser.Email), model.Email);
+            throw new DuplicateEntityException(nameof(KinUser), nameof(KinUser.Email), model.Email);
     }
 }

@@ -6,7 +6,7 @@ namespace Kin.KinHub.Core.Sql;
 
 public sealed class MemberRoleRepository : SqlRepository<MemberRole, Guid>, IMemberRoleRepository
 {
-    public MemberRoleRepository(KinHubCoreDbContext context)
+    public MemberRoleRepository(CoreDbContext context)
         : base(context) { }
 
     /// <inheritdoc/>
