@@ -18,6 +18,12 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IFamilyService, KinHubFamilyService>();
         services.AddScoped<IKinHubServiceService, KinHubServiceService>();
+        services.AddScoped<IRecipeBookService, KinHubRecipeBookService>();
+        services.AddScoped<IRecipeService, KinHubRecipeService>();
+        services.AddScoped<IRecipeIngredientService, KinHubRecipeIngredientService>();
+        services.AddScoped<IRecipeStepService, KinHubRecipeStepService>();
+        services.AddScoped<IFridgeService, KinHubFridgeService>();
+        services.AddScoped<IFridgeIngredientService, KinHubFridgeIngredientService>();
 
         return services;
     }

@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.*" />
-    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.*" />
+    <PackageReference Include="AspNetCore.HealthChecks.Npgsql" Version="9.*" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.4" />
@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Businesses\Kin.KinHub.Identity.Business\Kin.KinHub.Identity.Business.csproj" />
-    <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.Sql\Kin.KinHub.Identity.Sql.csproj" />
+    <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.PostgreSql\Kin.KinHub.Identity.PostgreSql.csproj" />
     <ProjectReference Include="..\..\Infrastructures\Kin.KinHub.Identity.Jwt\Kin.KinHub.Identity.Jwt.csproj" />
   </ItemGroup>
 
