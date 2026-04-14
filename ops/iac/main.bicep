@@ -289,7 +289,7 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
 
 resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: keyVault
-  name: guid(keyVault.id, webApp.id, keyVaultSecretsUserRoleDefinitionId, webApp.identity.principalId)
+  name: guid(keyVault.id, webApp.id, keyVaultSecretsUserRoleDefinitionId)
   properties: {
     principalId: webApp.identity.principalId
     principalType: 'ServicePrincipal'
@@ -299,7 +299,7 @@ resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignme
 
 resource openAiKeyVaultSecretsUserRoleAssignmentWebApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: keyVault
-  name: guid(keyVault.id, webApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai', webApp.identity.principalId)
+  name: guid(keyVault.id, webApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai')
   properties: {
     principalId: webApp.identity.principalId
     principalType: 'ServicePrincipal'
@@ -343,7 +343,7 @@ resource identityWebApp 'Microsoft.Web/sites@2024-04-01' = {
 
 resource identityKeyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: keyVault
-  name: guid(keyVault.id, identityWebApp.id, keyVaultSecretsUserRoleDefinitionId, identityWebApp.identity.principalId)
+  name: guid(keyVault.id, identityWebApp.id, keyVaultSecretsUserRoleDefinitionId)
   properties: {
     principalId: identityWebApp.identity.principalId
     principalType: 'ServicePrincipal'
@@ -353,13 +353,7 @@ resource identityKeyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/role
 
 resource openAiKeyVaultSecretsUserRoleAssignmentIdentityWebApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: keyVault
-  name: guid(
-    keyVault.id,
-    identityWebApp.id,
-    keyVaultSecretsUserRoleDefinitionId,
-    'openai',
-    identityWebApp.identity.principalId
-  )
+  name: guid(keyVault.id, identityWebApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai')
   properties: {
     principalId: identityWebApp.identity.principalId
     principalType: 'ServicePrincipal'
