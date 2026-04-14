@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
         configure(options);
         options.Validate();
 
-        services.AddDbContext<KinHubCoreDbContext>(o =>
+        services.AddDbContext<CoreDbContext>(o =>
             o.UseSqlServer(options.ConnectionString));
 
         services.AddScoped<IFamilyRepository, FamilyRepository>();

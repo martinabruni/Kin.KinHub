@@ -24,8 +24,8 @@ GO
 -- IDENTITY SCHEMA
 -- ============================================================
 
--- identity.UserEntity
-CREATE TABLE [identity].[UserEntity]
+-- identity.KinUserEntity
+CREATE TABLE [identity].[KinUserEntity]
 (
     [Id] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     [Email] NVARCHAR(256) NOT NULL,
@@ -36,8 +36,8 @@ CREATE TABLE [identity].[UserEntity]
     [IsDeleted] BIT NOT NULL DEFAULT 0,
     [CreatedAt] DATETIME2 NOT NULL,
     [UpdatedAt] DATETIME2 NOT NULL,
-    CONSTRAINT [PK_identity_UserEntity] PRIMARY KEY ([Id]),
-    CONSTRAINT [UQ_identity_UserEntity_Email] UNIQUE ([Email])
+    CONSTRAINT [PK_identity_KinUserEntity] PRIMARY KEY ([Id]),
+    CONSTRAINT [UQ_identity_KinUserEntity_Email] UNIQUE ([Email])
 );
 GO
 
@@ -67,7 +67,7 @@ CREATE TABLE [identity].[UserCredentialEntity]
     [UpdatedAt] DATETIME2 NOT NULL,
     CONSTRAINT [PK_identity_UserCredentialEntity] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_identity_UserCredentialEntity_UserId] FOREIGN KEY ([UserId])
-        REFERENCES [identity].[UserEntity] ([Id]),
+        REFERENCES [identity].[KinUserEntity] ([Id]),
     CONSTRAINT [UQ_identity_UserCredentialEntity_UserId] UNIQUE ([UserId])
 );
 GO
@@ -84,7 +84,7 @@ CREATE TABLE [identity].[UserProviderEntity]
     [UpdatedAt] DATETIME2 NOT NULL,
     CONSTRAINT [PK_identity_UserProviderEntity] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_identity_UserProviderEntity_UserId] FOREIGN KEY ([UserId])
-        REFERENCES [identity].[UserEntity] ([Id]),
+        REFERENCES [identity].[KinUserEntity] ([Id]),
     CONSTRAINT [FK_identity_UserProviderEntity_ProviderId] FOREIGN KEY ([ProviderId])
         REFERENCES [identity].[ProviderEntity] ([Id]),
     CONSTRAINT [UQ_identity_UserProviderEntity_UserProvider] UNIQUE ([UserId], [ProviderId]),
@@ -104,7 +104,7 @@ CREATE TABLE [identity].[RefreshTokenEntity]
     [UpdatedAt] DATETIME2 NOT NULL,
     CONSTRAINT [PK_identity_RefreshTokenEntity] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_identity_RefreshTokenEntity_UserId] FOREIGN KEY ([UserId])
-        REFERENCES [identity].[UserEntity] ([Id]),
+        REFERENCES [identity].[KinUserEntity] ([Id]),
     CONSTRAINT [UQ_identity_RefreshTokenEntity_Token] UNIQUE ([Token])
 );
 GO
@@ -117,8 +117,8 @@ GO
 -- CORE SCHEMA
 -- ============================================================
 
--- core.KinHubService  (config table — pre-populated)
-CREATE TABLE [core].[KinHubService]
+-- core.KinHubServiceEntity  (config table — pre-populated)
+CREATE TABLE [core].[KinHubServiceEntity]
 (
     [Id] INT NOT NULL,
     [Name] NVARCHAR(200) NOT NULL,
@@ -127,7 +127,7 @@ CREATE TABLE [core].[KinHubService]
     [IsAdminOnly] BIT NOT NULL DEFAULT 0,
     [CreatedAt] DATETIME2 NOT NULL,
     [UpdatedAt] DATETIME2 NOT NULL,
-    CONSTRAINT [PK_core_KinHubService] PRIMARY KEY ([Id])
+    CONSTRAINT [PK_core_KinHubServiceEntity] PRIMARY KEY ([Id])
 );
 GO
 
@@ -157,7 +157,7 @@ CREATE TABLE [core].[FamilyEntity]
     [UpdatedAt] DATETIME2 NOT NULL,
     CONSTRAINT [PK_core_FamilyEntity] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_core_FamilyEntity_UserId] FOREIGN KEY ([UserId])
-        REFERENCES [identity].[UserEntity] ([Id])
+        REFERENCES [identity].[KinUserEntity] ([Id])
 );
 GO
 
@@ -185,8 +185,8 @@ CREATE INDEX [IX_core_FamilyMemberEntity_FamilyId]
     ON [core].[FamilyMemberEntity] ([FamilyId]);
 GO
 
--- core.FamilyService
-CREATE TABLE [core].[FamilyService]
+-- core.FamilyServiceEntity
+CREATE TABLE [core].[FamilyServiceEntity]
 (
     [Id] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     [FamilyId] UNIQUEIDENTIFIER NOT NULL,
@@ -194,17 +194,17 @@ CREATE TABLE [core].[FamilyService]
     [IsActive] BIT NOT NULL DEFAULT 1,
     [CreatedAt] DATETIME2 NOT NULL,
     [UpdatedAt] DATETIME2 NOT NULL,
-    CONSTRAINT [PK_core_FamilyService] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_core_FamilyService_FamilyId] FOREIGN KEY ([FamilyId])
+    CONSTRAINT [PK_core_FamilyServiceEntity] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_core_FamilyServiceEntity_FamilyId] FOREIGN KEY ([FamilyId])
         REFERENCES [core].[FamilyEntity] ([Id]),
-    CONSTRAINT [FK_core_FamilyService_ServiceId] FOREIGN KEY ([ServiceId])
-        REFERENCES [core].[KinHubService] ([Id]),
-    CONSTRAINT [UQ_core_FamilyService_FamilyService] UNIQUE ([FamilyId], [ServiceId])
+    CONSTRAINT [FK_core_FamilyServiceEntity_ServiceId] FOREIGN KEY ([ServiceId])
+        REFERENCES [core].[KinHubServiceEntity] ([Id]),
+    CONSTRAINT [UQ_core_FamilyServiceEntity_FamilyService] UNIQUE ([FamilyId], [ServiceId])
 );
 GO
 
-CREATE INDEX [IX_core_FamilyService_FamilyId]
-    ON [core].[FamilyService] ([FamilyId]);
+CREATE INDEX [IX_core_FamilyServiceEntity_FamilyId]
+    ON [core].[FamilyServiceEntity] ([FamilyId]);
 GO
 
 -- core.MemberRoleEntity
@@ -253,8 +253,8 @@ VALUES
     (2, N'member', 1, '2026-01-01T00:00:00', '2026-01-01T00:00:00');
 GO
 
--- core.KinHubService
-INSERT INTO [core].[KinHubService]
+-- core.KinHubServiceEntity
+INSERT INTO [core].[KinHubServiceEntity]
     ([Id], [Name], [BaseUrl], [IsActive], [IsAdminOnly], [CreatedAt], [UpdatedAt])
 VALUES
     (1, N'KinConsole', N'/kin-console', 1, 1, '2026-01-01T00:00:00', '2026-01-01T00:00:00'),

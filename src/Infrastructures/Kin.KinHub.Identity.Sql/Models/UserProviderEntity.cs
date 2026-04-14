@@ -23,5 +23,5 @@ public partial class UserProviderEntity
 
     public virtual ProviderEntity Provider { get; set; }
 
-    public virtual UserEntity User { get; set; }
+    public virtual KinUserEntity User { get; set; }
 }

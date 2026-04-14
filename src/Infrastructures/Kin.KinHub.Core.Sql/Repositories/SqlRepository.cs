@@ -1,59 +1,63 @@
 using Kin.KinHub.Core.Domain;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Core.Sql;
 
-public abstract class SqlRepository<TModel, TKey>
-    where TModel : class
+public abstract class SqlRepository<TEntity, TDomain, TKey>
+    where TEntity : class
+    where TDomain : class
 {
     protected DbContext Context { get; }
-    protected DbSet<TModel> Set => Context.Set<TModel>();
+    protected DbSet<TEntity> Set => Context.Set<TEntity>();
 
     protected SqlRepository(DbContext context)
     {
         Context = context;
     }
 
-    public async Task<TModel> CreateAsync(TModel model)
+    public async Task<TDomain> CreateAsync(TDomain model)
     {
-        await OnBeforeCreateAsync(model);
-        await Set.AddAsync(model);
+        var entity = model.Adapt<TEntity>();
+        await OnBeforeCreateAsync(entity);
+        await Set.AddAsync(entity);
         await Context.SaveChangesAsync();
-        return model;
+        return entity.Adapt<TDomain>();
     }
 
-    public async Task<TModel> GetAsync(TKey key)
+    public async Task<TDomain> GetAsync(TKey key)
     {
         var entity = await Set.FindAsync(key);
         if (entity is null)
-            throw new EntityNotFoundException(typeof(TModel).Name, key!);
-        return entity;
+            throw new EntityNotFoundException(typeof(TEntity).Name, key!);
+        return entity.Adapt<TDomain>();
     }
 
-    public async Task<IReadOnlyList<TModel>> GetAllAsync()
+    public async Task<IReadOnlyList<TDomain>> GetAllAsync()
     {
-        return await Set.ToListAsync();
+        var entities = await Set.ToListAsync();
+        return entities.Adapt<IReadOnlyList<TDomain>>();
     }
 
-    public async Task<TModel> UpdateAsync(TKey key, TModel model)
+    public async Task<TDomain> UpdateAsync(TKey key, TDomain model)
     {
         var existing = await Set.FindAsync(key);
         if (existing is null)
-            throw new EntityNotFoundException(typeof(TModel).Name, key!);
-        Context.Entry(existing).CurrentValues.SetValues(model);
+            throw new EntityNotFoundException(typeof(TEntity).Name, key!);
+        Context.Entry(existing).CurrentValues.SetValues(model.Adapt<TEntity>());
         await Context.SaveChangesAsync();
-        return model;
+        return existing.Adapt<TDomain>();
     }
 
-    public async Task<TModel> DeleteAsync(TKey key)
+    public async Task<TDomain> DeleteAsync(TKey key)
     {
         var existing = await Set.FindAsync(key);
         if (existing is null)
-            throw new EntityNotFoundException(typeof(TModel).Name, key!);
+            throw new EntityNotFoundException(typeof(TEntity).Name, key!);
         Set.Remove(existing);
         await Context.SaveChangesAsync();
-        return existing;
+        return existing.Adapt<TDomain>();
     }
 
-    protected virtual Task OnBeforeCreateAsync(TModel model) => Task.CompletedTask;
+    protected virtual Task OnBeforeCreateAsync(TEntity entity) => Task.CompletedTask;
 }

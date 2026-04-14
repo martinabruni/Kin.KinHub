@@ -15,14 +15,14 @@ public static class ServiceCollectionExtensions
         configure(options);
         options.Validate();
 
-        services.AddDbContext<KinHubIdentityDbContext>(o =>
+        services.AddDbContext<IdentityDbContext>(o =>
             o.UseSqlServer(options.ConnectionString));
 
-        services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
-        services.AddScoped<IIdentityUserRepository, IdentityUserRepository>();
-        services.AddScoped<IIdentityProviderRepository, IdentityProviderRepository>();
-        services.AddScoped<IIdentityUserProviderRepository, IdentityUserProviderRepository>();
-        services.AddScoped<IIdentityUserCredentialRepository, IdentityUserCredentialRepository>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IKinUserRepository, KinUserRepository>();
+        services.AddScoped<IProviderRepository, ProviderRepository>();
+        services.AddScoped<IUserProviderRepository, UserProviderRepository>();
+        services.AddScoped<IUserCredentialRepository, UserCredentialRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         return services;

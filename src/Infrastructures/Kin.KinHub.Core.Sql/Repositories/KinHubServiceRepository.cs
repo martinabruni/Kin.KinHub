@@ -1,12 +1,13 @@
 using Kin.KinHub.Core.Domain;
 using Kin.KinHub.Core.Sql.Models;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Core.Sql;
 
-public sealed class KinHubServiceRepository : SqlRepository<KinHubService, int>, IKinHubServiceRepository
+public sealed class KinHubServiceRepository : SqlRepository<KinHubServiceEntity, KinHubService, int>, IKinHubServiceRepository
 {
-    public KinHubServiceRepository(KinHubCoreDbContext context)
+    public KinHubServiceRepository(CoreDbContext context)
         : base(context) { }
 
     /// <inheritdoc/>
@@ -14,7 +15,8 @@ public sealed class KinHubServiceRepository : SqlRepository<KinHubService, int>,
         KinHubServiceType serviceType,
         CancellationToken cancellationToken = default)
     {
-        return await Set
+        var entity = await Set
             .FirstOrDefaultAsync(s => s.Id == (int)serviceType, cancellationToken);
+        return entity?.Adapt<KinHubService>();
     }
 }

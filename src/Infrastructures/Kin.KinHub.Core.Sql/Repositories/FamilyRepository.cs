@@ -1,12 +1,13 @@
 using Kin.KinHub.Core.Domain;
 using Kin.KinHub.Core.Sql.Models;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Core.Sql;
 
-public sealed class FamilyRepository : SqlRepository<Family, Guid>, IFamilyRepository
+public sealed class FamilyRepository : SqlRepository<FamilyEntity, Family, Guid>, IFamilyRepository
 {
-    public FamilyRepository(KinHubCoreDbContext context)
+    public FamilyRepository(CoreDbContext context)
         : base(context) { }
 
     /// <inheritdoc/>
@@ -14,7 +15,8 @@ public sealed class FamilyRepository : SqlRepository<Family, Guid>, IFamilyRepos
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        return await Set
+        var entity = await Set
             .FirstOrDefaultAsync(f => f.UserId == userId && !f.IsDeleted, cancellationToken);
+        return entity?.Adapt<Family>();
     }
 }

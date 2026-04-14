@@ -21,5 +21,5 @@ public partial class KinHubServiceEntity
 
     public DateTime UpdatedAt { get; set; }
 
-    public virtual ICollection<FamilyServiceEntity> FamilyService { get; set; } = new List<FamilyServiceEntity>();
+    public virtual ICollection<FamilyServiceEntity> FamilyServiceEntity { get; set; } = new List<FamilyServiceEntity>();
 }

@@ -31,11 +31,11 @@
          "ObjectType": 0
       },
       {
-         "Name": "[core].[FamilyService]",
+         "Name": "[core].[FamilyServiceEntity]",
          "ObjectType": 0
       },
       {
-         "Name": "[core].[KinHubService]",
+         "Name": "[core].[KinHubServiceEntity]",
          "ObjectType": 0
       },
       {

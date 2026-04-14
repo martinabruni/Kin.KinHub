@@ -10,17 +10,17 @@ namespace Kin.KinHub.Identity.Business.Services;
 
 public sealed class KinHubAuthenticationService : IAuthenticationService
 {
-    private readonly IIdentityUserRepository _userRepository;
-    private readonly IIdentityUserCredentialRepository _credentialRepository;
-    private readonly IIdentityUserProviderRepository _userProviderRepository;
+    private readonly IKinUserRepository _userRepository;
+    private readonly IUserCredentialRepository _credentialRepository;
+    private readonly IUserProviderRepository _userProviderRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenGenerator _tokenGenerator;
 
     public KinHubAuthenticationService(
-        IIdentityUserRepository userRepository,
-        IIdentityUserCredentialRepository credentialRepository,
-        IIdentityUserProviderRepository userProviderRepository,
+        IKinUserRepository userRepository,
+        IUserCredentialRepository credentialRepository,
+        IUserProviderRepository userProviderRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IPasswordHasher passwordHasher,
         ITokenGenerator tokenGenerator)
@@ -42,7 +42,7 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
         {
             var now = DateTime.UtcNow;
 
-            var user = new IdentityUser
+            var user = new KinUser
             {
                 Id = Guid.NewGuid(),
                 Email = request.Email,
@@ -57,7 +57,7 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
 
             var hash = _passwordHasher.Hash(request.Password);
 
-            var credential = new IdentityUserCredential
+            var credential = new UserCredential
             {
                 Id = Guid.NewGuid(),
                 UserId = created.Id,
@@ -68,7 +68,7 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
 
             await _credentialRepository.CreateAsync(credential);
 
-            var userProvider = new IdentityUserProvider
+            var userProvider = new UserProvider
             {
                 Id = Guid.NewGuid(),
                 UserId = created.Id,
@@ -208,7 +208,7 @@ public sealed class KinHubAuthenticationService : IAuthenticationService
         }
     }
 
-    private async Task<LoginResponse> GenerateTokenResponseAsync(IdentityUser user)
+    private async Task<LoginResponse> GenerateTokenResponseAsync(KinUser user)
     {
         var accessToken = _tokenGenerator.GenerateAccessToken(user, []);
         var rawRefreshToken = _tokenGenerator.GenerateRefreshToken();
