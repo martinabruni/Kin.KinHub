@@ -27,18 +27,24 @@ param applicationInsightsName string = '${webAppName}-appi'
 @description('Key Vault name.')
 param keyVaultName string
 
-@description('SQL Server name.')
-param sqlServerName string
+@description('PostgreSQL Flexible Server name.')
+param postgresServerName string
 
-@description('SQL Database name.')
-param sqlDatabaseName string
+@description('PostgreSQL Database name.')
+param postgresDatabaseName string
 
-@description('SQL administrator login.')
-param sqlAdministratorLogin string
+@description('PostgreSQL administrator login.')
+param postgresAdministratorLogin string
 
-@description('SQL administrator password.')
+@description('PostgreSQL administrator password.')
 @secure()
-param sqlAdministratorPassword string
+param postgresAdministratorPassword string
+
+@description('Azure OpenAI account name.')
+param openAiAccountName string
+
+@description('Azure OpenAI SKU name.')
+param openAiSkuName string = 'S0'
 
 @description('JWT secret key.')
 @secure()
@@ -50,7 +56,15 @@ param jwtIssuer string = 'kinhub'
 @description('JWT access token expiry in minutes.')
 param jwtAccessTokenExpiryMinutes string = '15'
 
-var sqlServerFullyQualifiedDomainName = '${sqlServer.name}${environment().suffixes.sqlServerHostname}'
+var postgresConnectionString = 'Host=${postgresServer.properties.fullyQualifiedDomainName};Database=${postgresDatabaseName};Username=${postgresAdministratorLogin};Password=${postgresAdministratorPassword};SslMode=Require;'
+var sqlConnectionStringSecretName = 'sql-connection-string'
+var jwtSecretSecretName = 'jwt-secret'
+var openAiEndpointSecretName = 'openai-endpoint'
+var openAiKeySecretName = 'openai-key'
+var keyVaultSecretsUserRoleDefinitionId = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '4633458b-17de-408a-b874-0445c86b69e6'
+)
 var identityWebAppSettings = [
   {
     name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -69,13 +83,6 @@ var identityWebAppSettings = [
     value: jwtIssuer
   }
 ]
-var sqlConnectionString = 'Server=tcp:${sqlServerFullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabase.name};Persist Security Info=False;User ID=${sqlAdministratorLogin};Password=${sqlAdministratorPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-var sqlConnectionStringSecretName = 'sql-connection-string'
-var jwtSecretSecretName = 'jwt-secret'
-var keyVaultSecretsUserRoleDefinitionId = subscriptionResourceId(
-  'Microsoft.Authorization/roleDefinitions',
-  '4633458b-17de-408a-b874-0445c86b69e6'
-)
 var webAppSettings = [
   {
     name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -96,6 +103,22 @@ var webAppSettings = [
   {
     name: 'Jwt__AccessTokenExpiryMinutes'
     value: jwtAccessTokenExpiryMinutes
+  }
+  {
+    name: 'OpenAi__Endpoint'
+    value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=${openAiEndpointSecretName})'
+  }
+  {
+    name: 'OpenAi__ApiKey'
+    value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=${openAiKeySecretName})'
+  }
+  {
+    name: 'OpenAi__EmbeddingDeploymentName'
+    value: embeddingDeployment.name
+  }
+  {
+    name: 'OpenAi__ChatDeploymentName'
+    value: gpt4oDeployment.name
   }
 ]
 
@@ -128,27 +151,27 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   }
 }
 
-resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
-  name: sqlServerName
-  location: location
-  properties: {
-    administratorLogin: sqlAdministratorLogin
-    administratorLoginPassword: sqlAdministratorPassword
-    publicNetworkAccess: 'Enabled'
-    version: '12.0'
-  }
-}
-
-resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
-  parent: sqlServer
-  name: sqlDatabaseName
+resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview' = {
+  name: postgresServerName
   location: location
   sku: {
-    name: 'Basic'
-    tier: 'Basic'
+    name: 'Standard_B1ms'
+    tier: 'Burstable'
   }
   properties: {
-    collation: 'SQL_Latin1_General_CP1_CI_AS'
+    administratorLogin: postgresAdministratorLogin
+    administratorLoginPassword: postgresAdministratorPassword
+    version: '16'
+    storage: {
+      storageSizeGB: 32
+    }
+    backup: {
+      backupRetentionDays: 7
+      geoRedundantBackup: 'Disabled'
+    }
+    highAvailability: {
+      mode: 'Disabled'
+    }
   }
 }
 
@@ -156,7 +179,69 @@ resource sqlConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01
   parent: keyVault
   name: sqlConnectionStringSecretName
   properties: {
-    value: sqlConnectionString
+    value: postgresConnectionString
+  }
+}
+
+resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+  name: openAiAccountName
+  location: location
+  kind: 'OpenAI'
+  sku: {
+    name: openAiSkuName
+  }
+  properties: {
+    customSubDomainName: openAiAccountName
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
+resource gpt4oDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+  parent: openAiAccount
+  name: 'gpt-4o'
+  sku: {
+    name: 'Standard'
+    capacity: 10
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: 'gpt-4o'
+      version: '2024-08-06'
+    }
+  }
+}
+
+resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+  parent: openAiAccount
+  name: 'text-embedding-3-small'
+  dependsOn: [gpt4oDeployment]
+  sku: {
+    name: 'Standard'
+    capacity: 10
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: 'text-embedding-3-small'
+      version: '1'
+    }
+  }
+}
+
+resource openAiEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: openAiEndpointSecretName
+  properties: {
+    value: openAiAccount.properties.endpoint
+  }
+}
+
+resource openAiKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: openAiKeySecretName
+  properties: {
+    value: openAiAccount.listKeys().key1
   }
 }
 
@@ -212,6 +297,16 @@ resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignme
   }
 }
 
+resource openAiKeyVaultSecretsUserRoleAssignmentWebApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyVault
+  name: guid(keyVault.id, webApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai')
+  properties: {
+    principalId: webApp.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
+  }
+}
+
 resource identityAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: identityAppServicePlanName
   location: location
@@ -256,6 +351,16 @@ resource identityKeyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/role
   }
 }
 
+resource openAiKeyVaultSecretsUserRoleAssignmentIdentityWebApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyVault
+  name: guid(keyVault.id, identityWebApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai')
+  properties: {
+    principalId: identityWebApp.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
+  }
+}
+
 resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   name: staticWebAppName
   location: staticWebAppLocation
@@ -273,3 +378,4 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
 output webAppDefaultHostname string = webApp.properties.defaultHostName
 output identityWebAppDefaultHostname string = identityWebApp.properties.defaultHostName
 output staticWebAppDefaultHostname string = staticWebApp.properties.defaultHostname
+output openAiEndpoint string = openAiAccount.properties.endpoint

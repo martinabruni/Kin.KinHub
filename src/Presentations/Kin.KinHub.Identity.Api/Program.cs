@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Scoped, includeInternalTypes: true)
     .AddScoped(typeof(IRequestValidator<>), typeof(FluentRequestValidator<>))
-    .AddKinHubIdentitySqlInfrastructure(o => o.ConnectionString = builder.Configuration.GetConnectionString("KinHub")!)
+    .AddKinHubIdentityPostgreSqlInfrastructure(o => o.ConnectionString = builder.Configuration.GetConnectionString("KinHub")!)
     .AddKinHubJwtInfrastructure(o =>
     {
         o.Secret = builder.Configuration["Jwt:Secret"]
@@ -22,7 +22,7 @@ builder.Services
 builder.Services.AddOpenTelemetry().UseAzureMonitor();
 builder.Services
     .AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("KinHub")!);
+    .AddNpgSql(builder.Configuration.GetConnectionString("KinHub")!);
 
 builder.Services.AddScoped<JwtAuthenticationMiddleware>();
 builder.Services.AddControllers();

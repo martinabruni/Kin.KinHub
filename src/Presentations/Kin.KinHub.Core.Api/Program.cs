@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Scoped, includeInternalTypes: true)
     .AddScoped(typeof(IRequestValidator<>), typeof(FluentRequestValidator<>))
-    .AddKinHubCoreSqlInfrastructure(o => o.ConnectionString = builder.Configuration.GetConnectionString("KinHub")!)
+    .AddKinHubCorePostgreSqlInfrastructure(o => o.ConnectionString = builder.Configuration.GetConnectionString("KinHub")!)
     .AddKinHubJwtInfrastructure(o =>
     {
         o.Secret = builder.Configuration["Jwt:Secret"]
@@ -18,12 +18,19 @@ builder.Services
         o.Issuer = builder.Configuration["Jwt:Issuer"]
             ?? "kinhub";
     })
-    .AddKinHubCoreBusiness();
+    .AddKinHubCoreBusiness()
+    .AddKinHubOpenAiInfrastructure(o =>
+    {
+        o.Endpoint = builder.Configuration["OpenAi:Endpoint"] ?? string.Empty;
+        o.ApiKey = builder.Configuration["OpenAi:ApiKey"] ?? string.Empty;
+        o.EmbeddingDeploymentName = builder.Configuration["OpenAi:EmbeddingDeploymentName"] ?? "text-embedding-3-small";
+        o.ChatDeploymentName = builder.Configuration["OpenAi:ChatDeploymentName"] ?? "gpt-4o";
+    });
 
 builder.Services.AddOpenTelemetry().UseAzureMonitor();
 builder.Services
     .AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("KinHub")!);
+    .AddNpgSql(builder.Configuration.GetConnectionString("KinHub")!);
 
 builder.Services.AddScoped<JwtAuthenticationMiddleware>();
 builder.Services.AddControllers();
