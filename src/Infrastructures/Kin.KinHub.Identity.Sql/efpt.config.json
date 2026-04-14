@@ -19,6 +19,10 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "[identity].[KinUserEntity]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[identity].[ProviderEntity]",
          "ObjectType": 0
       },
@@ -28,10 +32,6 @@
       },
       {
          "Name": "[identity].[UserCredentialEntity]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[identity].[UserEntity]",
          "ObjectType": 0
       },
       {

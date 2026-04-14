@@ -1,10 +1,11 @@
 using Kin.KinHub.Core.Domain;
 using Kin.KinHub.Core.Sql.Models;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Core.Sql;
 
-public sealed class MemberRoleRepository : SqlRepository<MemberRole, Guid>, IMemberRoleRepository
+public sealed class MemberRoleRepository : SqlRepository<MemberRoleEntity, MemberRole, Guid>, IMemberRoleRepository
 {
     public MemberRoleRepository(CoreDbContext context)
         : base(context) { }
@@ -14,8 +15,9 @@ public sealed class MemberRoleRepository : SqlRepository<MemberRole, Guid>, IMem
         Guid memberId,
         CancellationToken cancellationToken = default)
     {
-        return await Set
+        var entities = await Set
             .Where(r => r.MemberId == memberId)
             .ToListAsync(cancellationToken);
+        return entities.Adapt<IReadOnlyList<MemberRole>>();
     }
 }

@@ -1,10 +1,11 @@
 using Kin.KinHub.Core.Domain;
 using Kin.KinHub.Core.Sql.Models;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Core.Sql;
 
-public sealed class FamilyServiceRepository : SqlRepository<FamilyService, Guid>, IFamilyServiceRepository
+public sealed class FamilyServiceRepository : SqlRepository<FamilyServiceEntity, FamilyService, Guid>, IFamilyServiceRepository
 {
     public FamilyServiceRepository(CoreDbContext context)
         : base(context) { }
@@ -14,9 +15,10 @@ public sealed class FamilyServiceRepository : SqlRepository<FamilyService, Guid>
         Guid familyId,
         CancellationToken cancellationToken = default)
     {
-        return await Set
+        var entities = await Set
             .Where(s => s.FamilyId == familyId)
             .ToListAsync(cancellationToken);
+        return entities.Adapt<IReadOnlyList<FamilyService>>();
     }
 
     /// <inheritdoc/>
@@ -25,7 +27,8 @@ public sealed class FamilyServiceRepository : SqlRepository<FamilyService, Guid>
         int serviceId,
         CancellationToken cancellationToken = default)
     {
-        return await Set
+        var entity = await Set
             .FirstOrDefaultAsync(s => s.FamilyId == familyId && s.ServiceId == serviceId, cancellationToken);
+        return entity?.Adapt<FamilyService>();
     }
 }

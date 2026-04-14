@@ -19,9 +19,9 @@ public partial class CoreDbContext : DbContext
 
     public virtual DbSet<FamilyRoleEntity> FamilyRoleEntity { get; set; }
 
-    public virtual DbSet<FamilyServiceEntity> FamilyService { get; set; }
+    public virtual DbSet<FamilyServiceEntity> FamilyServiceEntity { get; set; }
 
-    public virtual DbSet<KinHubServiceEntity> KinHubService { get; set; }
+    public virtual DbSet<KinHubServiceEntity> KinHubServiceEntity { get; set; }
 
     public virtual DbSet<MemberRoleEntity> MemberRoleEntity { get; set; }
 
@@ -79,33 +79,33 @@ public partial class CoreDbContext : DbContext
 
         modelBuilder.Entity<FamilyServiceEntity>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_core_FamilyService");
+            entity.HasKey(e => e.Id).HasName("PK_core_FamilyServiceEntity");
 
-            entity.ToTable("FamilyService", "core");
+            entity.ToTable("FamilyServiceEntity", "core");
 
-            entity.HasIndex(e => e.FamilyId, "IX_core_FamilyService_FamilyId");
+            entity.HasIndex(e => e.FamilyId, "IX_core_FamilyServiceEntity_FamilyId");
 
-            entity.HasIndex(e => new { e.FamilyId, e.ServiceId }, "UQ_core_FamilyService_FamilyService").IsUnique();
+            entity.HasIndex(e => new { e.FamilyId, e.ServiceId }, "UQ_core_FamilyServiceEntity_FamilyService").IsUnique();
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
 
-            entity.HasOne(d => d.Family).WithMany(p => p.FamilyService)
+            entity.HasOne(d => d.Family).WithMany(p => p.FamilyServiceEntity)
                 .HasForeignKey(d => d.FamilyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_core_FamilyService_FamilyId");
+                .HasConstraintName("FK_core_FamilyServiceEntity_FamilyId");
 
-            entity.HasOne(d => d.Service).WithMany(p => p.FamilyService)
+            entity.HasOne(d => d.Service).WithMany(p => p.FamilyServiceEntity)
                 .HasForeignKey(d => d.ServiceId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_core_FamilyService_ServiceId");
+                .HasConstraintName("FK_core_FamilyServiceEntity_ServiceId");
         });
 
         modelBuilder.Entity<KinHubServiceEntity>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_core_KinHubService");
+            entity.HasKey(e => e.Id).HasName("PK_core_KinHubServiceEntity");
 
-            entity.ToTable("KinHubService", "core");
+            entity.ToTable("KinHubServiceEntity", "core");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.BaseUrl)

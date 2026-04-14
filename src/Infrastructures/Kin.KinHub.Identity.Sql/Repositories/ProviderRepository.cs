@@ -4,7 +4,7 @@ using Kin.KinHub.Identity.Sql.Models;
 
 namespace Kin.KinHub.Identity.Sql;
 
-public sealed class ProviderRepository : SqlRepository<Provider, int>, IProviderRepository
+public sealed class ProviderRepository : SqlRepository<ProviderEntity, Provider, int>, IProviderRepository
 {
     public ProviderRepository(IdentityDbContext context)
         : base(context) { }

@@ -23,5 +23,5 @@ public partial class FamilyEntity
 
     public virtual ICollection<FamilyMemberEntity> FamilyMemberEntity { get; set; } = new List<FamilyMemberEntity>();
 
-    public virtual ICollection<FamilyServiceEntity> FamilyService { get; set; } = new List<FamilyServiceEntity>();
+    public virtual ICollection<FamilyServiceEntity> FamilyServiceEntity { get; set; } = new List<FamilyServiceEntity>();
 }

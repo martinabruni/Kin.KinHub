@@ -1,11 +1,12 @@
 using Kin.KinHub.Identity.Domain.Interfaces;
 using Kin.KinHub.Identity.Domain.Models;
 using Kin.KinHub.Identity.Sql.Models;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kin.KinHub.Identity.Sql;
 
-public sealed class RefreshTokenRepository : SqlRepository<RefreshToken, Guid>, IRefreshTokenRepository
+public sealed class RefreshTokenRepository : SqlRepository<RefreshTokenEntity, RefreshToken, Guid>, IRefreshTokenRepository
 {
     public RefreshTokenRepository(IdentityDbContext context)
         : base(context) { }
@@ -13,8 +14,9 @@ public sealed class RefreshTokenRepository : SqlRepository<RefreshToken, Guid>, 
     /// <inheritdoc/>
     public async Task<RefreshToken?> FindByTokenAsync(string token)
     {
-        return await Set
+        var entity = await Set
             .FirstOrDefaultAsync(x => x.Token == token);
+        return entity?.Adapt<RefreshToken>();
     }
 
     /// <inheritdoc/>

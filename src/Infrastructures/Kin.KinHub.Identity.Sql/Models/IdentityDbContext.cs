@@ -13,18 +13,37 @@ public partial class IdentityDbContext : DbContext
     {
     }
 
+    public virtual DbSet<KinUserEntity> KinUserEntity { get; set; }
+
     public virtual DbSet<ProviderEntity> ProviderEntity { get; set; }
 
     public virtual DbSet<RefreshTokenEntity> RefreshTokenEntity { get; set; }
 
     public virtual DbSet<UserCredentialEntity> UserCredentialEntity { get; set; }
 
-    public virtual DbSet<KinUserEntity> UserEntity { get; set; }
-
     public virtual DbSet<UserProviderEntity> UserProviderEntity { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<KinUserEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_identity_KinUserEntity");
+
+            entity.ToTable("KinUserEntity", "identity");
+
+            entity.HasIndex(e => e.Email, "UQ_identity_KinUserEntity_Email").IsUnique();
+
+            entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.DisplayName).HasMaxLength(200);
+            entity.Property(e => e.Email)
+                .IsRequired()
+                .HasMaxLength(256);
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasDefaultValue("Active");
+        });
+
         modelBuilder.Entity<ProviderEntity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_identity_ProviderEntity");
@@ -78,25 +97,6 @@ public partial class IdentityDbContext : DbContext
                 .HasForeignKey<UserCredentialEntity>(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_identity_UserCredentialEntity_UserId");
-        });
-
-        modelBuilder.Entity<KinUserEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_identity_UserEntity");
-
-            entity.ToTable("UserEntity", "identity");
-
-            entity.HasIndex(e => e.Email, "UQ_identity_UserEntity_Email").IsUnique();
-
-            entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.DisplayName).HasMaxLength(200);
-            entity.Property(e => e.Email)
-                .IsRequired()
-                .HasMaxLength(256);
-            entity.Property(e => e.Status)
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasDefaultValue("Active");
         });
 
         modelBuilder.Entity<UserProviderEntity>(entity =>
