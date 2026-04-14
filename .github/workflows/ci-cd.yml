@@ -28,6 +28,7 @@ env:
   FRONTEND_PATH: src/Presentations/Kin.KinHub.Core.React
   BICEP_FILE: ops/iac/main.bicep
   API_ARTIFACT_DIR: artifacts/webapp
+  IDENTITY_API_ARTIFACT_DIR: artifacts/identity-webapp
   FRONTEND_ARTIFACT_DIR: artifacts/staticwebapp
 # -----------------------------------------------------------------------
 
@@ -128,13 +129,20 @@ jobs:
         run: dotnet publish "${{ env.CORE_API_PROJECT }}" --configuration Release --output ${{ env.API_ARTIFACT_DIR }}
 
       - name: Publish Identity API
-        run: dotnet publish "${{ env.IDENTITY_API_PROJECT }}" --configuration Release --output ${{ env.API_ARTIFACT_DIR }}
+        run: dotnet publish "${{ env.IDENTITY_API_PROJECT }}" --configuration Release --output ${{ env.IDENTITY_API_ARTIFACT_DIR }}
 
       - name: Upload Web App package
         uses: actions/upload-artifact@v4
         with:
           name: webapp-package
           path: ${{ env.API_ARTIFACT_DIR }}
+          if-no-files-found: error
+
+      - name: Upload Identity Web App package
+        uses: actions/upload-artifact@v4
+        with:
+          name: identity-webapp-package
+          path: ${{ env.IDENTITY_API_ARTIFACT_DIR }}
           if-no-files-found: error
 
   validate_bicep:
@@ -184,6 +192,12 @@ jobs:
           name: webapp-package
           path: webapp-package
 
+      - name: Download Identity Web App package
+        uses: actions/download-artifact@v4
+        with:
+          name: identity-webapp-package
+          path: identity-webapp-package
+
       - name: Download Static Web App artifact
         uses: actions/download-artifact@v4
         with:
@@ -200,6 +214,7 @@ jobs:
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
               webAppName="${{ vars.WEB_APP_NAME }}" \
+              identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
@@ -215,6 +230,7 @@ jobs:
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
               webAppName="${{ vars.WEB_APP_NAME }}" \
+              identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
@@ -227,6 +243,12 @@ jobs:
         with:
           app-name: ${{ vars.WEB_APP_NAME }}
           package: webapp-package
+
+      - name: Deploy Identity Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.IDENTITY_WEB_APP_NAME }}
+          package: identity-webapp-package
 
       - name: Deploy Static Web App
         uses: Azure/static-web-apps-deploy@v1
@@ -340,6 +362,12 @@ jobs:
           name: webapp-package
           path: webapp-package
 
+      - name: Download Identity Web App package
+        uses: actions/download-artifact@v4
+        with:
+          name: identity-webapp-package
+          path: identity-webapp-package
+
       - name: Download Static Web App artifact
         uses: actions/download-artifact@v4
         with:
@@ -356,6 +384,7 @@ jobs:
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
               webAppName="${{ vars.WEB_APP_NAME }}" \
+              identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
@@ -371,6 +400,7 @@ jobs:
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
               webAppName="${{ vars.WEB_APP_NAME }}" \
+              identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               sqlServerName="${{ vars.SQL_SERVER_NAME }}" \
               sqlDatabaseName="${{ vars.SQL_DATABASE_NAME }}" \
@@ -383,6 +413,12 @@ jobs:
         with:
           app-name: ${{ vars.WEB_APP_NAME }}
           package: webapp-package
+
+      - name: Deploy Identity Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.IDENTITY_WEB_APP_NAME }}
+          package: identity-webapp-package
 
       - name: Deploy Static Web App
         uses: Azure/static-web-apps-deploy@v1
