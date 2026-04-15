@@ -30,7 +30,9 @@ param keyVaultName string
 @description('PostgreSQL Flexible Server name.')
 param postgresServerName string
 
-@description('PostgreSQL Database name.')
+@description('PostgreSQL Database name. Must be 1-63 lowercase alphanumerics and hyphens only. Cannot start or end with hyphens.')
+@minLength(1)
+@maxLength(63)
 param postgresDatabaseName string
 
 @description('PostgreSQL administrator login.')
