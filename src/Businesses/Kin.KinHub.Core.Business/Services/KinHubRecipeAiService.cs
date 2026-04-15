@@ -4,7 +4,6 @@ using Kin.KinHub.Core.Domain.AI;
 using Kin.KinHub.Core.Domain.Interfaces.AI;
 using Kin.KinHub.Core.Domain.Interfaces.Recipes;
 using Kin.KinHub.Core.Domain.Recipes;
-using System.Xml;
 
 namespace Kin.KinHub.Core.Business;
 
@@ -123,7 +122,7 @@ public sealed class KinHubRecipeAiService : IRecipeAiService
         {
             Name = recipe.Name,
             Backstory = recipe.Backstory,
-            FinalTime = XmlConvert.ToString(recipe.FinalTime),
+            FinalTime = recipe.FinalTime,
             Portions = recipe.Portions,
             Ingredients = ingredients
                 .Select(i => new RecipeAssistantIngredient { Name = i.Name, Quantity = i.Quantity, Unit = i.MeasureUnit })

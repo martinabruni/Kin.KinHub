@@ -4,6 +4,7 @@ using Kin.KinHub.Core.Domain.AI;
 using Kin.KinHub.Core.Domain.Interfaces.AI;
 using Kin.KinHub.OpenAi.Common;
 using OpenAI.Chat;
+using System.Globalization;
 using System.Text.Json;
 
 namespace Kin.KinHub.OpenAi.Services;
@@ -17,7 +18,7 @@ internal sealed class OpenAiRecipeAssistantService : IRecipeAssistantService
         - Always include "task_type" in the response, matching the value from the input.
         - Never invent implausible or fictional ingredients.
         - Preserve the original unit of measure when provided; default to metric otherwise.
-        - Express "final_time" as an ISO 8601 duration string (e.g., "PT30M", "PT1H15M").
+        - Express "final_time" as a duration string in HH:MM:SS format (e.g., "00:30:00", "01:15:00").
         - Ingredient shape: { "name": string, "quantity": number, "unit": string }
         - Step shape: { "order": integer (starting at 1), "description": string }
         - If a value cannot be determined: use null for nullable strings, 0 for unknown quantities, "unknown" for missing units.
@@ -248,7 +249,7 @@ internal sealed class OpenAiRecipeAssistantService : IRecipeAssistantService
         {
             Name = j.Name,
             Backstory = j.Backstory,
-            FinalTime = j.FinalTime,
+            FinalTime = TimeSpan.TryParse(j.FinalTime, CultureInfo.InvariantCulture, out var ts) ? ts : TimeSpan.Zero,
             Portions = j.Portions,
             Ingredients = j.Ingredients.Select(MapToIngredient).ToList(),
             Steps = j.Steps.Select(MapToStep).ToList(),
