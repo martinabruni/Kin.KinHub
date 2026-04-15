@@ -58,7 +58,7 @@ param jwtIssuer string = 'kinhub'
 @description('JWT access token expiry in minutes.')
 param jwtAccessTokenExpiryMinutes string = '15'
 
-var postgresConnectionString = 'Host=${postgresServer.properties.fullyQualifiedDomainName};Database=${postgresDatabaseName};Username=${postgresAdministratorLogin};Password=${postgresAdministratorPassword};SslMode=Require;CommandTimeout=30;Keepalive=30;Timeout=30;'
+var postgresConnectionString = 'Server=${postgresServer.properties.fullyQualifiedDomainName};Database=${postgresDatabaseName};Port=5432;User Id=${postgresAdministratorLogin};Password=${postgresAdministratorPassword};Ssl Mode=Require;'
 var sqlConnectionStringSecretName = 'sql-connection-string'
 var jwtSecretSecretName = 'jwt-secret'
 var openAiEndpointSecretName = 'openai-endpoint'
