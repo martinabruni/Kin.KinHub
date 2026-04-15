@@ -15,7 +15,14 @@ public static class ServiceCollectionExtensions
         options.Validate();
 
         services.AddDbContext<IdentityDbContext>(o =>
-            o.UseNpgsql(options.ConnectionString));
+            o.UseNpgsql(options.ConnectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.CommandTimeout(30);
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorCodesToAdd: null);
+            }));
 
         services.AddScoped<IPasswordHasher, Kin.KinHub.Identity.PostgreSql.PasswordHasher>();
         services.AddScoped<IKinUserRepository, Kin.KinHub.Identity.PostgreSql.KinUserRepository>();

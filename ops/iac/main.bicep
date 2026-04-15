@@ -56,7 +56,7 @@ param jwtIssuer string = 'kinhub'
 @description('JWT access token expiry in minutes.')
 param jwtAccessTokenExpiryMinutes string = '15'
 
-var postgresConnectionString = 'Host=${postgresServer.properties.fullyQualifiedDomainName};Database=${postgresDatabaseName};Username=${postgresAdministratorLogin};Password=${postgresAdministratorPassword};SslMode=Require;'
+var postgresConnectionString = 'Host=${postgresServer.properties.fullyQualifiedDomainName};Database=${postgresDatabaseName};Username=${postgresAdministratorLogin};Password=${postgresAdministratorPassword};SslMode=Require;Connection Timeout=30;Command Timeout=30;Keepalive=30;Timeout=30;'
 var sqlConnectionStringSecretName = 'sql-connection-string'
 var jwtSecretSecretName = 'jwt-secret'
 var openAiEndpointSecretName = 'openai-endpoint'
@@ -172,6 +172,24 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-pr
     highAvailability: {
       mode: 'Disabled'
     }
+  }
+}
+
+resource postgresFirewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01-preview' = {
+  parent: postgresServer
+  name: 'AllowAllAzureServicesAndResourcesWithinAzureIps'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01-preview' = {
+  parent: postgresServer
+  name: postgresDatabaseName
+  properties: {
+    charset: 'UTF8'
+    collation: 'en_US.UTF8'
   }
 }
 
@@ -295,16 +313,6 @@ resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignme
   }
 }
 
-resource openAiKeyVaultSecretsUserRoleAssignmentWebApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: keyVault
-  name: guid(keyVault.id, webApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai')
-  properties: {
-    principalId: webApp.identity.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
-  }
-}
-
 resource identityAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: identityAppServicePlanName
   location: location
@@ -342,16 +350,6 @@ resource identityWebApp 'Microsoft.Web/sites@2024-04-01' = {
 resource identityKeyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: keyVault
   name: guid(keyVault.id, identityWebApp.id, keyVaultSecretsUserRoleDefinitionId)
-  properties: {
-    principalId: identityWebApp.identity.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
-  }
-}
-
-resource openAiKeyVaultSecretsUserRoleAssignmentIdentityWebApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: keyVault
-  name: guid(keyVault.id, identityWebApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai')
   properties: {
     principalId: identityWebApp.identity.principalId
     principalType: 'ServicePrincipal'

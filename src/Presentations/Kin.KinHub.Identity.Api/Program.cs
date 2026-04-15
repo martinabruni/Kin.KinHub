@@ -22,7 +22,10 @@ builder.Services
 builder.Services.AddOpenTelemetry().UseAzureMonitor();
 builder.Services
     .AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString("KinHub")!);
+    .AddNpgSql(
+        builder.Configuration.GetConnectionString("KinHub")!,
+        name: "postgresql",
+        timeout: TimeSpan.FromSeconds(10));
 
 builder.Services.AddScoped<JwtAuthenticationMiddleware>();
 builder.Services.AddControllers();
