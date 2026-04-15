@@ -295,15 +295,7 @@ resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignme
   }
 }
 
-resource openAiKeyVaultSecretsUserRoleAssignmentWebApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: keyVault
-  name: guid(keyVault.id, webApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai')
-  properties: {
-    principalId: webApp.identity.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
-  }
-}
+
 
 resource identityAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: identityAppServicePlanName
@@ -349,15 +341,7 @@ resource identityKeyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/role
   }
 }
 
-resource openAiKeyVaultSecretsUserRoleAssignmentIdentityWebApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: keyVault
-  name: guid(keyVault.id, identityWebApp.id, keyVaultSecretsUserRoleDefinitionId, 'openai')
-  properties: {
-    principalId: identityWebApp.identity.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
-  }
-}
+
 
 resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   name: staticWebAppName
