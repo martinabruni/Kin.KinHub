@@ -56,7 +56,7 @@ param jwtIssuer string = 'kinhub'
 @description('JWT access token expiry in minutes.')
 param jwtAccessTokenExpiryMinutes string = '15'
 
-var postgresConnectionString = 'Host=${postgresServer.properties.fullyQualifiedDomainName};Database=${postgresDatabaseName};Username=${postgresAdministratorLogin};Password=${postgresAdministratorPassword};SslMode=Require;'
+var postgresConnectionString = 'Host=${postgresServer.properties.fullyQualifiedDomainName};Database=${postgresDatabaseName};Username=${postgresAdministratorLogin};Password=${postgresAdministratorPassword};SslMode=Require;Connection Timeout=30;Command Timeout=30;Keepalive=30;Timeout=30;'
 var sqlConnectionStringSecretName = 'sql-connection-string'
 var jwtSecretSecretName = 'jwt-secret'
 var openAiEndpointSecretName = 'openai-endpoint'
@@ -172,6 +172,24 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-pr
     highAvailability: {
       mode: 'Disabled'
     }
+  }
+}
+
+resource postgresFirewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01-preview' = {
+  parent: postgresServer
+  name: 'AllowAllAzureServicesAndResourcesWithinAzureIps'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01-preview' = {
+  parent: postgresServer
+  name: postgresDatabaseName
+  properties: {
+    charset: 'UTF8'
+    collation: 'en_US.UTF8'
   }
 }
 
@@ -295,8 +313,6 @@ resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignme
   }
 }
 
-
-
 resource identityAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: identityAppServicePlanName
   location: location
@@ -340,8 +356,6 @@ resource identityKeyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/role
     roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
   }
 }
-
-
 
 resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   name: staticWebAppName

@@ -25,7 +25,14 @@ public static class ServiceCollectionExtensions
             .MapWith(f => new Vector(f));
 
         services.AddDbContext<CoreDbContext>(o =>
-            o.UseNpgsql(options.ConnectionString));
+            o.UseNpgsql(options.ConnectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.CommandTimeout(30);
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorCodesToAdd: null);
+            }));
 
         // Core repositories
         services.AddScoped<IFamilyRepository, FamilyRepository>();
