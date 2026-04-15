@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(options);
         services.AddScoped<IEmbeddingService, OpenAiEmbeddingService>();
         services.AddScoped<IRecipeMissingIngredientsService, OpenAiRecipeMissingIngredientsService>();
+        services.AddScoped<IRecipeAssistantService, OpenAiRecipeAssistantService>();
 
         return services;
     }

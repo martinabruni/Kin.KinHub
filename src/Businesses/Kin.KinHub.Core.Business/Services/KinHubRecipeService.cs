@@ -56,6 +56,42 @@ public sealed class KinHubRecipeService : IRecipeService
         };
 
         var created = await _recipeRepository.AddAsync(recipe, cancellationToken);
+
+        if (request.Ingredients is { Count: > 0 })
+        {
+            var now2 = DateTime.UtcNow;
+            foreach (var ing in request.Ingredients)
+            {
+                await _recipeIngredientRepository.AddAsync(new RecipeIngredient
+                {
+                    Id = Guid.NewGuid(),
+                    Name = ing.Name,
+                    MeasureUnit = ing.MeasureUnit,
+                    Quantity = ing.Quantity,
+                    RecipeId = created.Id,
+                    CreatedAt = now2,
+                    UpdatedAt = now2,
+                }, cancellationToken);
+            }
+        }
+
+        if (request.Steps is { Count: > 0 })
+        {
+            var now3 = DateTime.UtcNow;
+            foreach (var step in request.Steps)
+            {
+                await _recipeStepRepository.AddAsync(new RecipeStep
+                {
+                    Id = Guid.NewGuid(),
+                    Order = step.Order,
+                    Description = step.Description,
+                    RecipeId = created.Id,
+                    CreatedAt = now3,
+                    UpdatedAt = now3,
+                }, cancellationToken);
+            }
+        }
+
         return Result<RecipeResponse>.Success(await MapAsync(created, cancellationToken));
     }
 
