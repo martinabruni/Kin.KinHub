@@ -161,7 +161,7 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-pr
   properties: {
     administratorLogin: postgresAdministratorLogin
     administratorLoginPassword: postgresAdministratorPassword
-    version: '16'
+    version: '17'
     storage: {
       storageSizeGB: 32
     }
