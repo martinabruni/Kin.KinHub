@@ -296,6 +296,15 @@ function SaveParsedRecipePanel({
         finalTime: recipe.finalTime,
         portions: recipe.portions,
         recipeBookId: bookId,
+        ingredients: recipe.ingredients.map((i) => ({
+          name: i.name,
+          measureUnit: i.unit,
+          quantity: i.quantity,
+        })),
+        steps: recipe.steps.map((s) => ({
+          order: s.order,
+          description: s.description,
+        })),
       },
       {
         onSuccess: () => {

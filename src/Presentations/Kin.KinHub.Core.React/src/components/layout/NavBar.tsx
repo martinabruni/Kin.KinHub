@@ -5,8 +5,13 @@ import { useAuthStore } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { useUiStore } from "@/stores/uiStore";
 import { useLogout } from "@/api/identity/useLogout";
+import { useGetServices } from "@/api/core/useGetServices";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
+
+const serviceRoutes: Record<string, string> = {
+  KinRecipe: "/recipe-books",
+};
 
 export function NavBar() {
   const { t, i18n } = useTranslation();
@@ -14,10 +19,17 @@ export function NavBar() {
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const logout = useAuthStore((s) => s.logout);
   const clearProfile = useProfileStore((s) => s.clearProfile);
+  const { selectedProfile } = useProfileStore();
   const { theme, toggleTheme, setLanguage } = useUiStore();
   const navigate = useNavigate();
   const logoutMutation = useLogout();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [servicesMenuOpen, setServicesMenuOpen] = useState(false);
+  const { data: services } = useGetServices();
+
+  const filteredServices = (services ?? []).filter(
+    (s) => !s.isAdminOnly || selectedProfile?.role === "admin",
+  );
 
   function handleLogout() {
     setMenuOpen(false);
@@ -53,29 +65,14 @@ export function NavBar() {
         : "text-[var(--fg)] hover:bg-[var(--border)]",
     );
 
-  const navLinks = (
+  const commonNavLinks = (
     <>
-      <NavLink
-        to="/"
-        end
-        onClick={() => setMenuOpen(false)}
-        className={navLinkClass}
-      >
-        {t("nav.dashboard")}
-      </NavLink>
       <NavLink
         to="/family"
         onClick={() => setMenuOpen(false)}
         className={navLinkClass}
       >
         {t("nav.family")}
-      </NavLink>
-      <NavLink
-        to="/recipe-books"
-        onClick={() => setMenuOpen(false)}
-        className={navLinkClass}
-      >
-        {t("nav.kinRecipe")}
       </NavLink>
       <NavLink
         to="/profile"
@@ -99,7 +96,41 @@ export function NavBar() {
         </Link>
 
         {/* Desktop nav links */}
-        <nav className="hidden gap-1 sm:flex">{navLinks}</nav>
+        <nav className="hidden items-center gap-1 sm:flex">
+          {/* Kin Services dropdown */}
+          <div
+            className="relative"
+            onMouseEnter={() => setServicesMenuOpen(true)}
+            onMouseLeave={() => setServicesMenuOpen(false)}
+          >
+            <button
+              onClick={() => navigate("/")}
+              className="rounded-md px-3 py-1.5 text-sm text-[var(--fg)] transition-colors hover:bg-[var(--border)]"
+            >
+              {t("nav.kinServices")}
+            </button>
+            {servicesMenuOpen && filteredServices.length > 0 && (
+              <div className="absolute left-0 top-full z-20 min-w-[160px] rounded-md border border-[var(--border)] bg-[var(--card)] py-1 shadow-lg">
+                {filteredServices.map((service) => (
+                  <button
+                    key={service.id}
+                    onClick={() => {
+                      setServicesMenuOpen(false);
+                      navigate(
+                        serviceRoutes[service.name] ??
+                          `/services/${service.id}`,
+                      );
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm text-[var(--fg)] hover:bg-[var(--border)]"
+                  >
+                    {service.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {commonNavLinks}
+        </nav>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
@@ -151,7 +182,33 @@ export function NavBar() {
       {/* Mobile dropdown */}
       {menuOpen && (
         <div className="border-t border-[var(--border)] bg-[var(--card)] px-4 py-3 sm:hidden">
-          <nav className="flex flex-col gap-1">{navLinks}</nav>
+          <nav className="flex flex-col gap-1">
+            {/* Kin Services header + service items */}
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                navigate("/");
+              }}
+              className="rounded-md px-3 py-1.5 text-left text-sm text-[var(--fg)] transition-colors hover:bg-[var(--border)]"
+            >
+              {t("nav.kinServices")}
+            </button>
+            {filteredServices.map((service) => (
+              <button
+                key={service.id}
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate(
+                    serviceRoutes[service.name] ?? `/services/${service.id}`,
+                  );
+                }}
+                className="rounded-md py-1.5 pl-6 text-left text-sm text-[var(--muted)] transition-colors hover:bg-[var(--border)] hover:text-[var(--fg)]"
+              >
+                {service.name}
+              </button>
+            ))}
+            {commonNavLinks}
+          </nav>
           {user && (
             <Button
               variant="ghost"

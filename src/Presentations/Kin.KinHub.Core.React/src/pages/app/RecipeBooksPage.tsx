@@ -159,7 +159,10 @@ export function RecipeBooksPage() {
                     onClose={handleClose}
                   />
                 ) : (
-                  <Card key={book.id}>
+                  <Card
+                    key={book.id}
+                    onClick={() => navigate(`/recipe-books/${book.id}/recipes`)}
+                  >
                     <div className="flex flex-col gap-3">
                       <div>
                         <h3 className="font-semibold text-[var(--fg)]">
@@ -174,16 +177,11 @@ export function RecipeBooksPage() {
                       <div className="flex flex-wrap gap-2">
                         <Button
                           size="sm"
-                          onClick={() =>
-                            navigate(`/recipe-books/${book.id}/recipes`)
-                          }
-                        >
-                          {t("app.recipeBooks.viewRecipes")}
-                        </Button>
-                        <Button
-                          size="sm"
                           variant="secondary"
-                          onClick={() => openEdit(book)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEdit(book);
+                          }}
                         >
                           {t("app.recipeBooks.edit")}
                         </Button>
@@ -191,14 +189,15 @@ export function RecipeBooksPage() {
                           size="sm"
                           variant="danger"
                           loading={deleteBook.isPending}
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             deleteBook.mutate(book.id, {
                               onError: (err) =>
                                 showSnackbar(
                                   err.message ?? t("errors.generic"),
                                 ),
-                            })
-                          }
+                            });
+                          }}
                         >
                           {t("app.recipeBooks.delete")}
                         </Button>
@@ -283,7 +282,10 @@ export function RecipeBooksPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {fridges?.map((fridge) => (
-                <Card key={fridge.id}>
+                <Card
+                  key={fridge.id}
+                  onClick={() => navigate(`/fridges/${fridge.id}`)}
+                >
                   <div className="flex flex-col gap-3">
                     <h3 className="font-semibold text-[var(--fg)]">
                       {fridge.name}
@@ -291,20 +293,15 @@ export function RecipeBooksPage() {
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        onClick={() => navigate(`/fridges/${fridge.id}`)}
-                      >
-                        {t("app.fridges.viewIngredients")}
-                      </Button>
-                      <Button
-                        size="sm"
                         variant="danger"
                         loading={deleteFridge.isPending}
-                        onClick={() =>
+                        onClick={(e) => {
+                          e.stopPropagation();
                           deleteFridge.mutate(fridge.id, {
                             onError: (err) =>
                               showSnackbar(err.message ?? t("errors.generic")),
-                          })
-                        }
+                          });
+                        }}
                       >
                         {t("app.fridges.delete")}
                       </Button>

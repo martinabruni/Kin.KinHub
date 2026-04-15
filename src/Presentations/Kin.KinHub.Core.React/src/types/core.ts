@@ -101,12 +101,25 @@ export interface RecipeResponse {
   steps: RecipeStepResponse[];
 }
 
+export interface CreateRecipeIngredientInlineRequest {
+  name: string;
+  measureUnit: string;
+  quantity: number;
+}
+
+export interface CreateRecipeStepInlineRequest {
+  order: number;
+  description: string;
+}
+
 export interface CreateRecipeRequest {
   name: string;
   backstory?: string;
   finalTime: string;
   portions: number;
   recipeBookId: string;
+  ingredients?: CreateRecipeIngredientInlineRequest[];
+  steps?: CreateRecipeStepInlineRequest[];
 }
 
 export interface UpdateRecipeRequest {

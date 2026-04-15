@@ -160,7 +160,12 @@ export function RecipesPage() {
               onClose={handleClose}
             />
           ) : (
-            <Card key={recipe.id}>
+            <Card
+              key={recipe.id}
+              onClick={() =>
+                navigate(`/recipe-books/${recipeBookId}/recipes/${recipe.id}`)
+              }
+            >
               <div className="flex flex-col gap-3">
                 <div>
                   <h3 className="font-semibold text-[var(--fg)]">
@@ -179,18 +184,11 @@ export function RecipesPage() {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    onClick={() =>
-                      navigate(
-                        `/recipe-books/${recipeBookId}/recipes/${recipe.id}`,
-                      )
-                    }
-                  >
-                    {t("app.recipes.viewDetail")}
-                  </Button>
-                  <Button
-                    size="sm"
                     variant="secondary"
-                    onClick={() => openEdit(recipe)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEdit(recipe);
+                    }}
                   >
                     {t("app.recipes.edit")}
                   </Button>
@@ -198,12 +196,13 @@ export function RecipesPage() {
                     size="sm"
                     variant="danger"
                     loading={deleteRecipe.isPending}
-                    onClick={() =>
+                    onClick={(e) => {
+                      e.stopPropagation();
                       deleteRecipe.mutate(recipe.id, {
                         onError: (err) =>
                           showSnackbar(err.message ?? t("errors.generic")),
-                      })
-                    }
+                      });
+                    }}
                   >
                     {t("app.recipes.delete")}
                   </Button>

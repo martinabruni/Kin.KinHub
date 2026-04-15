@@ -5,6 +5,7 @@ export const it = {
     profile: "Profilo",
     profileSettings: "Impostazioni Profilo",
     kinRecipe: "Kin Recipe",
+    kinServices: "Kin Services",
     logout: "Esci",
   },
   theme: {

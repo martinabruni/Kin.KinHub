@@ -5,6 +5,7 @@ export const en = {
     profile: "Profile",
     profileSettings: "Profile Settings",
     kinRecipe: "Kin Recipe",
+    kinServices: "Kin Services",
     logout: "Logout",
   },
   theme: {
