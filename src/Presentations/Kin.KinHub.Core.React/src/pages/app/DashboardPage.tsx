@@ -12,6 +12,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { ApiError } from "@/lib/http/httpClient";
 
+const serviceRoutes: Record<string, string> = {
+  KinRecipe: "/recipe-books",
+};
+
 export function DashboardPage() {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
@@ -158,7 +162,12 @@ export function DashboardPage() {
                 .map((service) => (
                   <button
                     key={service.id}
-                    onClick={() => navigate(`/services/${service.id}`)}
+                    onClick={() =>
+                      navigate(
+                        serviceRoutes[service.name] ??
+                          `/services/${service.id}`,
+                      )
+                    }
                     className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-4 text-left text-sm font-medium text-[var(--fg)] shadow-sm transition-colors hover:bg-[var(--border)]"
                   >
                     {service.name}

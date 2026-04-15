@@ -12,6 +12,10 @@ import { ProfileInformationPage } from "@/pages/app/profile/ProfileInformationPa
 import { ProfileAccountPage } from "@/pages/app/profile/ProfileAccountPage";
 import { KinConsolePage } from "@/pages/app/KinConsolePage";
 import { ServicePage } from "@/pages/app/ServicePage";
+import { RecipeBooksPage } from "@/pages/app/RecipeBooksPage";
+import { RecipesPage } from "@/pages/app/RecipesPage";
+import { RecipeDetailPage } from "@/pages/app/RecipeDetailPage";
+import { FridgePage } from "@/pages/app/FridgePage";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +39,17 @@ export const router = createBrowserRouter([
     children: [
       { path: "/", element: <DashboardPage /> },
       { path: "/family", element: <FamilyPage /> },
+      { path: "/recipe-books", element: <RecipeBooksPage /> },
+      {
+        path: "/recipe-books/:recipeBookId/recipes",
+        element: <RecipesPage />,
+      },
+      {
+        path: "/recipe-books/:recipeBookId/recipes/:recipeId",
+        element: <RecipeDetailPage />,
+      },
+      { path: "/fridges", element: <FridgePage /> },
+      { path: "/fridges/:fridgeId", element: <FridgePage /> },
       { path: "/services/:serviceId", element: <ServicePage /> },
       {
         path: "/profile",
