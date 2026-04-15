@@ -95,9 +95,9 @@ export function RecipesPage() {
         <h1 className="text-2xl font-bold text-[var(--fg)]">
           {t("app.recipes.title")}
         </h1>
-        <Button className="ml-auto" onClick={openCreate}>
-          {t("app.recipes.create")}
-        </Button>
+        <div className="ml-auto">
+          <Button onClick={openCreate}>{t("app.recipes.create")}</Button>
+        </div>
       </div>
 
       {showForm && !editingRecipe && (
@@ -114,21 +114,23 @@ export function RecipesPage() {
               value={backstory}
               onChange={(e) => setBackstory(e.target.value)}
             />
-            <Input
-              label={t("app.recipes.finalTime")}
-              value={finalTime}
-              onChange={(e) => setFinalTime(e.target.value)}
-              placeholder="00:30:00"
-              required
-            />
-            <Input
-              label={t("app.recipes.portions")}
-              type="number"
-              min={1}
-              value={portions}
-              onChange={(e) => setPortions(e.target.value)}
-              required
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label={t("app.recipes.finalTime")}
+                value={finalTime}
+                onChange={(e) => setFinalTime(e.target.value)}
+                placeholder="00:30:00"
+                required
+              />
+              <Input
+                label={t("app.recipes.portions")}
+                type="number"
+                min={1}
+                value={portions}
+                onChange={(e) => setPortions(e.target.value)}
+                required
+              />
+            </div>
             {formError && (
               <p className="text-sm text-[var(--danger)]">{formError}</p>
             )}
@@ -159,20 +161,22 @@ export function RecipesPage() {
             />
           ) : (
             <Card key={recipe.id}>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-semibold text-[var(--fg)]">
-                  {recipe.name}
-                </h3>
-                {recipe.backstory && (
-                  <p className="text-sm text-[var(--muted)] line-clamp-2">
-                    {recipe.backstory}
+              <div className="flex flex-col gap-3">
+                <div>
+                  <h3 className="font-semibold text-[var(--fg)]">
+                    {recipe.name}
+                  </h3>
+                  {recipe.backstory && (
+                    <p className="mt-1 text-sm text-[var(--muted)] line-clamp-2">
+                      {recipe.backstory}
+                    </p>
+                  )}
+                  <p className="mt-1 text-sm text-[var(--muted)]">
+                    {t("app.recipeDetail.portions")}: {recipe.portions} &middot;{" "}
+                    {t("app.recipeDetail.cookingTime")}: {recipe.finalTime}
                   </p>
-                )}
-                <p className="text-sm text-[var(--muted)]">
-                  {t("app.recipeDetail.portions")}: {recipe.portions} &middot;{" "}
-                  {t("app.recipeDetail.cookingTime")}: {recipe.finalTime}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
+                </div>
+                <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
                     onClick={() =>
@@ -261,20 +265,22 @@ function EditRecipeForm({
           value={backstory}
           onChange={(e) => setBackstory(e.target.value)}
         />
-        <Input
-          label={t("app.recipes.finalTime")}
-          value={finalTime}
-          onChange={(e) => setFinalTime(e.target.value)}
-          required
-        />
-        <Input
-          label={t("app.recipes.portions")}
-          type="number"
-          min={1}
-          value={portions}
-          onChange={(e) => setPortions(e.target.value)}
-          required
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input
+            label={t("app.recipes.finalTime")}
+            value={finalTime}
+            onChange={(e) => setFinalTime(e.target.value)}
+            required
+          />
+          <Input
+            label={t("app.recipes.portions")}
+            type="number"
+            min={1}
+            value={portions}
+            onChange={(e) => setPortions(e.target.value)}
+            required
+          />
+        </div>
         {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
         <div className="flex gap-2">
           <Button type="submit" loading={updateRecipe.isPending}>

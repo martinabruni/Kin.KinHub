@@ -13,19 +13,22 @@ import { useGetFridges } from "@/api/core/useGetFridges";
 import { useCreateFridge } from "@/api/core/useCreateFridge";
 import { useDeleteFridge } from "@/api/core/useDeleteFridge";
 import { useUiStore } from "@/stores/uiStore";
+import { RecipeAssistantPanel } from "@/pages/app/RecipeAssistantPage";
+import { cn } from "@/lib/cn";
 import type { RecipeBookResponse } from "@/types/core";
+
+type Section = "books" | "fridges" | "ai";
 
 export function RecipeBooksPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: books, isLoading } = useGetRecipeBooks();
+  const [section, setSection] = useState<Section>("books");
+
+  // Books state
+  const { data: books, isLoading: booksLoading } = useGetRecipeBooks();
   const createBook = useCreateRecipeBook();
   const deleteBook = useDeleteRecipeBook();
-  const { data: fridges, isLoading: fridgesLoading } = useGetFridges();
-  const createFridge = useCreateFridge();
-  const deleteFridge = useDeleteFridge();
   const showSnackbar = useUiStore((s) => s.showSnackbar);
-
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState<RecipeBookResponse | null>(
     null,
@@ -34,7 +37,10 @@ export function RecipeBooksPage() {
   const [description, setDescription] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Fridge state
+  // Fridges state
+  const { data: fridges, isLoading: fridgesLoading } = useGetFridges();
+  const createFridge = useCreateFridge();
+  const deleteFridge = useDeleteFridge();
   const [showFridgeForm, setShowFridgeForm] = useState(false);
   const [fridgeName, setFridgeName] = useState("");
   const [fridgeFormError, setFridgeFormError] = useState<string | null>(null);
@@ -63,227 +69,256 @@ export function RecipeBooksPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setFormError(null);
-
-    if (editingBook) {
-      // handled inline in EditBookForm to pass the id
-    } else {
+    if (!editingBook) {
       createBook.mutate(
         { name: name.trim(), description: description.trim() || undefined },
         {
-          onSuccess: () => {
-            handleClose();
-          },
-          onError: (err) => {
-            setFormError(err.message ?? t("errors.generic"));
-          },
+          onSuccess: handleClose,
+          onError: (err) => setFormError(err.message ?? t("errors.generic")),
         },
       );
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center pt-16">
-        <Spinner size="lg" className="text-[var(--accent)]" />
-      </div>
+  const tabClass = (s: Section) =>
+    cn(
+      "px-4 py-2 text-sm font-medium transition-colors",
+      section === s
+        ? "border-b-2 border-[var(--accent)] text-[var(--accent)]"
+        : "text-[var(--muted)] hover:text-[var(--fg)]",
     );
-  }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--fg)]">
-          {t("app.recipeBooks.title")}
-        </h1>
-        <Button onClick={openCreate}>{t("app.recipeBooks.create")}</Button>
+      <h1 className="text-2xl font-bold text-[var(--fg)]">
+        {t("app.kinRecipe.title")}
+      </h1>
+
+      {/* Tab bar */}
+      <div className="flex gap-1 border-b border-[var(--border)]">
+        {(["books", "fridges", "ai"] as Section[]).map((s) => (
+          <button key={s} onClick={() => setSection(s)} className={tabClass(s)}>
+            {t(`app.recipeBooks.tabs.${s}`)}
+          </button>
+        ))}
       </div>
 
-      {showForm && !editingBook && (
-        <Card>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <Input
-              label={t("app.recipeBooks.name")}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <Input
-              label={t("app.recipeBooks.description")}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            {formError && (
-              <p className="text-sm text-[var(--danger)]">{formError}</p>
-            )}
-            <div className="flex gap-2">
-              <Button type="submit" loading={createBook.isPending}>
-                {t("app.recipeBooks.save")}
-              </Button>
-              <Button type="button" variant="secondary" onClick={handleClose}>
-                {t("app.recipeBooks.cancel")}
-              </Button>
+      {/* ── Books tab ── */}
+      {section === "books" && (
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-end">
+            <Button onClick={openCreate}>{t("app.recipeBooks.create")}</Button>
+          </div>
+
+          {showForm && !editingBook && (
+            <Card>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <Input
+                  label={t("app.recipeBooks.name")}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+                <Input
+                  label={t("app.recipeBooks.description")}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+                {formError && (
+                  <p className="text-sm text-[var(--danger)]">{formError}</p>
+                )}
+                <div className="flex gap-2">
+                  <Button type="submit" loading={createBook.isPending}>
+                    {t("app.recipeBooks.save")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleClose}
+                  >
+                    {t("app.recipeBooks.cancel")}
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          )}
+
+          {booksLoading ? (
+            <div className="flex justify-center py-8">
+              <Spinner size="lg" className="text-[var(--accent)]" />
             </div>
-          </form>
-        </Card>
-      )}
-
-      {!books?.length && !showForm && (
-        <p className="text-[var(--muted)]">{t("app.recipeBooks.empty")}</p>
-      )}
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {books?.map((book) =>
-          editingBook?.id === book.id ? (
-            <EditBookForm key={book.id} book={book} onClose={handleClose} />
+          ) : !books?.length && !showForm ? (
+            <p className="text-[var(--muted)]">{t("app.recipeBooks.empty")}</p>
           ) : (
-            <Card key={book.id}>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-semibold text-[var(--fg)]">{book.name}</h3>
-                {book.description && (
-                  <p className="text-sm text-[var(--muted)]">
-                    {book.description}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {books?.map((book) =>
+                editingBook?.id === book.id ? (
+                  <EditBookForm
+                    key={book.id}
+                    book={book}
+                    onClose={handleClose}
+                  />
+                ) : (
+                  <Card key={book.id}>
+                    <div className="flex flex-col gap-3">
+                      <div>
+                        <h3 className="font-semibold text-[var(--fg)]">
+                          {book.name}
+                        </h3>
+                        {book.description && (
+                          <p className="mt-1 text-sm text-[var(--muted)] line-clamp-2">
+                            {book.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            navigate(`/recipe-books/${book.id}/recipes`)
+                          }
+                        >
+                          {t("app.recipeBooks.viewRecipes")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => openEdit(book)}
+                        >
+                          {t("app.recipeBooks.edit")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          loading={deleteBook.isPending}
+                          onClick={() =>
+                            deleteBook.mutate(book.id, {
+                              onError: (err) =>
+                                showSnackbar(
+                                  err.message ?? t("errors.generic"),
+                                ),
+                            })
+                          }
+                        >
+                          {t("app.recipeBooks.delete")}
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ),
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Fridges tab ── */}
+      {section === "fridges" && (
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-end">
+            <Button
+              onClick={() => {
+                setFridgeName("");
+                setFridgeFormError(null);
+                setShowFridgeForm(true);
+              }}
+            >
+              {t("app.fridges.create")}
+            </Button>
+          </div>
+
+          {showFridgeForm && (
+            <Card>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setFridgeFormError(null);
+                  createFridge.mutate(
+                    { name: fridgeName.trim() },
+                    {
+                      onSuccess: () => {
+                        setShowFridgeForm(false);
+                        setFridgeName("");
+                      },
+                      onError: (err) =>
+                        setFridgeFormError(err.message ?? t("errors.generic")),
+                    },
+                  );
+                }}
+                className="flex flex-col gap-4"
+              >
+                <Input
+                  label={t("app.fridges.name")}
+                  value={fridgeName}
+                  onChange={(e) => setFridgeName(e.target.value)}
+                  required
+                />
+                {fridgeFormError && (
+                  <p className="text-sm text-[var(--danger)]">
+                    {fridgeFormError}
                   </p>
                 )}
-                <div className="mt-2 flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => navigate(`/recipe-books/${book.id}/recipes`)}
-                  >
-                    {t("app.recipeBooks.viewRecipes")}
+                <div className="flex gap-2">
+                  <Button type="submit" loading={createFridge.isPending}>
+                    {t("app.fridges.save")}
                   </Button>
                   <Button
-                    size="sm"
+                    type="button"
                     variant="secondary"
-                    onClick={() => openEdit(book)}
+                    onClick={() => setShowFridgeForm(false)}
                   >
-                    {t("app.recipeBooks.edit")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    loading={deleteBook.isPending}
-                    onClick={() =>
-                      deleteBook.mutate(book.id, {
-                        onError: (err) =>
-                          showSnackbar(err.message ?? t("errors.generic")),
-                      })
-                    }
-                  >
-                    {t("app.recipeBooks.delete")}
+                    {t("app.fridges.cancel")}
                   </Button>
                 </div>
-              </div>
+              </form>
             </Card>
-          ),
-        )}
-      </div>
+          )}
 
-      {/* Fridges section */}
-      <div className="border-t border-[var(--border)] pt-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[var(--fg)]">
-            {t("app.fridges.title")}
-          </h2>
-          <Button
-            size="sm"
-            onClick={() => {
-              setFridgeName("");
-              setFridgeFormError(null);
-              setShowFridgeForm(true);
-            }}
-          >
-            {t("app.fridges.create")}
-          </Button>
-        </div>
-
-        {showFridgeForm && (
-          <Card className="mt-4">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setFridgeFormError(null);
-                createFridge.mutate(
-                  { name: fridgeName.trim() },
-                  {
-                    onSuccess: () => {
-                      setShowFridgeForm(false);
-                      setFridgeName("");
-                    },
-                    onError: (err) =>
-                      setFridgeFormError(err.message ?? t("errors.generic")),
-                  },
-                );
-              }}
-              className="flex flex-col gap-4"
-            >
-              <Input
-                label={t("app.fridges.name")}
-                value={fridgeName}
-                onChange={(e) => setFridgeName(e.target.value)}
-                required
-              />
-              {fridgeFormError && (
-                <p className="text-sm text-[var(--danger)]">
-                  {fridgeFormError}
-                </p>
-              )}
-              <div className="flex gap-2">
-                <Button type="submit" loading={createFridge.isPending}>
-                  {t("app.fridges.save")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setShowFridgeForm(false)}
-                >
-                  {t("app.fridges.cancel")}
-                </Button>
-              </div>
-            </form>
-          </Card>
-        )}
-
-        {fridgesLoading ? (
-          <div className="flex justify-center py-6">
-            <Spinner className="text-[var(--accent)]" />
-          </div>
-        ) : !fridges?.length && !showFridgeForm ? (
-          <p className="mt-3 text-[var(--muted)]">{t("app.fridges.empty")}</p>
-        ) : (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {fridges?.map((fridge) => (
-              <Card key={fridge.id}>
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-semibold text-[var(--fg)]">
-                    {fridge.name}
-                  </h3>
-                  <div className="mt-2 flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => navigate(`/fridges/${fridge.id}`)}
-                    >
-                      {t("app.fridges.viewIngredients")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      loading={deleteFridge.isPending}
-                      onClick={() =>
-                        deleteFridge.mutate(fridge.id, {
-                          onError: (err) =>
-                            showSnackbar(err.message ?? t("errors.generic")),
-                        })
-                      }
-                    >
-                      {t("app.fridges.delete")}
-                    </Button>
+          {fridgesLoading ? (
+            <div className="flex justify-center py-8">
+              <Spinner size="lg" className="text-[var(--accent)]" />
+            </div>
+          ) : !fridges?.length && !showFridgeForm ? (
+            <p className="text-[var(--muted)]">{t("app.fridges.empty")}</p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {fridges?.map((fridge) => (
+                <Card key={fridge.id}>
+                  <div className="flex flex-col gap-3">
+                    <h3 className="font-semibold text-[var(--fg)]">
+                      {fridge.name}
+                    </h3>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/fridges/${fridge.id}`)}
+                      >
+                        {t("app.fridges.viewIngredients")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        loading={deleteFridge.isPending}
+                        onClick={() =>
+                          deleteFridge.mutate(fridge.id, {
+                            onError: (err) =>
+                              showSnackbar(err.message ?? t("errors.generic")),
+                          })
+                        }
+                      >
+                        {t("app.fridges.delete")}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── AI tab ── */}
+      {section === "ai" && <RecipeAssistantPanel />}
     </div>
   );
 }

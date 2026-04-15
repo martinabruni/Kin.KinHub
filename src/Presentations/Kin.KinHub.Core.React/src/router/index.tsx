@@ -50,6 +50,10 @@ export const router = createBrowserRouter([
       },
       { path: "/fridges", element: <FridgePage /> },
       { path: "/fridges/:fridgeId", element: <FridgePage /> },
+      {
+        path: "/recipe-assistant",
+        element: <Navigate to="/recipe-books" replace />,
+      },
       { path: "/services/:serviceId", element: <ServicePage /> },
       {
         path: "/profile",

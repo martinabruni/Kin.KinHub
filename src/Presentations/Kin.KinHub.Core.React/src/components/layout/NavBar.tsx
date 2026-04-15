@@ -71,6 +71,13 @@ export function NavBar() {
         {t("nav.family")}
       </NavLink>
       <NavLink
+        to="/recipe-books"
+        onClick={() => setMenuOpen(false)}
+        className={navLinkClass}
+      >
+        {t("nav.kinRecipe")}
+      </NavLink>
+      <NavLink
         to="/profile"
         onClick={() => setMenuOpen(false)}
         className={navLinkClass}

@@ -183,3 +183,54 @@ export interface UpdateFridgeIngredientRequest {
 export interface MissingIngredientsResponse {
   missingIngredients: string[];
 }
+
+// Recipe Assistant (AI)
+export interface RecipeAssistantIngredient {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface RecipeAssistantStep {
+  order: number;
+  description: string;
+}
+
+export interface RecipeAssistantRecipe {
+  name: string;
+  backstory?: string;
+  finalTime: string;
+  portions: number;
+  ingredients: RecipeAssistantIngredient[];
+  steps: RecipeAssistantStep[];
+}
+
+export interface RecipeSuggestion {
+  recipe: RecipeAssistantRecipe;
+  matchPercentage: number;
+  missingIngredients: RecipeAssistantIngredient[];
+}
+
+export interface RecipeChange {
+  type: string;
+  description: string;
+}
+
+export interface RecipeAdaptationResult {
+  originalRecipe: RecipeAssistantRecipe;
+  adaptedRecipe: RecipeAssistantRecipe;
+  changes: RecipeChange[];
+}
+
+export interface SuggestRecipesRequest {
+  fridgeId: string;
+}
+
+export interface ParseRecipeRequest {
+  rawText: string;
+}
+
+export interface AdaptRecipeRequest {
+  recipeId: string;
+  constraints: string[];
+}
