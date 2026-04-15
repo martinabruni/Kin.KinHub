@@ -187,10 +187,6 @@ resource postgresFirewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewal
 resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01-preview' = {
   parent: postgresServer
   name: postgresDatabaseName
-  properties: {
-    charset: 'UTF8'
-    collation: 'en_US.UTF8'
-  }
 }
 
 resource sqlConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
