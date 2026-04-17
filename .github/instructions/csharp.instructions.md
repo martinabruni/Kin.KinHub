@@ -14,6 +14,22 @@ Non si applicano a script/tooling e file C# non applicativi, salvo richiesta esp
 
 ## Regole obbligatorie
 
+0. Struttura per Feature
+   Ogni feature deve essere organizzata in una cartella con naming:
+
+   `<NomeFeature>Feature`
+
+   All'interno di ogni feature, le sottocartelle devono ispirarsi a queste:
+   - `<NomeFeature>Feature/Models`
+   - `<NomeFeature>Feature/Services`
+     (contenente Repository / Manager / Service)
+   - `<NomeFeature>Feature/Interfaces`
+     (interfacce implementate dai modelli o contratti interni alla feature)
+   - `<NomeFeature>Feature/Enums`
+   - `<NomeFeature>Feature/Dtos`
+
+   Tutti i file devono risiedere nella cartella corretta in base alla responsabilità.
+
 1. Classi sempre `sealed` di default (si puo rimuovere solo se serve estendibilita reale).
 
 2. Namespace file-scoped (`namespace X.Y.Z;`) e derivato dal path fino alla cartella feature o `Common`
@@ -79,11 +95,22 @@ Non si applicano a script/tooling e file C# non applicativi, salvo richiesta esp
     - La segmentazione è per “tipologia di integrazione” (db engine / provider / vendor / adapter esterno),
       non per singolo caso d’uso.
     - I nomi dei progetti devono rispettare sempre questa naming convention: `Cliente.Progetto.{TipologiaIntegrazione}` (es. `Cliente.Progetto.OpenAi`). Stessa cosa vale per i progetti nel layer Presentation (es. `Cliente.Progetto.Api` oppure `Cliente.Progetto.Function`).
+21. Progetti Infrastructure SQL: approccio DB-first
+    - Adotta sempre l'approccio DB-first per i progetti Infrastructure legati a un database SQL.
+    - Crea prima uno script SQL DDL runnabile con la definizione delle tabelle; non generare codice C# di mapping prima che lo script sia stato eseguito.
+    - Ogni tabella deve seguire la naming convention `<NomeTabella>Entity`, sempre al singolare
+      (es. `FamilyServiceEntity`, `OrderEntity`, `CustomerEntity`).
+    - Una volta generato lo script, attendere che lo sviluppatore lo esegua sul database
+      e proceda con lo scaffolding tramite EF Core Power Tools.
+    - **MAI** inserire connection string in chiaro nel codice committabile.
+      Le connection string devono essere sempre lette dagli User Secrets
+      configurati con `dotnet user-secrets` (`secrets.json`), mai hardcodate né incluse in `appsettings.json` committato.
+22. Non creare mai 2 oggetti nello stesso file, ogni file deve ospitare uno e un solo oggetto
 
 ## Esempi
 
 ```csharp
-namespace Cliente.Progetto.Domain.Orders;
+namespace Cliente.Progetto.Domain.OrderFeature;
 
 public sealed class Order
 {
@@ -92,8 +119,8 @@ public sealed class Order
 ```
 
 ```csharp
-// src/Businesses/Cliente.Progetto.Business/Orders/Services/OrderManager.cs
-namespace Cliente.Progetto.Business.Orders;
+// src/Businesses/Cliente.Progetto.Business/OrderFeature/Services/OrderManager.cs
+namespace Cliente.Progetto.Business.OrderFeature;
 
 // src/Businesses/Cliente.Progetto.Business/Common/Models/BusinessOptions.cs
 namespace Cliente.Progetto.Business.Common;
@@ -209,8 +236,8 @@ public abstract class BaseTest
 ```
 
 ```csharp
-// tests/Cliente.Progetto.Tests/Orders/OrderServiceTests.cs
-namespace Cliente.Progetto.Tests.Orders;
+// tests/Cliente.Progetto.Tests/OrderFeature/OrderFeatureerviceTests.cs
+namespace Cliente.Progetto.Tests.OrderFeature;
 
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -281,4 +308,19 @@ public sealed class OpenAiOptions
         }
     }
 }
+```
+
+```sql
+-- Script DDL DB-first (regola 21)
+-- Naming convention: <NomeTabella>Entity, sempre al singolare
+-- Eseguire questo script sul database prima di procedere con lo scaffolding via EF Core Power Tools.
+-- La connection string NON deve mai comparire nel codice committato: usare dotnet user-secrets.
+
+CREATE TABLE [dbo].[FamilyServiceEntity] (
+    [Id]           UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
+    [Name]         NVARCHAR(200)    NOT NULL,
+    [CreatedAtUtc] DATETIME2        NOT NULL DEFAULT SYSUTCDATETIME(),
+    [UpdatedAtUtc] DATETIME2        NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT [PK_FamilyServiceEntity] PRIMARY KEY ([Id])
+);
 ```

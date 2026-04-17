@@ -1,4 +1,4 @@
-namespace Kin.KinHub.Identity.PostgreSql;
+﻿namespace Kin.KinHub.Identity.PostgreSql.Common;
 
 public sealed class PostgreSqlOptions
 {

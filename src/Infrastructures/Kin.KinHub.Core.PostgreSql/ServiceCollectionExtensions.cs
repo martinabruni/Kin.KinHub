@@ -1,9 +1,4 @@
-using Kin.KinHub.Core.Domain;
-using Kin.KinHub.Core.Domain.Interfaces.Recipes;
-using Kin.KinHub.Core.PostgreSql.Models;
-using Kin.KinHub.Core.PostgreSql.Repositories.Core;
-using Kin.KinHub.Core.PostgreSql.Repositories.Recipe;
-using Mapster;
+﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Pgvector;
 
@@ -13,9 +8,9 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddKinHubCorePostgreSqlInfrastructure(
         this IServiceCollection services,
-        Action<Kin.KinHub.Core.PostgreSql.PostgreSqlOptions> configure)
+        Action<PostgreSqlOptions> configure)
     {
-        var options = new Kin.KinHub.Core.PostgreSql.PostgreSqlOptions();
+        var options = new PostgreSqlOptions();
         configure(options);
         options.Validate();
 
@@ -42,7 +37,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IKinHubServiceRepository, KinHubServiceRepository>();
         services.AddScoped<IFamilyServiceRepository, FamilyServiceRepository>();
 
-        // Recipe repositories (stubs — implement after EF Core Power Tools scaffold)
+        // Recipe repositories (stubs â€” implement after EF Core Power Tools scaffold)
         services.AddScoped<IRecipeBookRepository, RecipeBookRepository>();
         services.AddScoped<IRecipeRepository, RecipeRepository>();
         services.AddScoped<IRecipeIngredientRepository, RecipeIngredientRepository>();

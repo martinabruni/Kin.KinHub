@@ -1,8 +1,5 @@
-using Azure.Monitor.OpenTelemetry.AspNetCore;
+﻿using Azure.Monitor.OpenTelemetry.AspNetCore;
 using FluentValidation;
-using Kin.KinHub.Core.Api.Middlewares;
-using Kin.KinHub.Core.Api.Validators;
-using Kin.KinHub.Core.Api.Validators.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

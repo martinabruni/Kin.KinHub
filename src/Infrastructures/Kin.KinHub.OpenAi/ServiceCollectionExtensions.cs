@@ -1,6 +1,4 @@
-using Kin.KinHub.Core.Domain.Interfaces.AI;
-using Kin.KinHub.OpenAi.Common;
-using Kin.KinHub.OpenAi.Services;
+﻿using Kin.KinHub.OpenAi.Common;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
