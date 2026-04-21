@@ -83,8 +83,7 @@ jobs:
 
       - name: Build frontend
         env:
-          VITE_CORE_URL: ${{ vars.VITE_CORE_URL }}
-          VITE_IDENTITY_URL: ${{ vars.VITE_IDENTITY_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: npm run build
 
       - name: Deploy Static Web App
@@ -169,8 +168,7 @@ jobs:
 
       - name: Build frontend
         env:
-          VITE_CORE_URL: ${{ vars.VITE_CORE_URL }}
-          VITE_IDENTITY_URL: ${{ vars.VITE_IDENTITY_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: npm run build
 
       - name: Deploy Static Web App

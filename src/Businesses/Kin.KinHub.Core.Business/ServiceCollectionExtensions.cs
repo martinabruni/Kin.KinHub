@@ -1,5 +1,4 @@
-using Kin.KinHub.Core.Business;
-using Kin.KinHub.Core.Business.Common;
+﻿using Kin.KinHub.Core.Business.Common;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

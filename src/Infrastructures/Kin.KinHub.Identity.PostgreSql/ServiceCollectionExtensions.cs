@@ -1,6 +1,4 @@
-using Kin.KinHub.Identity.Domain.Interfaces;
-using Kin.KinHub.Identity.PostgreSql.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -8,9 +6,9 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddKinHubIdentityPostgreSqlInfrastructure(
         this IServiceCollection services,
-        Action<Kin.KinHub.Identity.PostgreSql.PostgreSqlOptions> configure)
+        Action<PostgreSqlOptions> configure)
     {
-        var options = new Kin.KinHub.Identity.PostgreSql.PostgreSqlOptions();
+        var options = new PostgreSqlOptions();
         configure(options);
         options.Validate();
 
@@ -24,12 +22,12 @@ public static class ServiceCollectionExtensions
                     errorCodesToAdd: null);
             }));
 
-        services.AddScoped<IPasswordHasher, Kin.KinHub.Identity.PostgreSql.PasswordHasher>();
-        services.AddScoped<IKinUserRepository, Kin.KinHub.Identity.PostgreSql.KinUserRepository>();
-        services.AddScoped<IProviderRepository, Kin.KinHub.Identity.PostgreSql.ProviderRepository>();
-        services.AddScoped<IUserProviderRepository, Kin.KinHub.Identity.PostgreSql.UserProviderRepository>();
-        services.AddScoped<IUserCredentialRepository, Kin.KinHub.Identity.PostgreSql.UserCredentialRepository>();
-        services.AddScoped<IRefreshTokenRepository, Kin.KinHub.Identity.PostgreSql.RefreshTokenRepository>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IKinUserRepository, KinUserRepository>();
+        services.AddScoped<IProviderRepository, ProviderRepository>();
+        services.AddScoped<IUserProviderRepository, UserProviderRepository>();
+        services.AddScoped<IUserCredentialRepository, UserCredentialRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         return services;
     }
