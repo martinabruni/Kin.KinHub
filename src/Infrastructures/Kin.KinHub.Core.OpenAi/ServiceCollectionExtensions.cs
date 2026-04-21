@@ -1,4 +1,4 @@
-﻿using Kin.KinHub.OpenAi.Common;
+﻿using Kin.KinHub.Core.OpenAi.Common;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

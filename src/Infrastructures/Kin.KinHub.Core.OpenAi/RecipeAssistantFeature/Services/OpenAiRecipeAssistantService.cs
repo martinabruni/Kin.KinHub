@@ -1,11 +1,11 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
-using Kin.KinHub.OpenAi.Common;
+using Kin.KinHub.Core.OpenAi.Common;
 using OpenAI.Chat;
 using System.Globalization;
 using System.Text.Json;
 
-namespace Kin.KinHub.OpenAi.RecipeAssistantFeature;
+namespace Kin.KinHub.Core.OpenAi.RecipeAssistantFeature;
 
 internal sealed class OpenAiRecipeAssistantService : IRecipeAssistantService
 {

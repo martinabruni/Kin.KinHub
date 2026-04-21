@@ -1,5 +1,5 @@
 ﻿
-namespace Kin.KinHub.OpenAi.RecipeAssistantFeature;
+namespace Kin.KinHub.Core.OpenAi.RecipeAssistantFeature;
 
 internal sealed class OpenAiRecipeMissingIngredientsService : IRecipeMissingIngredientsService
 {

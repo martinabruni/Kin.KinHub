@@ -37,7 +37,7 @@
   <Folder Name="/src/Infrastructures/">
     <Project Path="src\Infrastructures\Kin.KinHub.Core.PostgreSql\Kin.KinHub.Core.PostgreSql.csproj" />
     <Project Path="src\Infrastructures\Kin.KinHub.Identity.PostgreSql\Kin.KinHub.Identity.PostgreSql.csproj" />
-    <Project Path="src\Infrastructures\Kin.KinHub.OpenAi\Kin.KinHub.OpenAi.csproj" />
+    <Project Path="src\Infrastructures\Kin.KinHub.Core.OpenAi\Kin.KinHub.Core.OpenAi.csproj" />
     <Project Path="src\Infrastructures\Kin.KinHub.Identity.Jwt\Kin.KinHub.Identity.Jwt.csproj" />
   </Folder>
   <Folder Name="/src/Presentations/">

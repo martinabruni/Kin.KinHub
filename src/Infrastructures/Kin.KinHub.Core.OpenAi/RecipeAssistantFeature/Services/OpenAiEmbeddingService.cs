@@ -1,9 +1,9 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
-using Kin.KinHub.OpenAi.Common;
+using Kin.KinHub.Core.OpenAi.Common;
 using OpenAI.Embeddings;
 
-namespace Kin.KinHub.OpenAi.RecipeAssistantFeature;
+namespace Kin.KinHub.Core.OpenAi.RecipeAssistantFeature;
 
 internal sealed class OpenAiEmbeddingService : IEmbeddingService
 {

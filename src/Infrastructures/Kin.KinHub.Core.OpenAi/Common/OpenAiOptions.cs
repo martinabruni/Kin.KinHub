@@ -1,4 +1,4 @@
-namespace Kin.KinHub.OpenAi.Common;
+namespace Kin.KinHub.Core.OpenAi.Common;
 
 public sealed class OpenAiOptions
 {
