@@ -15,12 +15,6 @@ param webAppName string
 @description('App Service plan name for the Web App.')
 param appServicePlanName string = '${webAppName}-plan'
 
-@description('Identity Web App name.')
-param identityWebAppName string
-
-@description('App Service plan name for the Identity Web App.')
-param identityAppServicePlanName string = '${identityWebAppName}-plan'
-
 @description('Application Insights name.')
 param applicationInsightsName string = '${webAppName}-appi'
 
@@ -67,24 +61,6 @@ var keyVaultSecretsUserRoleDefinitionId = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
   '4633458b-17de-408a-b874-0445c86b69e6'
 )
-var identityWebAppSettings = [
-  {
-    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-    value: applicationInsights.properties.ConnectionString
-  }
-  {
-    name: 'ConnectionStrings__KinHub'
-    value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=${sqlConnectionStringSecretName})'
-  }
-  {
-    name: 'Jwt__Secret'
-    value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=${jwtSecretSecretName})'
-  }
-  {
-    name: 'Jwt__Issuer'
-    value: jwtIssuer
-  }
-]
 var webAppSettings = [
   {
     name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -311,50 +287,6 @@ resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignme
   }
 }
 
-resource identityAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
-  name: identityAppServicePlanName
-  location: location
-  sku: {
-    name: 'B1'
-    tier: 'Basic'
-  }
-  kind: 'linux'
-  properties: {
-    reserved: true
-  }
-}
-
-resource identityWebApp 'Microsoft.Web/sites@2024-04-01' = {
-  name: identityWebAppName
-  location: location
-  kind: 'app,linux'
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    httpsOnly: true
-    serverFarmId: identityAppServicePlan.id
-    siteConfig: {
-      appSettings: identityWebAppSettings
-      ftpsState: 'Disabled'
-      healthCheckPath: '/health'
-      http20Enabled: true
-      linuxFxVersion: 'DOTNETCORE|10.0'
-      minTlsVersion: '1.2'
-    }
-  }
-}
-
-resource identityKeyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: keyVault
-  name: guid(keyVault.id, identityWebApp.id, keyVaultSecretsUserRoleDefinitionId)
-  properties: {
-    principalId: identityWebApp.identity.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
-  }
-}
-
 resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   name: staticWebAppName
   location: staticWebAppLocation
@@ -370,6 +302,5 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
 }
 
 output webAppDefaultHostname string = webApp.properties.defaultHostName
-output identityWebAppDefaultHostname string = identityWebApp.properties.defaultHostName
 output staticWebAppDefaultHostname string = staticWebApp.properties.defaultHostname
 output openAiEndpoint string = openAiAccount.properties.endpoint

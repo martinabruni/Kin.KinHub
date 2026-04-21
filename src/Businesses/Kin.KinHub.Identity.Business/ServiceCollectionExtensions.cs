@@ -6,7 +6,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers the KinHub business services.
     /// </summary>
-    public static IServiceCollection AddKinHubBusiness(this IServiceCollection services)
+    public static IServiceCollection AddKinHubIdentityBusiness(this IServiceCollection services)
     {
         services.AddScoped<IAuthenticationService, KinHubAuthenticationService>();
 

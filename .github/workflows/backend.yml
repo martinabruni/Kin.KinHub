@@ -19,14 +19,12 @@ permissions:
 env:
   DOTNET_VERSION: 10.0.x
   DOTNET_SOLUTION: Kin.KinHub.Core.slnx
-  CORE_API_PROJECT: src/Presentations/Kin.KinHub.Core.Api/Kin.KinHub.Core.Api.csproj
-  IDENTITY_API_PROJECT: src/Presentations/Kin.KinHub.Identity.Api/Kin.KinHub.Identity.Api.csproj
+  SHARED_API_PROJECT: src/Presentations/Kin.KinHub.Shared.Api/Kin.KinHub.Shared.Api.csproj
   # TODO: add test projects when created
   # BUSINESS_TESTS_PROJECT: src/Tests/Kin.KinHub.Business.Tests/Kin.KinHub.Business.Tests.csproj
   # API_TESTS_PROJECT: src/Tests/Kin.KinHub.Api.Tests/Kin.KinHub.Api.Tests.csproj
   BICEP_FILE: ops/iac/main.bicep
   API_ARTIFACT_DIR: artifacts/webapp
-  IDENTITY_API_ARTIFACT_DIR: artifacts/identity-webapp
 # -----------------------------------------------------------------------
 
 concurrency:
@@ -78,24 +76,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Publish Core API
-        run: dotnet publish "${{ env.CORE_API_PROJECT }}" --configuration Release --output ${{ env.API_ARTIFACT_DIR }}
-
-      - name: Publish Identity API
-        run: dotnet publish "${{ env.IDENTITY_API_PROJECT }}" --configuration Release --output ${{ env.IDENTITY_API_ARTIFACT_DIR }}
+      - name: Publish Shared API
+        run: dotnet publish "${{ env.SHARED_API_PROJECT }}" --configuration Release --output ${{ env.API_ARTIFACT_DIR }}
 
       - name: Upload Web App package
         uses: actions/upload-artifact@v4
         with:
           name: webapp-package
           path: ${{ env.API_ARTIFACT_DIR }}
-          if-no-files-found: error
-
-      - name: Upload Identity Web App package
-        uses: actions/upload-artifact@v4
-        with:
-          name: identity-webapp-package
-          path: ${{ env.IDENTITY_API_ARTIFACT_DIR }}
           if-no-files-found: error
 
   validate_bicep:
@@ -143,12 +131,6 @@ jobs:
           name: webapp-package
           path: webapp-package
 
-      - name: Download Identity Web App package
-        uses: actions/download-artifact@v4
-        with:
-          name: identity-webapp-package
-          path: identity-webapp-package
-
       - name: Deploy infrastructure
         run: |
           az deployment group what-if \
@@ -159,7 +141,6 @@ jobs:
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
               webAppName="${{ vars.WEB_APP_NAME }}" \
-              identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
               postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
@@ -176,7 +157,6 @@ jobs:
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
               webAppName="${{ vars.WEB_APP_NAME }}" \
-              identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
               postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
@@ -190,12 +170,6 @@ jobs:
         with:
           app-name: ${{ vars.WEB_APP_NAME }}
           package: webapp-package
-
-      - name: Deploy Identity Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ vars.IDENTITY_WEB_APP_NAME }}
-          package: identity-webapp-package
 
   # deploy_test:
   #   name: Deploy Test
@@ -301,12 +275,6 @@ jobs:
           name: webapp-package
           path: webapp-package
 
-      - name: Download Identity Web App package
-        uses: actions/download-artifact@v4
-        with:
-          name: identity-webapp-package
-          path: identity-webapp-package
-
       - name: Deploy infrastructure
         run: |
           az deployment group what-if \
@@ -317,7 +285,6 @@ jobs:
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
               webAppName="${{ vars.WEB_APP_NAME }}" \
-              identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
               postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
@@ -334,7 +301,6 @@ jobs:
               staticWebAppLocation="${{ vars.STATIC_WEB_APP_LOCATION }}" \
               staticWebAppName="${{ vars.STATIC_WEB_APP_NAME }}" \
               webAppName="${{ vars.WEB_APP_NAME }}" \
-              identityWebAppName="${{ vars.IDENTITY_WEB_APP_NAME }}" \
               keyVaultName="${{ vars.KEY_VAULT_NAME }}" \
               postgresServerName="${{ vars.POSTGRES_SERVER_NAME }}" \
               postgresDatabaseName="${{ vars.POSTGRES_DATABASE_NAME }}" \
@@ -348,9 +314,3 @@ jobs:
         with:
           app-name: ${{ vars.WEB_APP_NAME }}
           package: webapp-package
-
-      - name: Deploy Identity Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ vars.IDENTITY_WEB_APP_NAME }}
-          package: identity-webapp-package

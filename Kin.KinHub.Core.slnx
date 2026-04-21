@@ -36,12 +36,12 @@
   </Folder>
   <Folder Name="/src/Infrastructures/">
     <Project Path="src\Infrastructures\Kin.KinHub.Core.PostgreSql\Kin.KinHub.Core.PostgreSql.csproj" />
+    <Project Path="src\Infrastructures\Kin.KinHub.Identity.PostgreSql\Kin.KinHub.Identity.PostgreSql.csproj" />
     <Project Path="src\Infrastructures\Kin.KinHub.OpenAi\Kin.KinHub.OpenAi.csproj" />
     <Project Path="src\Infrastructures\Kin.KinHub.Identity.Jwt\Kin.KinHub.Identity.Jwt.csproj" />
   </Folder>
   <Folder Name="/src/Presentations/">
-    <Project Path="src\Presentations\Kin.KinHub.Core.Api\Kin.KinHub.Core.Api.csproj" />
-    <Project Path="src\Presentations\Kin.KinHub.Identity.Api\Kin.KinHub.Identity.Api.csproj" />
+    <Project Path="src\Presentations\Kin.KinHub.Shared.Api\Kin.KinHub.Shared.Api.csproj" />
   </Folder>
   <Folder Name="/src/Tests/">
     <Project Path="src/Tests/Kin.KinHub.Core.Test/Kin.KinHub.Core.Test.csproj" Id="4a373282-2a52-44cd-ab39-d964ca708def" />
