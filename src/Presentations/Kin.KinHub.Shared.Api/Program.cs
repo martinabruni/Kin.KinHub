@@ -18,7 +18,7 @@ builder.Services
     })
     .AddKinHubCoreBusiness()
     .AddKinHubIdentityBusiness()
-    .AddKinHubOpenAiInfrastructure(o =>
+    .AddKinHubCoreOpenAiInfrastructure(o =>
     {
         o.Endpoint = builder.Configuration["OpenAi:Endpoint"] ?? string.Empty;
         o.ApiKey = builder.Configuration["OpenAi:ApiKey"] ?? string.Empty;
