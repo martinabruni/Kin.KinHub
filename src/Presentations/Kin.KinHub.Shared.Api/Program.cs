@@ -31,7 +31,7 @@ builder.Services
     .AddHealthChecks()
     .AddNpgSql(
         builder.Configuration.GetConnectionString("KinHub")!,
-        name: "postgresql",
+        name: "kinhub-dev-psqldb",
         timeout: TimeSpan.FromSeconds(10));
 
 builder.Services.AddScoped<JwtAuthenticationMiddleware>();
