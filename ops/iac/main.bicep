@@ -53,7 +53,7 @@ param jwtIssuer string = 'kinhub'
 param jwtAccessTokenExpiryMinutes string = '15'
 
 var postgresConnectionString = 'Server=${postgresServer.properties.fullyQualifiedDomainName};Database=${postgresDatabaseName};Port=5432;User Id=${postgresAdministratorLogin};Password=${postgresAdministratorPassword};Ssl Mode=Require;'
-var sqlConnectionStringSecretName = 'sql-connection-string'
+var sqlConnectionStringSecretName = 'database-connection-string'
 var jwtSecretSecretName = 'jwt-secret'
 var openAiEndpointSecretName = 'openai-endpoint'
 var openAiKeySecretName = 'openai-key'
