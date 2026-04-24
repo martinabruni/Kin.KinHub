@@ -1,0 +1,313 @@
+{
+  "app": {
+    "name": "KinHub",
+    "tagline": "La tua famiglia, tutta in un posto."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "family": "Famiglia",
+    "services": "Servizi",
+    "recipeBooks": "Ricettari",
+    "fridges": "Frigoriferi",
+    "aiAssistant": "Assistente AI",
+    "profile": "Profilo",
+    "logout": "Esci"
+  },
+  "auth": {
+    "signIn": "Accedi",
+    "signingIn": "Accesso in corso...",
+    "createAccount": "Crea account",
+    "creatingAccount": "Creazione in corso...",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Conferma password",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "noAccount": "Non hai un account?",
+    "register": "Registrati",
+    "alreadyHaveAccount": "Hai già un account?",
+    "login": "Accedi",
+    "passwordMismatch": "Le password non corrispondono",
+    "accountCreated": "Account creato! Accedi ora.",
+    "loggedOut": "Disconnesso con successo."
+  },
+  "dashboard": {
+    "greeting": "Ciao, {{name}}! 👋",
+    "yourServices": "I tuoi servizi",
+    "open": "Apri →",
+    "recentActivity": "Attività recente in arrivo",
+    "noFamily": {
+      "title": "Non fai ancora parte di una famiglia",
+      "create": "Crea una famiglia",
+      "join": "Unisciti con codice invito"
+    },
+    "members": "{{count}} membro",
+    "members_other": "{{count}} membri",
+    "manageFamily": "Gestisci Famiglia →"
+  },
+  "family": {
+    "title": "Famiglia",
+    "members": "Membri",
+    "addMember": "Aggiungi Membro",
+    "editName": "Modifica nome famiglia",
+    "name": "Nome famiglia",
+    "save": "Salva",
+    "role": {
+      "admin": "Admin",
+      "member": "Membro"
+    },
+    "actions": {
+      "edit": "Modifica",
+      "remove": "Rimuovi"
+    },
+    "removeMember": {
+      "title": "Rimuovi membro",
+      "description": "Sei sicuro di voler rimuovere {{name}} dalla famiglia? Questa azione non può essere annullata.",
+      "confirm": "Rimuovi"
+    },
+    "adminCode": {
+      "title": "Codice Admin",
+      "reveal": "Mostra",
+      "hide": "Nascondi",
+      "verify": "Verifica codice",
+      "verifyBtn": "Verifica",
+      "regenerate": "Rigenera",
+      "regenerateTitle": "Rigenera Codice Admin",
+      "regenerateDescription": "Questo invaliderà il codice admin corrente. Sei sicuro?",
+      "regenerateConfirm": "Rigenera"
+    },
+    "dangerZone": {
+      "title": "Zona Pericolosa",
+      "leave": "Lascia Famiglia",
+      "leaveTitle": "Lascia Famiglia",
+      "leaveDescription": "Sei sicuro di voler lasciare questa famiglia? Perderai l'accesso a tutte le risorse condivise.",
+      "leaveConfirm": "Lascia",
+      "delete": "Elimina Famiglia",
+      "deleteTitle": "Elimina Famiglia",
+      "deleteDescription": "Questa azione eliminerà permanentemente la famiglia e tutti i dati associati. Non può essere annullata.",
+      "deleteConfirm": "Elimina"
+    },
+    "noMembers": "Nessun membro",
+    "updated": "Famiglia aggiornata.",
+    "codeRegenerated": "Codice admin rigenerato.",
+    "memberRemoved": "Membro rimosso.",
+    "left": "Hai lasciato la famiglia.",
+    "deleted": "Famiglia eliminata."
+  },
+  "services": {
+    "title": "Servizi Famiglia",
+    "subtitle": "Abilita o disabilita funzionalità per la tua famiglia",
+    "active": "Attivo",
+    "inactive": "Inattivo",
+    "toggleError": "Aggiornamento servizio fallito. Ripristino.",
+    "updated": "Servizio aggiornato."
+  },
+  "recipeBooks": {
+    "title": "Ricettari",
+    "new": "Nuovo Ricettario",
+    "search": "Cerca ricettari...",
+    "recipes": "ricette",
+    "recipe": "ricetta",
+    "lastUpdated": "Aggiornato {{date}}",
+    "empty": {
+      "title": "Nessun ricettario",
+      "cta": "Crea il primo"
+    },
+    "create": {
+      "title": "Nuovo Ricettario",
+      "namePlaceholder": "es. Classici Italiani",
+      "submit": "Crea"
+    },
+    "edit": {
+      "title": "Modifica Ricettario",
+      "submit": "Salva"
+    },
+    "delete": {
+      "title": "Elimina Ricettario",
+      "description": "Sei sicuro di voler eliminare \"{{name}}\"? Tutte le ricette verranno eliminate. Azione irreversibile.",
+      "confirm": "Elimina"
+    },
+    "created": "Ricettario creato.",
+    "updated": "Ricettario aggiornato.",
+    "deleted": "Ricettario eliminato."
+  },
+  "recipes": {
+    "title": "Ricette",
+    "addRecipe": "Aggiungi Ricetta",
+    "name": "Nome ricetta",
+    "description": "Descrizione (opzionale)",
+    "servingSize": "Porzioni",
+    "prepTime": "Tempo preparazione (minuti)",
+    "create": {
+      "title": "Nuova Ricetta",
+      "submit": "Crea"
+    },
+    "edit": {
+      "title": "Modifica Ricetta",
+      "submit": "Salva"
+    },
+    "delete": {
+      "title": "Elimina Ricetta",
+      "description": "Sei sicuro di voler eliminare \"{{name}}\"? Azione irreversibile.",
+      "confirm": "Elimina"
+    },
+    "ingredients": "Ingredienti",
+    "steps": "Passaggi",
+    "addIngredient": "Aggiungi",
+    "addStep": "Aggiungi",
+    "ingredientName": "Nome ingrediente",
+    "quantity": "Qtà",
+    "unit": "Unità",
+    "stepDescription": "Descrizione passaggio",
+    "cancel": "Annulla",
+    "saveIngredient": "Salva",
+    "saveStep": "Salva",
+    "checkMissing": "Verifica Ingredienti Mancanti",
+    "selectFridge": "Seleziona un frigorifero",
+    "allAvailable": "Tutti gli ingredienti disponibili!",
+    "missing": "Mancante",
+    "created": "Ricetta creata.",
+    "updated": "Ricetta aggiornata.",
+    "deleted": "Ricetta eliminata.",
+    "ingredientAdded": "Ingrediente aggiunto.",
+    "ingredientDeleted": "Ingrediente rimosso.",
+    "stepAdded": "Passaggio aggiunto.",
+    "stepDeleted": "Passaggio rimosso."
+  },
+  "fridges": {
+    "title": "Frigoriferi",
+    "new": "Nuovo Frigorifero",
+    "search": "Cerca ingredienti...",
+    "addIngredient": "Aggiungi Ingrediente",
+    "ingredients": "ingredienti",
+    "ingredient": "ingrediente",
+    "empty": {
+      "title": "Il frigorifero è vuoto.",
+      "cta": "Aggiungi il primo ingrediente."
+    },
+    "noFridges": {
+      "title": "Nessun frigorifero",
+      "cta": "Crea il primo"
+    },
+    "columns": {
+      "name": "Nome",
+      "quantity": "Quantità",
+      "unit": "Unità",
+      "actions": "Azioni"
+    },
+    "create": {
+      "title": "Nuovo Frigorifero",
+      "namePlaceholder": "es. Frigo Principale",
+      "submit": "Crea"
+    },
+    "edit": {
+      "title": "Modifica Frigorifero",
+      "submit": "Salva"
+    },
+    "delete": {
+      "title": "Elimina Frigorifero",
+      "description": "Sei sicuro di voler eliminare \"{{name}}\"? Azione irreversibile.",
+      "confirm": "Elimina"
+    },
+    "editIngredient": "Modifica ingrediente",
+    "deleteIngredient": {
+      "title": "Rimuovi Ingrediente",
+      "description": "Rimuovere \"{{name}}\" dal frigorifero?",
+      "confirm": "Rimuovi"
+    },
+    "created": "Frigorifero creato.",
+    "updated": "Frigorifero aggiornato.",
+    "deleted": "Frigorifero eliminato.",
+    "ingredientAdded": "Ingrediente aggiunto.",
+    "ingredientUpdated": "Ingrediente aggiornato.",
+    "ingredientDeleted": "Ingrediente rimosso."
+  },
+  "aiAssistant": {
+    "title": "Assistente Ricette AI",
+    "subtitle": "Powered by GPT-4o — lascia che l'AI ti aiuti a cucinare meglio",
+    "tabs": {
+      "suggest": "Suggerisci Ricette",
+      "parse": "Analizza Ricetta",
+      "adapt": "Adatta Ricetta"
+    },
+    "suggest": {
+      "selectFridge": "Scegli un frigorifero...",
+      "button": "Suggerisci Ricette",
+      "suggesting": "Suggerendo...",
+      "matchScore": "Corrispondenza",
+      "saveToBook": "Salva nel Ricettario",
+      "selectBook": "Scegli un ricettario...",
+      "save": "Salva",
+      "saved": "Ricetta salvata."
+    },
+    "parse": {
+      "placeholder": "Incolla una ricetta da qualsiasi fonte...",
+      "button": "Analizza Ricetta",
+      "parsing": "Analizzando...",
+      "saveToBook": "Salva nel Ricettario",
+      "saved": "Ricetta salvata."
+    },
+    "adapt": {
+      "selectRecipe": "Scegli una ricetta...",
+      "constraints": "Restrizioni dietetiche (es. senza glutine, vegano)",
+      "button": "Adatta Ricetta",
+      "adapting": "Adattando...",
+      "original": "Originale",
+      "adapted": "Adattato",
+      "saveAdapted": "Salva Ricetta Adattata",
+      "saved": "Ricetta adattata salvata."
+    }
+  },
+  "profile": {
+    "title": "Profilo",
+    "identity": {
+      "admin": "Admin",
+      "member": "Membro"
+    },
+    "updateEmail": {
+      "title": "Aggiorna Email",
+      "newEmail": "Nuova email",
+      "currentPassword": "Password attuale",
+      "save": "Salva",
+      "success": "Email aggiornata."
+    },
+    "updatePassword": {
+      "title": "Aggiorna Password",
+      "currentPassword": "Password attuale",
+      "newPassword": "Nuova password",
+      "confirmPassword": "Conferma nuova password",
+      "save": "Salva",
+      "success": "Password aggiornata."
+    },
+    "preferences": {
+      "title": "Preferenze",
+      "darkMode": "Modalità scura",
+      "language": "Lingua",
+      "english": "English",
+      "italian": "Italiano"
+    },
+    "dangerZone": {
+      "title": "Zona Pericolosa",
+      "delete": "Elimina Account",
+      "deleteTitle": "Elimina Account",
+      "deleteDescription": "Questa azione eliminerà permanentemente il tuo account e tutti i tuoi dati. Digita DELETE per confermare.",
+      "deleteConfirm": "Elimina Account",
+      "typeToConfirm": "Digita DELETE per confermare",
+      "success": "Account eliminato."
+    }
+  },
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Qualcosa è andato storto.",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "confirm": "Conferma",
+    "actions": "Azioni",
+    "noData": "Nessun dato disponibile.",
+    "search": "Cerca",
+    "clear": "Pulisci",
+    "retry": "Riprova"
+  }
+}

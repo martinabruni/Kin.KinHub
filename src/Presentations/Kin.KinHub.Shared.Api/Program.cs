@@ -18,7 +18,7 @@ builder.Services
     })
     .AddKinHubCoreBusiness()
     .AddKinHubIdentityBusiness()
-    .AddKinHubOpenAiInfrastructure(o =>
+    .AddKinHubCoreOpenAiInfrastructure(o =>
     {
         o.Endpoint = builder.Configuration["OpenAi:Endpoint"] ?? string.Empty;
         o.ApiKey = builder.Configuration["OpenAi:ApiKey"] ?? string.Empty;
@@ -31,7 +31,7 @@ builder.Services
     .AddHealthChecks()
     .AddNpgSql(
         builder.Configuration.GetConnectionString("KinHub")!,
-        name: "postgresql",
+        name: "kinhub-dev-psqldb",
         timeout: TimeSpan.FromSeconds(10));
 
 builder.Services.AddScoped<JwtAuthenticationMiddleware>();

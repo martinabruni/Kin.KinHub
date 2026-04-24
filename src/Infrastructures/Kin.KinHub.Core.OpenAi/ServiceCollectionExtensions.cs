@@ -4,7 +4,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddKinHubOpenAiInfrastructure(
+    public static IServiceCollection AddKinHubCoreOpenAiInfrastructure(
         this IServiceCollection services,
         Action<OpenAiOptions> configure)
     {
