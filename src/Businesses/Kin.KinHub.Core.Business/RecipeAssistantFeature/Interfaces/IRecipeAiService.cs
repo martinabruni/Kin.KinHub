@@ -14,7 +14,7 @@ public interface IRecipeAiService
         CancellationToken cancellationToken = default);
 
     /// <summary>Parses a recipe from free text or unstructured input. Returns null in the result value if the text cannot be parsed.</summary>
-    Task<Result<RecipeAssistantRecipe?>> ParseRecipeAsync(
+    Task<Result<Recipe?>> ParseRecipeAsync(
         string rawText,
         CancellationToken cancellationToken = default);
 

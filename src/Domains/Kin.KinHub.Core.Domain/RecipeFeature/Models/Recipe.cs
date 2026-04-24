@@ -9,4 +9,6 @@ public sealed class Recipe : BaseDeletableEntity<Guid>
     public required TimeSpan FinalTime { get; set; }
     public required int Portions { get; set; }
     public required Guid RecipeBookId { get; set; }
+    public IReadOnlyList<RecipeIngredient>? Ingredients { get; set; }
+    public IReadOnlyList<RecipeStep>? Steps { get; set; }
 }
