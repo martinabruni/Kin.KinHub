@@ -49,9 +49,18 @@
     "title": "Family",
     "members": "Members",
     "addMember": "Add Member",
+    "addMemberNamePlaceholder": "Member name",
     "editName": "Edit family name",
     "name": "Family name",
     "save": "Save",
+    "noFamily": {
+      "title": "You don't have a family yet",
+      "description": "Create a family to get started. Members are profiles, not accounts.",
+      "familyNamePlaceholder": "Family name",
+      "ownerProfileNamePlaceholder": "Your profile name (e.g. Mum)",
+      "adminCodePlaceholder": "Admin code (keep it secret)",
+      "create": "Create Family"
+    },
     "role": {
       "admin": "Admin",
       "member": "Member"
@@ -71,10 +80,11 @@
       "hide": "Hide",
       "verify": "Verify code",
       "verifyBtn": "Verify",
-      "regenerate": "Regenerate",
-      "regenerateTitle": "Regenerate Admin Code",
-      "regenerateDescription": "This will invalidate the current admin code. Are you sure?",
-      "regenerateConfirm": "Regenerate"
+      "changeCode": "Change Code",
+      "changeCodeTitle": "Change Admin Code",
+      "currentCodePlaceholder": "Current code",
+      "newCodePlaceholder": "New code",
+      "changeCodeConfirm": "Save"
     },
     "dangerZone": {
       "title": "Danger Zone",

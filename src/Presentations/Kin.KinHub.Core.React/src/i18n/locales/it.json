@@ -49,9 +49,18 @@
     "title": "Famiglia",
     "members": "Membri",
     "addMember": "Aggiungi Membro",
+    "addMemberNamePlaceholder": "Nome membro",
     "editName": "Modifica nome famiglia",
     "name": "Nome famiglia",
     "save": "Salva",
+    "noFamily": {
+      "title": "Non hai ancora una famiglia",
+      "description": "Crea una famiglia per iniziare. I membri sono profili, non account.",
+      "familyNamePlaceholder": "Nome famiglia",
+      "ownerProfileNamePlaceholder": "Il tuo nome profilo (es. Mamma)",
+      "adminCodePlaceholder": "Codice admin (tienilo segreto)",
+      "create": "Crea Famiglia"
+    },
     "role": {
       "admin": "Admin",
       "member": "Membro"
@@ -71,10 +80,11 @@
       "hide": "Nascondi",
       "verify": "Verifica codice",
       "verifyBtn": "Verifica",
-      "regenerate": "Rigenera",
-      "regenerateTitle": "Rigenera Codice Admin",
-      "regenerateDescription": "Questo invaliderà il codice admin corrente. Sei sicuro?",
-      "regenerateConfirm": "Rigenera"
+      "changeCode": "Cambia Codice",
+      "changeCodeTitle": "Cambia Codice Admin",
+      "currentCodePlaceholder": "Codice attuale",
+      "newCodePlaceholder": "Nuovo codice",
+      "changeCodeConfirm": "Salva"
     },
     "dangerZone": {
       "title": "Zona Pericolosa",
