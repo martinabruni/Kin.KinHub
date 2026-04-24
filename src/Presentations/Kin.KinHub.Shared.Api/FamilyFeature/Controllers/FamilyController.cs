@@ -191,4 +191,17 @@ public sealed class FamilyController : ControllerBase
 
         return HttpResultMapper.ToActionResult(result);
     }
+
+    [HttpDelete("{familyId:guid}")]
+    public async Task<IActionResult> DeleteFamilyAsync(
+        Guid familyId,
+        CancellationToken cancellationToken)
+    {
+        if (!_currentUser.IsAuthenticated)
+            return Unauthorized(new { message = "Missing or invalid Authorization header." });
+
+        var result = await _familyService.DeleteFamilyAsync(familyId, _currentUser.UserId, cancellationToken);
+
+        return HttpResultMapper.ToActionResult(result);
+    }
 }

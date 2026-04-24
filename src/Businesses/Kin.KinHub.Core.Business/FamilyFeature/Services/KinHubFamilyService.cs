@@ -429,4 +429,45 @@ public sealed class KinHubFamilyService : IFamilyService
             return Result<bool>.UnexpectedError(ex.Message);
         }
     }
+
+    /// <inheritdoc/>
+    public async Task<Result<bool>> DeleteFamilyAsync(
+        Guid familyId,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var family = await _familyRepository.FindByUserIdAsync(userId, cancellationToken);
+            if (family is null)
+                return Result<bool>.NotFound("Family not found for this user.");
+
+            if (family.Id != familyId)
+                return Result<bool>.Unauthorized("You do not own this family.");
+            
+            var members = await _familyMemberRepository.GetByFamilyIdAsync(familyId, cancellationToken);
+            var now = DateTime.UtcNow;
+
+            foreach (var member in members)
+            {
+                member.IsDeleted = true;
+                member.UpdatedAt = now;
+                await _familyMemberRepository.UpdateAsync(member.Id, member);
+            }
+
+            family.IsDeleted = true;
+            family.UpdatedAt = now;
+            await _familyRepository.UpdateAsync(family.Id, family);
+
+            return Result<bool>.Success(true);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Result<bool>.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.UnexpectedError(ex.Message);
+        }
+    }
 }

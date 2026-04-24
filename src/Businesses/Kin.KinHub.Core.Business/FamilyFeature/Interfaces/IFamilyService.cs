@@ -75,4 +75,12 @@ public interface IFamilyService
         UpdateAdminCodeRequest request,
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Permanently deletes a family and all its members (ownership validated).
+    /// </summary>
+    Task<Result<bool>> DeleteFamilyAsync(
+        Guid familyId,
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

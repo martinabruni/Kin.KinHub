@@ -51,11 +51,11 @@ public sealed class KinHubRecipeAiService : IRecipeAiService
 
         var fridgeIngredients = await _fridgeIngredientRepository.GetAllByFamilyIdAsync(fridgeId, cancellationToken);
         var fridgeAi = fridgeIngredients
-            .Select(i => new RecipeAssistantIngredient { Name = i.Name, Quantity = i.Quantity, Unit = i.MeasureUnit })
+            .Select(i => new RecipeIngredient { Id = Guid.Empty, Name = i.Name, Quantity = i.Quantity, MeasureUnit = i.MeasureUnit, RecipeId = Guid.Empty })
             .ToList();
 
         var books = await _recipeBookRepository.GetAllByFamilyIdAsync(family.Id, cancellationToken);
-        var familyRecipes = new List<RecipeAssistantRecipe>();
+        var familyRecipes = new List<Recipe>();
 
         foreach (var book in books)
         {
@@ -72,12 +72,12 @@ public sealed class KinHubRecipeAiService : IRecipeAiService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<RecipeAssistantRecipe?>> ParseRecipeAsync(
+    public async Task<Result<Recipe?>> ParseRecipeAsync(
         string rawText,
         CancellationToken cancellationToken = default)
     {
         var recipe = await _recipeAssistantService.ParseRecipeAsync(rawText, cancellationToken);
-        return Result<RecipeAssistantRecipe?>.Success(recipe);
+        return Result<Recipe?>.Success(recipe);
     }
 
     /// <inheritdoc/>
@@ -106,26 +106,14 @@ public sealed class KinHubRecipeAiService : IRecipeAiService
         return Result<RecipeAdaptationResult>.Success(result);
     }
 
-    private async Task<RecipeAssistantRecipe> BuildAiRecipeAsync(
+    private async Task<Recipe> BuildAiRecipeAsync(
         Recipe recipe,
         CancellationToken cancellationToken)
     {
-        var ingredients = await _recipeIngredientRepository.GetAllByFamilyIdAsync(recipe.Id, cancellationToken);
-        var steps = await _recipeStepRepository.GetAllByFamilyIdAsync(recipe.Id, cancellationToken);
-
-        return new RecipeAssistantRecipe
-        {
-            Name = recipe.Name,
-            Backstory = recipe.Backstory,
-            FinalTime = recipe.FinalTime,
-            Portions = recipe.Portions,
-            Ingredients = ingredients
-                .Select(i => new RecipeAssistantIngredient { Name = i.Name, Quantity = i.Quantity, Unit = i.MeasureUnit })
-                .ToList(),
-            Steps = steps
-                .OrderBy(s => s.Order)
-                .Select(s => new RecipeAssistantStep { Order = s.Order, Description = s.Description })
-                .ToList(),
-        };
+        recipe.Ingredients = await _recipeIngredientRepository.GetAllByFamilyIdAsync(recipe.Id, cancellationToken);
+        recipe.Steps = (await _recipeStepRepository.GetAllByFamilyIdAsync(recipe.Id, cancellationToken))
+            .OrderBy(s => s.Order)
+            .ToList();
+        return recipe;
     }
 }
