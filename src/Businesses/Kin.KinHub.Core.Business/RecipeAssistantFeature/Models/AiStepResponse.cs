@@ -1,0 +1,7 @@
+namespace Kin.KinHub.Core.Business.RecipeAssistantFeature;
+
+public sealed class AiStepResponse
+{
+    public required int Order { get; init; }
+    public required string Description { get; init; }
+}

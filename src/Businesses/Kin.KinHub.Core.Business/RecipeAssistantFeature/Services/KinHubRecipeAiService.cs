@@ -1,4 +1,5 @@
 ﻿using Kin.KinHub.Core.Business.Common;
+using Mapster;
 
 namespace Kin.KinHub.Core.Business.RecipeAssistantFeature;
 
@@ -34,20 +35,20 @@ public sealed class KinHubRecipeAiService : IRecipeAiService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<IReadOnlyList<RecipeSuggestion>>> SuggestRecipesAsync(
+    public async Task<Result<IReadOnlyList<RecipeSuggestionResponse>>> SuggestRecipesAsync(
         Guid fridgeId,
         Guid userId,
         CancellationToken cancellationToken = default)
     {
         var family = await _familyRepository.FindByUserIdAsync(userId, cancellationToken);
         if (family is null)
-            return Result<IReadOnlyList<RecipeSuggestion>>.NotFound("Family not found for the current user.");
+            return Result<IReadOnlyList<RecipeSuggestionResponse>>.NotFound("Family not found for the current user.");
 
         var fridge = await _fridgeRepository.GetByIdAsync(fridgeId, cancellationToken);
         if (fridge is null)
-            return Result<IReadOnlyList<RecipeSuggestion>>.NotFound("Fridge not found.");
+            return Result<IReadOnlyList<RecipeSuggestionResponse>>.NotFound("Fridge not found.");
         if (fridge.FamilyId != family.Id)
-            return Result<IReadOnlyList<RecipeSuggestion>>.Unauthorized("Access denied.");
+            return Result<IReadOnlyList<RecipeSuggestionResponse>>.Unauthorized("Access denied.");
 
         var fridgeIngredients = await _fridgeIngredientRepository.GetAllByFamilyIdAsync(fridgeId, cancellationToken);
         var fridgeAi = fridgeIngredients
@@ -68,20 +69,20 @@ public sealed class KinHubRecipeAiService : IRecipeAiService
         }
 
         var suggestions = await _recipeAssistantService.SuggestRecipesAsync(fridgeAi, familyRecipes, cancellationToken);
-        return Result<IReadOnlyList<RecipeSuggestion>>.Success(suggestions);
+        return Result<IReadOnlyList<RecipeSuggestionResponse>>.Success(suggestions.Adapt<IReadOnlyList<RecipeSuggestionResponse>>());
     }
 
     /// <inheritdoc/>
-    public async Task<Result<Recipe?>> ParseRecipeAsync(
+    public async Task<Result<ParsedRecipeResponse?>> ParseRecipeAsync(
         string rawText,
         CancellationToken cancellationToken = default)
     {
         var recipe = await _recipeAssistantService.ParseRecipeAsync(rawText, cancellationToken);
-        return Result<Recipe?>.Success(recipe);
+        return Result<ParsedRecipeResponse?>.Success(recipe?.Adapt<ParsedRecipeResponse>());
     }
 
     /// <inheritdoc/>
-    public async Task<Result<RecipeAdaptationResult>> AdaptRecipeAsync(
+    public async Task<Result<RecipeAdaptationResponse>> AdaptRecipeAsync(
         Guid recipeId,
         IReadOnlyList<string> constraints,
         Guid userId,
@@ -89,21 +90,21 @@ public sealed class KinHubRecipeAiService : IRecipeAiService
     {
         var family = await _familyRepository.FindByUserIdAsync(userId, cancellationToken);
         if (family is null)
-            return Result<RecipeAdaptationResult>.NotFound("Family not found for the current user.");
+            return Result<RecipeAdaptationResponse>.NotFound("Family not found for the current user.");
 
         var recipe = await _recipeRepository.GetByIdAsync(recipeId, cancellationToken);
         if (recipe is null)
-            return Result<RecipeAdaptationResult>.NotFound("Recipe not found.");
+            return Result<RecipeAdaptationResponse>.NotFound("Recipe not found.");
 
         var book = await _recipeBookRepository.GetByIdAsync(recipe.RecipeBookId, cancellationToken);
         if (book is null)
-            return Result<RecipeAdaptationResult>.NotFound("Recipe book not found.");
+            return Result<RecipeAdaptationResponse>.NotFound("Recipe book not found.");
         if (book.FamilyId != family.Id)
-            return Result<RecipeAdaptationResult>.Unauthorized("Access denied.");
+            return Result<RecipeAdaptationResponse>.Unauthorized("Access denied.");
 
         var aiRecipe = await BuildAiRecipeAsync(recipe, cancellationToken);
         var result = await _recipeAssistantService.AdaptRecipeAsync(aiRecipe, constraints, cancellationToken);
-        return Result<RecipeAdaptationResult>.Success(result);
+        return Result<RecipeAdaptationResponse>.Success(result.Adapt<RecipeAdaptationResponse>());
     }
 
     private async Task<Recipe> BuildAiRecipeAsync(

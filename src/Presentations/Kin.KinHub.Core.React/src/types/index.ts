@@ -75,27 +75,41 @@ export interface FridgeIngredient {
   unit: string;
 }
 
-export interface AISuggestedRecipe {
+export interface AiIngredient {
   name: string;
+  quantity: number;
+  measureUnit: string;
+}
+
+export interface AiStep {
+  order: number;
   description: string;
-  matchScore: number;
-  ingredients: Ingredient[];
-  steps: Step[];
 }
 
 export interface AIParsedRecipe {
   name: string;
+  backstory?: string;
+  finalTime: string;
+  portions: number;
+  ingredients: AiIngredient[];
+  steps: AiStep[];
+}
+
+export interface AISuggestedRecipe {
+  recipe: AIParsedRecipe;
+  matchPercentage: number;
+  missingIngredients: AiIngredient[];
+}
+
+export interface RecipeChange {
+  type: string;
   description: string;
-  ingredients: Ingredient[];
-  steps: Step[];
 }
 
 export interface AIAdaptedRecipe {
-  originalIngredients: Ingredient[];
-  adaptedIngredients: Ingredient[];
-  originalSteps: Step[];
-  adaptedSteps: Step[];
-  changedStepIds: number[];
+  originalRecipe: AIParsedRecipe;
+  adaptedRecipe: AIParsedRecipe;
+  changes: RecipeChange[];
 }
 
 export interface LoginRequest {
