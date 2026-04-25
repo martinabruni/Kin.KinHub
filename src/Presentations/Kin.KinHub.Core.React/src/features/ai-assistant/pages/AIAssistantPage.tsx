@@ -1,86 +1,139 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Sparkles } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { RecipeAssistantProvider, useRecipeAssistant } from '@/features/ai-assistant/RecipeAssistantProvider'
-import { RecipeBookProvider, useRecipeBooks } from '@/features/recipes/RecipeBookProvider'
-import { apiClient } from '@/api/apiClient'
-import type { AISuggestedRecipe, AIParsedRecipe, AIAdaptedRecipe, Fridge, Recipe, RecipeBook } from '@/types'
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  RecipeAssistantProvider,
+  useRecipeAssistant,
+} from "@/features/ai-assistant/RecipeAssistantProvider";
+import {
+  RecipeBookProvider,
+  useRecipeBooks,
+} from "@/features/recipes/RecipeBookProvider";
+import { apiClient } from "@/api/apiClient";
+import type {
+  AISuggestedRecipe,
+  AIParsedRecipe,
+  AIAdaptedRecipe,
+  Fridge,
+  Recipe,
+  RecipeBook,
+} from "@/types";
 
 function SuggestTab() {
-  const { t } = useTranslation()
-  const { suggestRecipes, isSuggesting } = useRecipeAssistant()
-  const { books } = useRecipeBooks()
-  const [fridgeId, setFridgeId] = useState('')
-  const [results, setResults] = useState<AISuggestedRecipe[]>([])
-  const [saveRecipe, setSaveRecipe] = useState<AISuggestedRecipe | null>(null)
-  const [saveBookId, setSaveBookId] = useState('')
+  const { t } = useTranslation();
+  const { suggestRecipes, isSuggesting } = useRecipeAssistant();
+  const { books } = useRecipeBooks();
+  const [fridgeId, setFridgeId] = useState("");
+  const [results, setResults] = useState<AISuggestedRecipe[]>([]);
+  const [saveRecipe, setSaveRecipe] = useState<AISuggestedRecipe | null>(null);
+  const [saveBookId, setSaveBookId] = useState("");
 
   const { data: fridges = [] } = useQuery({
-    queryKey: ['fridges'],
-    queryFn: async () => { const { data } = await apiClient.get<Fridge[]>('/api/fridges'); return data },
-  })
+    queryKey: ["fridges"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Fridge[]>("/api/fridges");
+      return data;
+    },
+  });
 
   const handleSuggest = async () => {
-    const res = await suggestRecipes(fridgeId)
-    setResults(res)
-  }
+    const res = await suggestRecipes(fridgeId);
+    setResults(res);
+  };
 
   const handleSave = async () => {
-    if (!saveRecipe || !saveBookId) return
+    if (!saveRecipe || !saveBookId) return;
     try {
-      await apiClient.post(`/api/recipe-books/${saveBookId}/recipes`, saveRecipe)
-      toast.success(t('aiAssistant.suggest.saved'))
-      setSaveRecipe(null)
+      await apiClient.post(
+        `/api/recipe-books/${saveBookId}/recipes`,
+        saveRecipe.recipe,
+      );
+      toast.success(t("aiAssistant.suggest.saved"));
+      setSaveRecipe(null);
     } catch {
-      toast.error(t('common.error'))
+      toast.error(t("common.error"));
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex gap-3 flex-wrap">
         <Select value={fridgeId} onValueChange={setFridgeId}>
           <SelectTrigger className="w-56">
-            <SelectValue placeholder={t('aiAssistant.suggest.selectFridge')} />
+            <SelectValue placeholder={t("aiAssistant.suggest.selectFridge")} />
           </SelectTrigger>
           <SelectContent>
-            {fridges.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}
+            {fridges.map((f) => (
+              <SelectItem key={f.id} value={f.id}>
+                {f.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Button onClick={handleSuggest} disabled={!fridgeId || isSuggesting}>
-          {isSuggesting ? t('aiAssistant.suggest.suggesting') : t('aiAssistant.suggest.button')}
+          {isSuggesting
+            ? t("aiAssistant.suggest.suggesting")
+            : t("aiAssistant.suggest.button")}
         </Button>
       </div>
 
       {isSuggesting ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)}
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-40 rounded-xl" />
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {results.map((r, i) => (
             <Card key={i}>
               <CardContent className="pt-4 pb-4">
-                <p className="font-semibold">{r.name}</p>
-                <p className="text-muted-foreground text-sm mt-1">{r.description}</p>
+                <p className="font-semibold">{r.recipe.name}</p>
+                {r.recipe.backstory && (
+                  <p className="text-muted-foreground text-sm mt-1">
+                    {r.recipe.backstory}
+                  </p>
+                )}
                 <div className="mt-3">
-                  <p className="text-xs text-muted-foreground mb-1">{t('aiAssistant.suggest.matchScore')}: {Math.round(r.matchScore * 100)}%</p>
-                  <Progress value={r.matchScore * 100} className="h-2 bg-muted [&>div]:bg-green-500" />
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {t("aiAssistant.suggest.matchScore")}: {r.matchPercentage}%
+                  </p>
+                  <Progress
+                    value={r.matchPercentage}
+                    className="h-2 bg-muted [&>div]:bg-green-500"
+                  />
                 </div>
-                <Button size="sm" variant="outline" className="mt-3" onClick={() => setSaveRecipe(r)}>
-                  {t('aiAssistant.suggest.saveToBook')}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-3"
+                  onClick={() => setSaveRecipe(r)}
+                >
+                  {t("aiAssistant.suggest.saveToBook")}
                 </Button>
               </CardContent>
             </Card>
@@ -90,56 +143,68 @@ function SuggestTab() {
 
       <Dialog open={!!saveRecipe} onOpenChange={() => setSaveRecipe(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{t('aiAssistant.suggest.saveToBook')}</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{t("aiAssistant.suggest.saveToBook")}</DialogTitle>
+          </DialogHeader>
           <Select value={saveBookId} onValueChange={setSaveBookId}>
-            <SelectTrigger><SelectValue placeholder={t('aiAssistant.suggest.selectBook')} /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder={t("aiAssistant.suggest.selectBook")} />
+            </SelectTrigger>
             <SelectContent>
-              {books.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+              {books.map((b) => (
+                <SelectItem key={b.id} value={b.id}>
+                  {b.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <DialogFooter>
-            <Button onClick={handleSave} disabled={!saveBookId}>{t('aiAssistant.suggest.save')}</Button>
+            <Button onClick={handleSave} disabled={!saveBookId}>
+              {t("aiAssistant.suggest.save")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 function ParseTab() {
-  const { t } = useTranslation()
-  const { parseRecipe, isParsing } = useRecipeAssistant()
-  const { books } = useRecipeBooks()
-  const [rawText, setRawText] = useState('')
-  const [result, setResult] = useState<AIParsedRecipe | null>(null)
-  const [saveBookId, setSaveBookId] = useState('')
+  const { t } = useTranslation();
+  const { parseRecipe, isParsing } = useRecipeAssistant();
+  const { books } = useRecipeBooks();
+  const [rawText, setRawText] = useState("");
+  const [result, setResult] = useState<AIParsedRecipe | null>(null);
+  const [saveBookId, setSaveBookId] = useState("");
 
   const handleParse = async () => {
-    const res = await parseRecipe(rawText)
-    setResult(res)
-  }
+    const res = await parseRecipe(rawText);
+    setResult(res);
+  };
 
   const handleSave = async () => {
-    if (!result || !saveBookId) return
+    if (!result || !saveBookId) return;
     try {
-      await apiClient.post(`/api/recipe-books/${saveBookId}/recipes`, result)
-      toast.success(t('aiAssistant.parse.saved'))
+      await apiClient.post(`/api/recipe-books/${saveBookId}/recipes`, result);
+      toast.success(t("aiAssistant.parse.saved"));
     } catch {
-      toast.error(t('common.error'))
+      toast.error(t("common.error"));
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       <Textarea
         rows={10}
-        placeholder={t('aiAssistant.parse.placeholder')}
+        placeholder={t("aiAssistant.parse.placeholder")}
         value={rawText}
         onChange={(e) => setRawText(e.target.value)}
         className="resize-y"
       />
       <Button onClick={handleParse} disabled={!rawText || isParsing}>
-        {isParsing ? t('aiAssistant.parse.parsing') : t('aiAssistant.parse.button')}
+        {isParsing
+          ? t("aiAssistant.parse.parsing")
+          : t("aiAssistant.parse.button")}
       </Button>
 
       {isParsing && (
@@ -156,13 +221,19 @@ function ParseTab() {
         <Card>
           <CardContent className="pt-4 pb-4">
             <p className="font-semibold text-lg">{result.name}</p>
-            {result.description && <p className="text-muted-foreground text-sm mt-1">{result.description}</p>}
+            {result.backstory && (
+              <p className="text-muted-foreground text-sm mt-1">
+                {result.backstory}
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-6 mt-4">
               <div>
                 <p className="font-medium text-sm mb-2">Ingredients</p>
                 <ul className="space-y-1">
                   {result.ingredients.map((ing, i) => (
-                    <li key={i} className="text-sm text-muted-foreground">{ing.quantity} {ing.unit} {ing.name}</li>
+                    <li key={i} className="text-sm text-muted-foreground">
+                      {ing.quantity} {ing.measureUnit} {ing.name}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -170,100 +241,138 @@ function ParseTab() {
                 <p className="font-medium text-sm mb-2">Steps</p>
                 <ol className="space-y-1">
                   {result.steps.map((step, i) => (
-                    <li key={i} className="text-sm text-muted-foreground">{i + 1}. {step.description}</li>
+                    <li key={i} className="text-sm text-muted-foreground">
+                      {i + 1}. {step.description}
+                    </li>
                   ))}
                 </ol>
               </div>
             </div>
             <div className="mt-4 flex gap-3">
               <Select value={saveBookId} onValueChange={setSaveBookId}>
-                <SelectTrigger className="w-48"><SelectValue placeholder={t('aiAssistant.suggest.selectBook')} /></SelectTrigger>
+                <SelectTrigger className="w-48">
+                  <SelectValue
+                    placeholder={t("aiAssistant.suggest.selectBook")}
+                  />
+                </SelectTrigger>
                 <SelectContent>
-                  {books.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                  {books.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              <Button onClick={handleSave} disabled={!saveBookId}>{t('aiAssistant.parse.saveToBook')}</Button>
+              <Button onClick={handleSave} disabled={!saveBookId}>
+                {t("aiAssistant.parse.saveToBook")}
+              </Button>
             </div>
           </CardContent>
         </Card>
       )}
     </div>
-  )
+  );
 }
 
 function AdaptTab() {
-  const { t } = useTranslation()
-  const { adaptRecipe, isAdapting } = useRecipeAssistant()
-  const [recipeId, setRecipeId] = useState('')
-  const [constraint, setConstraint] = useState('')
-  const [constraints, setConstraints] = useState<string[]>([])
-  const [result, setResult] = useState<AIAdaptedRecipe | null>(null)
+  const { t } = useTranslation();
+  const { adaptRecipe, isAdapting } = useRecipeAssistant();
+  const [recipeId, setRecipeId] = useState("");
+  const [constraint, setConstraint] = useState("");
+  const [constraints, setConstraints] = useState<string[]>([]);
+  const [result, setResult] = useState<AIAdaptedRecipe | null>(null);
 
   const { data: allRecipes = [] } = useQuery({
-    queryKey: ['all-recipes'],
+    queryKey: ["all-recipes"],
     queryFn: async () => {
-      const { data: books } = await apiClient.get<RecipeBook[]>('/api/recipe-books')
-      const all: (Recipe & { bookName: string })[] = []
+      const { data: books } =
+        await apiClient.get<RecipeBook[]>("/api/recipe-books");
+      const all: (Recipe & { bookName: string })[] = [];
       for (const book of books) {
-        const { data: recipes } = await apiClient.get<Recipe[]>(`/api/recipe-books/${book.id}/recipes`)
-        all.push(...recipes.map((r) => ({ ...r, bookName: book.name })))
+        const { data: recipes } = await apiClient.get<Recipe[]>(
+          `/api/recipe-books/${book.id}/recipes`,
+        );
+        all.push(...recipes.map((r) => ({ ...r, bookName: book.name })));
       }
-      return all
+      return all;
     },
-  })
+  });
 
   const addConstraint = () => {
     if (constraint.trim() && !constraints.includes(constraint.trim())) {
-      setConstraints((c) => [...c, constraint.trim()])
-      setConstraint('')
+      setConstraints((c) => [...c, constraint.trim()]);
+      setConstraint("");
     }
-  }
+  };
 
   const handleAdapt = async () => {
-    const res = await adaptRecipe(recipeId, constraints)
-    setResult(res)
-  }
+    const res = await adaptRecipe(recipeId, constraints);
+    setResult(res);
+  };
 
   return (
     <div className="space-y-4">
       <Select value={recipeId} onValueChange={setRecipeId}>
         <SelectTrigger className="w-full max-w-sm">
-          <SelectValue placeholder={t('aiAssistant.adapt.selectRecipe')} />
+          <SelectValue placeholder={t("aiAssistant.adapt.selectRecipe")} />
         </SelectTrigger>
         <SelectContent>
-          {allRecipes.map((r) => <SelectItem key={r.id} value={r.id}>{r.bookName} › {r.name}</SelectItem>)}
+          {allRecipes.map((r) => (
+            <SelectItem key={r.id} value={r.id}>
+              {r.bookName} › {r.name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
       <div className="flex gap-2 flex-wrap">
         <Input
-          placeholder={t('aiAssistant.adapt.constraints')}
+          placeholder={t("aiAssistant.adapt.constraints")}
           value={constraint}
           onChange={(e) => setConstraint(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addConstraint())}
+          onKeyDown={(e) =>
+            e.key === "Enter" && (e.preventDefault(), addConstraint())
+          }
           className="max-w-xs"
         />
-        <Button variant="outline" onClick={addConstraint}>+</Button>
+        <Button variant="outline" onClick={addConstraint}>
+          +
+        </Button>
         {constraints.map((c) => (
-          <Badge key={c} variant="secondary" className="gap-1 cursor-pointer" onClick={() => setConstraints((cs) => cs.filter((x) => x !== c))}>
+          <Badge
+            key={c}
+            variant="secondary"
+            className="gap-1 cursor-pointer"
+            onClick={() => setConstraints((cs) => cs.filter((x) => x !== c))}
+          >
             {c} ×
           </Badge>
         ))}
       </div>
 
-      <Button onClick={handleAdapt} disabled={!recipeId || constraints.length === 0 || isAdapting}>
-        {isAdapting ? t('aiAssistant.adapt.adapting') : t('aiAssistant.adapt.button')}
+      <Button
+        onClick={handleAdapt}
+        disabled={!recipeId || constraints.length === 0 || isAdapting}
+      >
+        {isAdapting
+          ? t("aiAssistant.adapt.adapting")
+          : t("aiAssistant.adapt.button")}
       </Button>
 
       {result && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           <Card>
             <CardContent className="pt-4">
-              <p className="font-semibold mb-3">{t('aiAssistant.adapt.original')}</p>
+              <p className="font-semibold mb-3">
+                {t("aiAssistant.adapt.original")}
+              </p>
               <ul className="space-y-1">
-                {result.originalIngredients.map((ing) => (
-                  <li key={ing.id} className={`text-sm ${result.adaptedIngredients.some((a) => a.id === ing.id && a.name !== ing.name) ? 'line-through text-muted-foreground' : ''}`}>
-                    {ing.quantity} {ing.unit} {ing.name}
+                {result.originalRecipe.ingredients.map((ing, i) => (
+                  <li
+                    key={i}
+                    className={`text-sm ${result.adaptedRecipe.ingredients.some((a) => a.name !== ing.name) ? "line-through text-muted-foreground" : ""}`}
+                  >
+                    {ing.quantity} {ing.measureUnit} {ing.name}
                   </li>
                 ))}
               </ul>
@@ -271,46 +380,78 @@ function AdaptTab() {
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <p className="font-semibold mb-3">{t('aiAssistant.adapt.adapted')}</p>
+              <p className="font-semibold mb-3">
+                {t("aiAssistant.adapt.adapted")}
+              </p>
               <ul className="space-y-1">
-                {result.adaptedIngredients.map((ing) => (
-                  <li key={ing.id} className="text-sm text-green-600 dark:text-green-400">
-                    {ing.quantity} {ing.unit} {ing.name}
+                {result.adaptedRecipe.ingredients.map((ing, i) => (
+                  <li
+                    key={i}
+                    className="text-sm text-green-600 dark:text-green-400"
+                  >
+                    {ing.quantity} {ing.measureUnit} {ing.name}
                   </li>
                 ))}
               </ul>
             </CardContent>
           </Card>
+          {result.changes.length > 0 && (
+            <Card className="md:col-span-2">
+              <CardContent className="pt-4">
+                <p className="font-semibold mb-3">
+                  {t("aiAssistant.adapt.changes")}
+                </p>
+                <ul className="space-y-1">
+                  {result.changes.map((c, i) => (
+                    <li key={i} className="text-sm text-muted-foreground">
+                      <span className="font-medium capitalize">{c.type}</span>:{" "}
+                      {c.description}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function AIAssistantContent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
         <Sparkles className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold">{t('aiAssistant.title')}</h1>
+        <h1 className="text-2xl font-bold">{t("aiAssistant.title")}</h1>
       </div>
-      <p className="text-muted-foreground text-sm mb-6">{t('aiAssistant.subtitle')}</p>
+      <p className="text-muted-foreground text-sm mb-6">
+        {t("aiAssistant.subtitle")}
+      </p>
 
       <Tabs defaultValue="suggest">
         <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="suggest">{t('aiAssistant.tabs.suggest')}</TabsTrigger>
-          <TabsTrigger value="parse">{t('aiAssistant.tabs.parse')}</TabsTrigger>
-          <TabsTrigger value="adapt">{t('aiAssistant.tabs.adapt')}</TabsTrigger>
+          <TabsTrigger value="suggest">
+            {t("aiAssistant.tabs.suggest")}
+          </TabsTrigger>
+          <TabsTrigger value="parse">{t("aiAssistant.tabs.parse")}</TabsTrigger>
+          <TabsTrigger value="adapt">{t("aiAssistant.tabs.adapt")}</TabsTrigger>
         </TabsList>
         <div className="mt-6">
-          <TabsContent value="suggest"><SuggestTab /></TabsContent>
-          <TabsContent value="parse"><ParseTab /></TabsContent>
-          <TabsContent value="adapt"><AdaptTab /></TabsContent>
+          <TabsContent value="suggest">
+            <SuggestTab />
+          </TabsContent>
+          <TabsContent value="parse">
+            <ParseTab />
+          </TabsContent>
+          <TabsContent value="adapt">
+            <AdaptTab />
+          </TabsContent>
         </div>
       </Tabs>
     </div>
-  )
+  );
 }
 
 export function AIAssistantPage() {
@@ -320,5 +461,5 @@ export function AIAssistantPage() {
         <AIAssistantContent />
       </RecipeBookProvider>
     </RecipeAssistantProvider>
-  )
+  );
 }

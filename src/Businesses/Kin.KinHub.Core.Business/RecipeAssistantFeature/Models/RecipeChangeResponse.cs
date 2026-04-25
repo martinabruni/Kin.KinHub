@@ -1,0 +1,7 @@
+namespace Kin.KinHub.Core.Business.RecipeAssistantFeature;
+
+public sealed class RecipeChangeResponse
+{
+    public required string Type { get; init; }
+    public required string Description { get; init; }
+}
