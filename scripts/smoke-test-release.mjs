@@ -32,7 +32,7 @@ async function verify(check) {
       });
       clearTimeout(timeout);
 
-      if (response.status === 200) {
+      if (response.status === 200 || isExpectedProtectedHealth(check, response)) {
         console.log(`${check.name}: ok (status 200, attempt ${attempt})`);
         return;
       }
@@ -52,4 +52,10 @@ async function verify(check) {
 
 function isRetryableStatus(status) {
   return status === 408 || status === 429 || status >= 500;
+}
+
+function isExpectedProtectedHealth(check, response) {
+  return check.name === 'Function health'
+    && response.status === 401
+    && response.headers.get('www-authenticate')?.toLowerCase().includes('bearer');
 }

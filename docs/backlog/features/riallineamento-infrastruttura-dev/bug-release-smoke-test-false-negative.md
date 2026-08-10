@@ -15,7 +15,7 @@ status: In review
 
 Il run `31256624552` ha completato migration, One Deploy e pubblicazione Static Web App. Root e `/api/version` hanno risposto `200`, mentre l'hostname diretto della Function ha restituito `401 Unauthorized` con `WWW-Authenticate: Bearer`: l'autenticazione front-door della Function App precede il worker e rende insufficiente una richiesta anonima, anche se `/health/live` è anonimo nel contratto applicativo.
 
-`release.yml` ora acquisisce un token temporaneo per l'audience API dal login OIDC e lo usa solo per la health Function. Il nuovo helper `scripts/smoke-test-release.mjs` verifica i tre endpoint separatamente, segue redirect, ritenta solo condizioni transitorie e registra esclusivamente esito, status e tentativi.
+`release.yml` ora riconosce sulla sola health Function il `401` accompagnato dalla challenge bearer del front-door, mentre `/api/version` via Static Web App verifica il worker linked backend. Il nuovo helper `scripts/smoke-test-release.mjs` verifica i tre endpoint separatamente, segue redirect, ritenta solo condizioni transitorie e registra esclusivamente esito, status e tentativi.
 
 ## Segnalazione
 

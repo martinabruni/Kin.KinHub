@@ -14,10 +14,6 @@ status: In review
 
 KinHub possiede già `SettingsPage` con lingua, tema, tutorial e PWA. La feature aggiunge un ingranaggio secondario nella vista KinList, una voce Famiglia nelle impostazioni e la route canonica `/settings/family`. Membri e inviti sono collezioni paginate; il codice segreto non compare mai in questa pagina.
 
-## Bug registrati
-
-- `bug-family-settings-deployment-404.md` - nell'ambiente dev le route Family e l'asset `staticwebapp.config.json` risultano non raggiungibili nel deployment pubblicato.
-
 ## Scope
 
 ### Incluso
@@ -36,30 +32,30 @@ KinHub possiede già `SettingsPage` con lingua, tema, tutorial e PWA. La feature
 
 ## Tracciabilità
 
-| Tipo | Riferimenti | Contributo della feature |
-|---|---|---|
-| Flussi | FLOW-010 | Navigazione e lettura Family |
-| Requisiti | FR-034-FR-036, FR-049-FR-051 | Settings, route e paginazione |
-| Regole/decisioni | BR-002, BR-027, BR-036-BR-038; DEC-018, DEC-019, DEC-021, DEC-028 | Contenuti minimi e segreto assente |
-| Architettura | ADR-012, ADR-016, ADR-017; sezioni 6.8 e 8 | Integrazione Settings e query protette |
+| Tipo             | Riferimenti                                                       | Contributo della feature               |
+| ---------------- | ----------------------------------------------------------------- | -------------------------------------- |
+| Flussi           | FLOW-010                                                          | Navigazione e lettura Family           |
+| Requisiti        | FR-034-FR-036, FR-049-FR-051                                      | Settings, route e paginazione          |
+| Regole/decisioni | BR-002, BR-027, BR-036-BR-038; DEC-018, DEC-019, DEC-021, DEC-028 | Contenuti minimi e segreto assente     |
+| Architettura     | ADR-012, ADR-016, ADR-017; sezioni 6.8 e 8                        | Integrazione Settings e query protette |
 
 ## Dipendenze
 
 ### Feature prerequisite
 
-| Feature | Tipo | Motivo | Output richiesto | Effetto sul parallelismo |
-|---|---|---|---|---|
-| FEAT-002 - Creare la propria famiglia | hard | Serve una famiglia reale e membership attiva | Schema shared e contesto famiglia | Inizio dopo FEAT-002 |
-| FEAT-014 - Usare un design system condiviso in tutta KinHub | hard | Settings, Family e ingranaggio devono nascere sul contratto UI condiviso e sostituire la navigazione legacy | Floating navigation, surfaces, list rows e regole di riuso/harness | Inizio dopo FEAT-014 |
-| FEAT-003 - Consultare la lista condivisa paginata | contract | Ingranaggio e lista condividono layout/safe area e convenzione pagina/cursori | CP-001/CP-002 congelati, area inferiore e contratto pagina | Può procedere nella stessa wave con ownership file coordinata |
+| Feature                                                     | Tipo     | Motivo                                                                                                      | Output richiesto                                                   | Effetto sul parallelismo                                      |
+| ----------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------- |
+| FEAT-002 - Creare la propria famiglia                       | hard     | Serve una famiglia reale e membership attiva                                                                | Schema shared e contesto famiglia                                  | Inizio dopo FEAT-002                                          |
+| FEAT-014 - Usare un design system condiviso in tutta KinHub | hard     | Settings, Family e ingranaggio devono nascere sul contratto UI condiviso e sostituire la navigazione legacy | Floating navigation, surfaces, list rows e regole di riuso/harness | Inizio dopo FEAT-014                                          |
+| FEAT-003 - Consultare la lista condivisa paginata           | contract | Ingranaggio e lista condividono layout/safe area e convenzione pagina/cursori                               | CP-001/CP-002 congelati, area inferiore e contratto pagina         | Può procedere nella stessa wave con ownership file coordinata |
 
 ### Gate e assunzioni
 
-| ID | Stato | Impatto | Evidenza per chiudere |
-|---|---|---|---|
-| ASM-004 | open, non bloccante | Qualità delle iniziali membro | Verifica profilo e fallback obbligatorio |
-| TECH-003 | open | Cursori/ordine membri e inviti | Contratti e test avanti/indietro |
-| TECH-008 | open | Posizionamento e focus dei controlli fissi | Verifica responsive/safe area/tastiera |
+| ID       | Stato               | Impatto                                    | Evidenza per chiudere                    |
+| -------- | ------------------- | ------------------------------------------ | ---------------------------------------- |
+| ASM-004  | open, non bloccante | Qualità delle iniziali membro              | Verifica profilo e fallback obbligatorio |
+| TECH-003 | open                | Cursori/ordine membri e inviti             | Contratti e test avanti/indietro         |
+| TECH-008 | open                | Posizionamento e focus dei controlli fissi | Verifica responsive/safe area/tastiera   |
 
 ### Parallelismo consentito
 
@@ -129,13 +125,13 @@ Con FEAT-003 dopo CP-001. Non modificare senza coordinamento `App.tsx`, `Setting
 
 ## Strategia di verifica
 
-| Livello | Verifica | Evidenza attesa |
-|---|---|---|
-| Unitario | Proiezioni/fallback e mapping stati | Test business |
-| Integrazione | Scope, pagine membri/inviti e nessun segreto | Test DB/API `Family` |
-| Frontend/component | Route, Settings preservata, focus, safe area, stati | Test componenti/accessibilità |
-| End-to-end/manuale | URL/refresh/history e target mobile | Evidenza Chrome/Edge/PWA |
-| Validator repository | i18n, routes, docs sync/validate, lint/typecheck/build e backend | Esiti registrati |
+| Livello              | Verifica                                                         | Evidenza attesa               |
+| -------------------- | ---------------------------------------------------------------- | ----------------------------- |
+| Unitario             | Proiezioni/fallback e mapping stati                              | Test business                 |
+| Integrazione         | Scope, pagine membri/inviti e nessun segreto                     | Test DB/API `Family`          |
+| Frontend/component   | Route, Settings preservata, focus, safe area, stati              | Test componenti/accessibilità |
+| End-to-end/manuale   | URL/refresh/history e target mobile                              | Evidenza Chrome/Edge/PWA      |
+| Validator repository | i18n, routes, docs sync/validate, lint/typecheck/build e backend | Esiti registrati              |
 
 ## Definition of Done
 

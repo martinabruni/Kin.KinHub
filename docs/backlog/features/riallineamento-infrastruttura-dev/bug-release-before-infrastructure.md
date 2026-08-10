@@ -1,5 +1,5 @@
 ---
-status: In review
+status: Completed
 ---
 
 # BUG-FEAT-016-001 - Avviare la release dopo l'infrastruttura
@@ -7,7 +7,7 @@ status: In review
 - **Feature interessata**: FEAT-016 `riallineamento-infrastruttura-dev`
 - **Tipo**: correzione delivery, orchestrazione GitHub Actions
 - **Readiness**: `ready`
-- **Stato**: `In review`
+- **Stato**: `risolto`
 - **Breaking change prodotto**: no
 - **Risultato**: `release.yml` distribuisce un commit soltanto dopo la conclusione con successo del provisioning infrastrutturale richiesto per quello stesso commit.
 
