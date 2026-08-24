@@ -10,6 +10,8 @@ Il provisioning e la release sono serializzati con concurrency `cancel-in-progre
 
 Il backend viene pubblicato in ZIP con `host.json` e assembly nella root, checksum SHA-256 e manifest. `Azure/functions-action` riceve il path ZIP esatto prodotto dal packaging, rileva Flex Consumption e usa One Deploy sul container configurato da `functionAppConfig.deployment.storage`. Dopo il login OIDC, `release.yml` recupera il token Static Web Apps con `az staticwebapp secrets list` e lo maschera prima del deploy, senza richiedere un secret GitHub separato.
 
+Lo smoke test post-release segue gli URL prodotti dal deployment ARM, segue i redirect e ritenta soltanto errori di rete, timeout e status transitori entro un limite definito. La health Function accetta `200` oppure il `401` con challenge bearer prodotto dal front-door protetto; `/api/version` via Static Web App verifica separatamente il worker linked backend e ogni altro status blocca la release. La diagnostica è limitata al nome logico, status e numero di tentativi.
+
 OIDC e obbligatorio come percorso primario. La federated credential GitHub deve autorizzare repository, branch/environment e workflow necessari. L'identita della pipeline richiede Contributor sul resource group, User Access Administrator (o custom equivalente) per creare role assignment durante il provisioning e deve essere configurata come Microsoft Entra administrator del server PostgreSQL usato dal workflow backend.
 
 ## Migration backend

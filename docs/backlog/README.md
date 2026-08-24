@@ -15,6 +15,7 @@
 | Infrastruttura esistente | `infra/`, `.github/workflows/`, `docs/operations/database-migrations.md` | Risorse condivise, deployment, migrazioni e differenze da colmare rispetto all'architettura approvata |
 | Piano refactor infrastruttura dev | `docs/backlog/features/riallineamento-infrastruttura-dev/feature.plan.md` | Refactor approvato di Bicep, workflow, harness, packaging e documentazione operativa |
 | Linee guida infrastruttura dev | `docs/backlog/features/riallineamento-infrastruttura-dev/infra-guidelines.md` | Vincoli di adozione sicura, acceptance checklist e controlli CI/CD del refactor |
+| Addenda approvati | `docs/backlog/approved-addenda.md` | Decisioni successive della responsabile; `ADD-004`-`ADD-006` sostituiscono la derivazione da MSAL con la creazione esplicita del profilo e il display name backend autorevole |
 
 I documenti in `docs/kinlist/research/` non sono stati usati come fonte di nuovi requisiti: analisi e architettura ne hanno già consolidato gli esiti approvati.
 
@@ -34,6 +35,7 @@ I documenti in `docs/kinlist/research/` non sono stati usati come fonte di nuovi
 - Catalogo KinService persistito e localizzato, disponibilità per famiglia, Home dinamica e protezione dell'accesso diretto ai servizi.
 - Sicurezza, privacy, accessibilità, osservabilità, documentazione e test applicati nelle feature che toccano le relative superfici.
 - Riallineamento operativo dell'ambiente `dev` con nomi Azure espliciti, Bicep incrementale, linked backend `/api`, workflow `ci.yml`/`infrastructure.yml`/`release.yml`, harness e documentazione coerenti.
+- Creazione esplicita ed estensibile del profilo applicativo al primo accesso, prima dell'onboarding familiare, con `DisplayName` fornito dall'utente e restituito dal backend come unica fonte del client.
 
 ### Out of scope
 
@@ -48,11 +50,13 @@ I documenti in `docs/kinlist/research/` non sono stati usati come fonte di nuovi
 - Nuove risorse Azure, microservizi, Function App dedicata, CQRS, mediator o event bus.
 - Convivenza permanente tra componenti/stili legacy e design system, duplicazione di componenti, stringhe visibili fuori da i18n o boilerplate UI parallelo.
 - UI/API amministrative del catalogo, attivazione o disattivazione manuale per famiglia e KinService diversi da KinList.
+- Pagina profilo, modifica self-service del display name, amministrazione dei profili, avatar, immagine di copertina, data di compleanno o altri campi futuri.
 
 ## Requisiti e decisioni approvati
 
 - I 64 requisiti funzionali `FR-001`-`FR-064`, le 48 regole `BR-001`-`BR-048` e le decisioni `DEC-001`-`DEC-040` sono congelati come descritto nell'analisi funzionale.
 - Gli ADR `ADR-001`-`ADR-020` definiscono l'implementazione approvata: monolite modulare, schemi PostgreSQL condiviso/kinlist, catalogo servizi, managed identity, policy `Family`, AI sincrona, keyset pagination e transazioni locali.
+- Gli addenda più recenti `ADD-004`-`ADD-006` sostituiscono `ADD-001`/`ADD-002`: il profilo viene completato esplicitamente con il display name fornito dall'utente prima dell'onboarding familiare e il client usa solo il valore backend. `ADD-003` resta valido; l'identità canonica `(iss, oid)` non cambia.
 - La trascrizione non apre una predisposizione per ruoli o gruppi: `DEC-013`, `ADR-003` e `ADR-011` impongono capacità uniformi senza ruoli.
 - La struttura logica proposta dall'architettura va adattata ai layer reali `domains`, `business`, `infrastructure`, `applications`; non autorizza nuovi progetti o rinominazioni non necessarie.
 
@@ -70,12 +74,13 @@ I documenti in `docs/kinlist/research/` non sono stati usati come fonte di nuovi
 
 | ID | Stato | Impatto | Trattamento nel backlog |
 |---|---|---|---|
-| ASM-004 | Open, non bloccante | Un nome profilo può permettere iniziali più descrittive | FEAT-003 e FEAT-004 verificano i dati disponibili; il fallback approvato `Membro`/`Member` e `?` mantiene il comportamento completo |
 | ASM-007 | Open, bloccante per privacy | Stabilisce se la cancellazione può avvenire dopo la soglia senza garanzia all'istante esatto | Tracciata come GATE-002 su FEAT-012 e FEAT-013; non cambia il divieto assoluto di cancellazione anticipata |
+
+ASM-004 è risolta da `ADD-004`-`ADD-006`: i nuovi profili richiedono un display name fornito dall'utente; il fallback `Membro`/`Member` e `?` resta valido per profili storici privi del valore, senza usare MSAL.
 
 ## Decisioni aperte
 
-Nessuna decisione funzionale condivisa è aperta. Le selezioni tecniche non ancora concrete sono classificate sotto, senza riaprire lo scope.
+Non restano decisioni aperte sul profilo: `ADD-004`-`ADD-006` chiudono GATE-004 eliminando il claim `name` dal flusso applicativo. I gate delle altre aree e le verifiche tecniche locali restano classificati sotto senza riaprire lo scope.
 
 ## Gate e verifiche aperte
 
@@ -93,6 +98,7 @@ Nessuna decisione funzionale condivisa è aperta. Le selezioni tecniche non anco
 | TECH-007 | technical-check | La policy HTTP attuale `microphone=()` deve essere resa compatibile con l'origine KinHub senza ampliare altri permessi. | FEAT-007 | Header deployato consente solo il microfono necessario e mantiene camera/geolocalizzazione negate |
 | TECH-008 | technical-check | Dove collocare esattamente voce Famiglia e controlli fissi senza conflitti con layout, focus, microfono e snackbar esistenti? | FEAT-004, FEAT-007, FEAT-010, FEAT-011 | Verifica responsive, safe area, zoom, tastiera e focus sui target primari |
 | TECH-009 | technical-check | Quali nomi concreti di tabelle, indici, endpoint e codici Problem Details realizzano catalogo, localizzazioni e disponibilità senza rompere migration e contratti esistenti? | FEAT-015 | Migration/rollback eseguibili, vincoli verificati, OpenAPI-route paritari e test dei contratti |
+| TECH-010 | technical-check | Quali normalizzazione, limiti e vincoli di persistenza rendono valido il `DisplayName` senza escludere i nomi nelle lingue supportate? | FEAT-017 | Contratto dominio/API/DB/UI coerente, documentato e coperto da test su whitespace, limiti e caratteri supportati |
 
 ## Dettagli implementativi delegabili
 
@@ -105,7 +111,7 @@ Nessuna decisione funzionale condivisa è aperta. Le selezioni tecniche non anco
 
 ## Strategia di scomposizione
 
-Le feature sono vertical slice orientate a un risultato utente o operativo e includono i layer necessari. FEAT-001 crea la capacità stabile di identità, autorizzazione e instradamento usata dalle altre slice; FEAT-014 aggiunge la fondazione UI condivisa di KinHub e congela catalogo componenti, token, convenzioni i18n e regole di riuso prima delle slice che estendono l'esperienza utente. FEAT-015 aggiunge catalogo, disponibilità, Home e guard KinService come un solo risultato sicuro prima che la lista paginata ne estenda l'interno. FEAT-016 è una slice operativa autonoma: consolida infrastruttura e delivery del repository senza introdurre nuovo scope prodotto, ma tocca contratti autorevoli condivisi e quindi non procede in parallelo con altre feature sui medesimi file. Retention e cleanup restano feature distinte perché hanno cutoff, dati ed esiti diversi, mentre FEAT-013 integra il secondo caso nel timer introdotto da FEAT-012.
+Le feature sono vertical slice orientate a un risultato utente o operativo e includono i layer necessari. FEAT-001 crea la capacità stabile di identità, autorizzazione e instradamento usata dalle altre slice; FEAT-014 aggiunge la fondazione UI condivisa di KinHub e congela catalogo componenti, token, convenzioni i18n e regole di riuso prima delle slice che estendono l'esperienza utente. FEAT-017 estende verticalmente il profilo esistente con stato incompleto, completamento del display name, guard server delle azioni familiari, bootstrap e tutte le superfici client: separare backend e frontend lascerebbe possibile un bypass o una fonte nome divergente. FEAT-015 aggiunge catalogo, disponibilità, Home e guard KinService come un solo risultato sicuro prima che la lista paginata ne estenda l'interno. FEAT-016 è una slice operativa autonoma: consolida infrastruttura e delivery del repository senza introdurre nuovo scope prodotto, ma tocca contratti autorevoli condivisi e quindi non procede in parallelo con altre feature sui medesimi file. Retention e cleanup restano feature distinte perché hanno cutoff, dati ed esiti diversi, mentre FEAT-013 integra il secondo caso nel timer introdotto da FEAT-012.
 
 ## Ordine di esecuzione
 
@@ -114,10 +120,11 @@ Le feature sono vertical slice orientate a un risultato utente o operativo e inc
 | 1 | FEAT-001 - Entrare nel percorso corretto dopo il login | enabler | Profilo unico, stato onboarding/famiglia e shell offline sicura | Nessuna | Unica fondazione iniziale |
 | 2 | FEAT-014 - Usare un design system condiviso in tutta KinHub | enabler | Pagine correnti e contratto UI condiviso senza componenti legacy | FEAT-001 | Nessuno nella wave; congela il contratto frontend |
 | 3 | FEAT-002 - Creare la propria famiglia | product | Famiglia e membership del creatore atomiche | FEAT-001, FEAT-014 | Nessuno nella wave |
+| 4 | FEAT-017 - Creare il profilo prima di entrare in una famiglia | product | Profilo iniziale con display name e nome backend autorevole nel client | FEAT-001, FEAT-002, FEAT-014 | Con FEAT-003 dopo CP-006; contratti e migration shared serializzati |
 | 4 | FEAT-015 - Raggiungere i servizi attivi della famiglia | product | Home dinamica, catalogo KinList e accesso diretto protetto | FEAT-002, FEAT-014 | Con FEAT-003 dopo CP-001 ampliato; migration shared serializzata |
 | 4 | FEAT-003 - Consultare la lista condivisa paginata | product | Lista attiva, visibile, ordinata e limitata | FEAT-002, FEAT-014 | Con FEAT-004 dopo CP-001; migration coordinate |
 | 4 | FEAT-004 - Consultare le impostazioni della famiglia | product | Ingranaggio, Settings e pagina membri/inviti | FEAT-002, FEAT-014 | Con FEAT-003 dopo CP-001; route/i18n separati |
-| 5 | FEAT-005 - Invitare e unirsi con un codice | product | Ciclo completo invito/join/revoca | FEAT-004, FEAT-014 | Con FEAT-007/008/009 dopo CP-002 |
+| 5 | FEAT-005 - Invitare e unirsi con un codice | product | Ciclo completo invito/join/revoca, riservato a profili completi | FEAT-004, FEAT-014, FEAT-017 | Con FEAT-007/008/009 dopo CP-002 |
 | 5 | FEAT-016 - Riallineare infrastruttura e delivery dell'ambiente dev | operational | Provisioning dev esplicito, workflow stabili e refactor documentale coerente | FEAT-001, FEAT-015 | Nessuno: modifica file autorevoli condivisi |
 | 5 | FEAT-007 - Aggiungere un gruppo tramite la voce | product | Registrazione e generazione atomica | FEAT-003, FEAT-014 | Bloccata da GATE-001; con FEAT-005/008/009 dopo CP-002/003 |
 | 5 | FEAT-008 - Filtrare la lista per categoria | product | Filtro singolo prima della paginazione | FEAT-003, FEAT-014 | Con FEAT-005/007/009 dopo CP-002 |
@@ -132,12 +139,13 @@ Le feature sono vertical slice orientate a un risultato utente o operativo e inc
 
 | Checkpoint | Feature coinvolte | Contratto da congelare | Possibili conflitti |
 |---|---|---|---|
-| CP-DS1 | FEAT-014, FEAT-002-FEAT-011 | Catalogo componenti, token, regole i18n e wrapper specifici consentiti del design system | `src/frontend/src/components/ui`, `Layout.tsx`, `styles.css`, `route-registry.json`, `.agents/skills/frontend/*`, `AGENTS.md` |
+| CP-DS1 | FEAT-014, FEAT-002-FEAT-011, FEAT-017 | Catalogo componenti, token, regole i18n e wrapper specifici consentiti del design system | `src/frontend/src/components/ui`, `Layout.tsx`, `styles.css`, `route-registry.json`, `.agents/skills/frontend/*`, `AGENTS.md` |
 | CP-001 | FEAT-015, FEAT-003, FEAT-004 | Identità interna, membership, policy `Family`, forma `familyId`, schema shared, catalogo servizi, guard KinService e strategia migration | `Program.cs`, DI, `KinHubDbContext`, migration, API client, Home e gate KinList |
 | CP-002 | FEAT-005, FEAT-007, FEAT-008, FEAT-009 | Contratto pagina/cursori, codici Problem Details, predicato visibilità e convenzioni API tipizzate | `src/frontend/src/lib/api.ts`, DbContext, opzioni, traduzioni condivise |
 | CP-003 | FEAT-007, FEAT-009, FEAT-010 | Stato item, owner/visibility, versione concorrente, ordine, tipi timeline e idempotency key | Entità/configurazioni item, timeline, riga lista e refresh |
 | CP-004 | FEAT-011, FEAT-012 | Semantica `CompletedAt`, eventi, command ID, chunk 1000 e transazioni condizionate | Repository item, migration, metriche e test PostgreSQL |
 | CP-005 | FEAT-012, FEAT-013 | Timer `0 0 0 * * *`, acquisizione `nowUtc`, budget, esiti e metriche distinti | Function timer, opzioni, runbook e alert |
+| CP-006 | FEAT-002, FEAT-004, FEAT-015, FEAT-017 | Stati incompleto/completo di `ApplicationUser`, guard family/join, proiezione profilo e forma compatibile della risposta bootstrap | Repository profilo, migration `shared`, `KinHubBootstrapResult`, OpenAPI, API client, context utente, Home e membri |
 
 ### Grafo delle dipendenze
 
@@ -146,6 +154,11 @@ flowchart LR
     F001["FEAT-001 - Accesso e instradamento"] --> F014["FEAT-014 - Design system condiviso"]
     F001 --> F002["FEAT-002 - Creazione famiglia"]
     F014 --> F002
+    F001 --> F017["FEAT-017 - Profilo applicativo autorevole"]
+    F014 --> F017
+    F002 --> F017
+    F004 -. "CP-006 contract" .-> F017
+    F015 -. "CP-006 contract" .-> F017
     F002 --> F015["FEAT-015 - Catalogo KinService"]
     F001 --> F016["FEAT-016 - Refactor infrastruttura dev"]
     F015 --> F016
@@ -162,6 +175,7 @@ flowchart LR
     F002 --> F003["FEAT-003 - Lista paginata"]
     F002 --> F004["FEAT-004 - Impostazioni famiglia"]
     F004 --> F005["FEAT-005 - Inviti e join"]
+    F017 --> F005
     F005 --> F006["FEAT-006 - Uscita famiglia"]
     F003 --> F007["FEAT-007 - Voce e generazione"]
     F003 --> F008["FEAT-008 - Filtro categoria"]
@@ -183,7 +197,7 @@ Le frecce continue sono dipendenze `hard`; le tratteggiate indicano coordinament
 
 `FEAT-001 -> FEAT-014 -> FEAT-002 -> FEAT-003 -> FEAT-009 -> FEAT-010 -> FEAT-012 -> FEAT-013`
 
-È il cammino hard più lungo fino alla chiusura del lifecycle: stabilisce accesso, contratto UI condiviso, famiglia, modello item/timeline, completamento, retention e infine cleanup. GATE-002 blocca gli ultimi due nodi; GATE-001 blocca FEAT-007 ma non il resto del grafo. FEAT-016 dipende da FEAT-001 e FEAT-015 ma non allunga il percorso critico perché non ha nodi dipendenti a valle.
+È il cammino hard più lungo fino alla chiusura del lifecycle: stabilisce accesso, contratto UI condiviso, famiglia, modello item/timeline, completamento, retention e infine cleanup. GATE-002 blocca gli ultimi due nodi; GATE-001 blocca FEAT-007 ma non il resto del grafo. FEAT-016 dipende da FEAT-001 e FEAT-015. FEAT-017 dipende da FEAT-001, FEAT-002 e FEAT-014 e alimenta il ramo FEAT-005 -> FEAT-006 -> FEAT-013, che resta più corto del percorso critico indicato.
 
 ## Catalogo feature
 
@@ -205,6 +219,7 @@ Le frecce continue sono dipendenze `hard`; le tratteggiate indicano coordinament
 | FEAT-012 | `retention-item-completati` | Eliminare gli item completati oltre retention | blocked | 7 | `features/retention-item-completati/feature.md` |
 | FEAT-013 | `cleanup-dati-inattivi` | Eliminare in sicurezza i dati inattivi | blocked | 8 | `features/cleanup-dati-inattivi/feature.md` |
 | FEAT-016 | `riallineamento-infrastruttura-dev` | Riallineare infrastruttura e delivery dell'ambiente dev | blocked | 5 | `features/riallineamento-infrastruttura-dev/feature.md` |
+| FEAT-017 | `profilo-applicativo-autorevole` | Creare il profilo prima di entrare in una famiglia | ready | 4 | `features/profilo-applicativo-autorevole/feature.md` |
 
 FEAT-001 ha applicato la correzione architetturale descritta in `features/accesso-instradamento/cr.md`; il piano originario è conservato in `feature.plan.md` e quello correttivo in `cr.plan.md`. La CR `features/accesso-instradamento/cr-login-refresh.md` sostituisce il solo vincolo `memoryStorage` con `sessionStorage` per mantenere la sessione MSAL nel refresh della stessa scheda, senza persistere dati familiari. Le feature dipendenti non devono copiare pattern endpoint locali e seguono invece `docs/architecture/http-functions.md`.
 
@@ -215,7 +230,7 @@ FEAT-014 include la CR implementata `features/design-system-condiviso/cr-help-na
 | Requisito o vincolo | Feature primaria | Feature di supporto | Criteri che lo verificano |
 |---|---|---|---|
 | FR-001, FR-002, FR-032 | FEAT-001 | FEAT-002, FEAT-005 | AC-001-AC-004 |
-| Vincolo design system condiviso, rimozione totale della UI legacy e harness/frontend obbligati al riuso | FEAT-014 | FEAT-002-FEAT-011 | AC-078-AC-083 |
+| Vincolo design system condiviso, rimozione totale della UI legacy e harness/frontend obbligati al riuso | FEAT-014 | FEAT-002-FEAT-011, FEAT-017 | AC-078-AC-083 |
 | FR-003 | FEAT-001 | FEAT-002-FEAT-013 | AC-003, AC-005 e criteri autorizzativi di ogni feature |
 | FR-004-FR-006 | FEAT-003 | FEAT-007-FEAT-011 | AC-011-AC-014 |
 | FR-007-FR-014 | FEAT-007 | FEAT-003 | AC-036-AC-042 |
@@ -249,14 +264,15 @@ FEAT-014 include la CR implementata `features/design-system-condiviso/cr-help-na
 | ADR-016 | FEAT-004 | FEAT-001 | AC-018-AC-022 |
 | ADR-018-ADR-020 | FEAT-015 | FEAT-002, FEAT-003 | AC-084-AC-090 |
 | Refactor infrastrutturale approvato (`feature.plan.md`, `infra-guidelines.md`, sezioni CI/CD di `AGENTS.md`) | FEAT-016 | Nessuna | AC-091-AC-096 |
+| ADD-004-ADD-006; ASM-004 | FEAT-017 | FEAT-001, FEAT-002, FEAT-004, FEAT-005, FEAT-014, FEAT-015 | AC-097-AC-102, AC-026 |
 
 ## Verifica di copertura
 
-- Requisiti in scope: 64 funzionali, 15 non funzionali, 48 regole di business, 40 decisioni e 20 ADR.
-- Requisiti funzionali con owner primario: 64.
+- Requisiti in scope: 64 funzionali consolidati, 3 requisiti addendum approvati, 15 non funzionali, 48 regole di business, 40 decisioni e 20 ADR.
+- Requisiti funzionali e addendum con owner primario: 67.
 - Requisiti non coperti: Nessuno.
 - Feature senza requisito o vincolo sorgente: Nessuna.
 - Feature prive di criteri verificabili: Nessuna.
 - Dipendenze cicliche: Nessuna.
-- Gate bloccanti: GATE-001 su FEAT-007; GATE-002 su FEAT-012 e FEAT-013; GATE-003 su FEAT-016. TECH-009 è una verifica locale non bloccante di FEAT-015.
-- Stato complessivo: backlog coerente e sviluppabile per le feature `ready`; FEAT-016 è definita ma resta `blocked` in `In review` finché la verifica Azure live non chiude GATE-003.
+- Gate bloccanti: GATE-001 su FEAT-007; GATE-002 su FEAT-012 e FEAT-013; GATE-003 su FEAT-016. TECH-009 e TECH-010 sono verifiche locali non bloccanti rispettivamente di FEAT-015 e FEAT-017.
+- Stato complessivo: backlog coerente e sviluppabile per le feature `ready`; FEAT-016 resta `blocked` in `In review` finché la verifica Azure live non chiude GATE-003, mentre FEAT-017 è `Open` e `ready` dopo la chiusura di GATE-004 tramite `ADD-004`-`ADD-006`.

@@ -247,7 +247,10 @@ jobs:
           output_location: ''
       - name: Smoke test release
         shell: bash
+        env:
+          FUNCTION_HEALTH_URL: https://${{ steps.arm.outputs.functionAppHostname }}/health/live
+          STATIC_ROOT_URL: https://${{ steps.arm.outputs.staticWebAppHostname }}/
+          STATIC_VERSION_URL: https://${{ steps.arm.outputs.staticWebAppHostname }}/api/version
         run: |
-          curl --fail --retry 8 --retry-delay 10 "https://${{ steps.arm.outputs.functionAppHostname }}/health/live"
-          curl --fail --retry 8 --retry-delay 10 "https://${{ steps.arm.outputs.staticWebAppHostname }}/"
-          curl --fail --retry 8 --retry-delay 10 "https://${{ steps.arm.outputs.staticWebAppHostname }}/api/version"
+          set -euo pipefail
+          node scripts/smoke-test-release.mjs

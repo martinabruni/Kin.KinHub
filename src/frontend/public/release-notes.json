@@ -1,8 +1,8 @@
 {
   "appName": "KinHub",
   "version": "0.1.0",
-  "commit": "c69b4a4",
-  "buildDate": "2026-08-06T10:48:56.924Z",
+  "commit": "d3dc39d",
+  "buildDate": "2026-08-08T14:42:16.013Z",
   "environment": "Development",
   "entries": [
     {
@@ -347,6 +347,17 @@
       }
     },
     {
+      "id": "none-fixed-family-member-identity",
+      "type": "fixed",
+      "area": "shared",
+      "breaking": false,
+      "issue": "none",
+      "descriptions": {
+        "it": "Corretta la pagina Famiglia: il refresh non approvato è stato rimosso dalla card del nome e il membro autenticato usa lo stesso nome profilo mostrato dal menu utente, mantenendo il fallback per i nomi assenti.",
+        "en": "Fixed the Family page: the unapproved refresh action was removed from the family name card, and the signed-in member now uses the same profile name shown by the user menu while preserving the fallback for missing names."
+      }
+    },
+    {
       "id": "none-fixed-flex-function-and-keyvault-deployments",
       "type": "fixed",
       "area": "infra",
@@ -468,6 +479,17 @@
       }
     },
     {
+      "id": "none-fixed-release-before-infrastructure",
+      "type": "fixed",
+      "area": "infrastructure",
+      "breaking": false,
+      "issue": "none",
+      "descriptions": {
+        "it": "La release dev attende il completamento riuscito del provisioning infrastrutturale per lo stesso commit prima di leggere gli output ARM o distribuire applicazioni.",
+        "en": "The dev release now waits for successful infrastructure provisioning for the same commit before reading ARM outputs or deploying applications."
+      }
+    },
+    {
       "id": "none-fixed-release-notes-responsive",
       "type": "fixed",
       "area": "frontend",
@@ -476,6 +498,17 @@
       "descriptions": {
         "it": "Rendo la pagina delle note di rilascio responsive sui dispositivi mobili e rimuovo la superficie card duplicata mantenendo una sola card per voce.",
         "en": "Make the release notes page responsive on mobile and remove the duplicated card surface, keeping one card per entry."
+      }
+    },
+    {
+      "id": "none-fixed-static-web-app-deployment-token",
+      "type": "fixed",
+      "area": "infrastructure",
+      "breaking": false,
+      "issue": "none",
+      "descriptions": {
+        "it": "La release dev recupera il token di deployment Static Web Apps tramite Azure OIDC invece di dipendere da un secret GitHub mancante.",
+        "en": "The dev release retrieves the Static Web Apps deployment token through Azure OIDC instead of depending on a missing GitHub secret."
       }
     },
     {

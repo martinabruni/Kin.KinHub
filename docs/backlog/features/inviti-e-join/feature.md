@@ -21,6 +21,7 @@ Gli inviti sono credenziali temporanee manuali, non messaggi. Tutti i membri han
 - Generazione crittografica, formato `XXXX-XXXX-XXXX`, massimo cinque inviti attivi e segreto one-time.
 - Elenco dei soli metadati, revoca confermata consentita a ogni membro e stato aggiornato.
 - Onboarding join con normalizzazione di spazi, trattini e maiuscole.
+- Verifica server-side del profilo completo prima di consumare il codice o creare/riattivare la membership.
 - Consumo atomico e creazione/riattivazione membership storica, con un solo vincitore concorrente.
 - Risposta generica per codice inesistente/scaduto/revocato/usato.
 - Rate limit per istanza 5/5 minuti per `(iss, oid)` e 20/5 minuti per origine attendibile, con `Retry-After`.
@@ -36,7 +37,7 @@ Gli inviti sono credenziali temporanee manuali, non messaggi. Tutti i membri han
 | Tipo | Riferimenti | Contributo della feature |
 |---|---|---|
 | Flussi | FLOW-011 | Generazione, condivisione manuale, join e revoca |
-| Requisiti | FR-037-FR-040, FR-054 | Ciclo invito e protezione tentativi |
+| Requisiti | ADD-004; FR-037-FR-040, FR-054 | Ciclo invito, prerequisito profilo e protezione tentativi |
 | Regole/decisioni | BR-023, BR-026-BR-028; DEC-013, DEC-020, DEC-021, DEC-032 | Capacità uniforme, segreto e consumo |
 | Architettura | ADR-011, ADR-012; sezioni 6.7, 8, 9 | HMAC, transazione, anti-enumeration e metriche |
 
@@ -48,6 +49,7 @@ Gli inviti sono credenziali temporanee manuali, non messaggi. Tutti i membri han
 |---|---|---|---|---|
 | FEAT-004 - Consultare le impostazioni della famiglia | hard | Generazione/revoca e metadati vivono nella pagina Family; join riusa onboarding | Route Family, proiezione inviti, onboarding e contratti pagina | Inizio dopo FEAT-004 |
 | FEAT-014 - Usare un design system condiviso in tutta KinHub | hard | Join e superfici one-time devono riusare form, dialog e state pattern condivisi | Primitive form/overlay/feedback e regole i18n del design system | Inizio dopo integrazione FEAT-014 |
+| FEAT-017 - Creare il profilo prima di entrare in una famiglia | hard | Un utente può diventare membro solo dopo avere completato il profilo applicativo | Stato profilo autorevole, guard riusabile e bootstrap con display name | Inizio solo dopo integrazione FEAT-017 |
 
 ### Gate e assunzioni
 
@@ -64,7 +66,7 @@ Con FEAT-007/008/009 dopo CP-002. Coordinare onboarding, pagina Family, API clie
 - Sotto cinque inviti attivi, il codice appare solo nella risposta/superficie di creazione con scadenza; chiuderla lo rende non recuperabile.
 - L'elenco successivo espone creatore, creazione, scadenza e stato, mai codice o HMAC.
 - Revoca richiede conferma e rende il codice immediatamente inutilizzabile.
-- Join normalizza input, non rivela la famiglia prima del successo e consuma invito più membership nello stesso commit.
+- Join richiede un profilo completo, normalizza input, non rivela la famiglia prima del successo e consuma invito più membership nello stesso commit.
 - Una membership storica della stessa famiglia viene riattivata; una membership attiva impedisce join a una seconda famiglia.
 
 ### Touchpoint previsti
@@ -107,10 +109,10 @@ Con FEAT-007/008/009 dopo CP-002. Coordinare onboarding, pagina Family, API clie
 
 ### AC-026 - Join atomico e riattivazione
 
-- **Dato** un utente senza famiglia e un codice valido normalizzato
+- **Dato** un utente con profilo completo, senza famiglia e con un codice valido normalizzato
 - **Quando** conferma il join
 - **Allora** il codice è consumato e la membership è creata o riattivata nello stesso commit, poi si apre KinList
-- **Fonte**: FR-040, BR-028
+- **Fonte**: ADD-004, FR-040, BR-028
 
 ### AC-027 - Consumo concorrente singolo
 
@@ -152,7 +154,7 @@ Con FEAT-007/008/009 dopo CP-002. Coordinare onboarding, pagina Family, API clie
 
 ## Definition of Done
 
-- AC-023-AC-030 verificati, FEAT-004 integrata e CP-002 rispettato.
+- AC-023-AC-030 verificati, FEAT-004 e FEAT-017 integrate e CP-002 rispettato.
 - Join, conferme e superfici invito usano componenti FEAT-014 senza nuovi pattern duplicati di dialog/form/snackbar.
 - Rotazione HMAC e origine attendibile sono documentate e testate senza secret nel repository.
 - Migration/rollback, telemetria, help/guide `it`/`en`, accessibilità e change fragment completi.
