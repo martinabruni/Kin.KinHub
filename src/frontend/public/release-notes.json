@@ -1,8 +1,8 @@
 {
   "appName": "KinHub",
   "version": "0.1.0",
-  "commit": "d3dc39d",
-  "buildDate": "2026-08-08T14:42:16.013Z",
+  "commit": "e1d35a0",
+  "buildDate": "2026-08-25T10:52:09.986Z",
   "environment": "Development",
   "entries": [
     {
@@ -91,6 +91,17 @@
       "descriptions": {
         "it": "Aggiunto il backlog esecutivo KinList con 13 feature autonome, tracciabilità completa, dipendenze, wave, gate e criteri verificabili.",
         "en": "Added the KinList execution backlog with 13 autonomous features, complete traceability, dependencies, waves, gates, and verifiable acceptance criteria."
+      }
+    },
+    {
+      "id": "none-changed-deterministic-azure-sql-dev",
+      "type": "changed",
+      "area": "infrastructure",
+      "breaking": true,
+      "issue": "none",
+      "descriptions": {
+        "it": "FEAT-016 ora deriva in modo deterministico i nomi Azure del solo ambiente `dev`, sostituisce PostgreSQL/Npgsql con Azure SQL Database Basic e aggiorna backend, migration, workflow, skill e runbook al nuovo contratto identity-based.",
+        "en": "FEAT-016 now derives the `dev` Azure resource names deterministically, replaces PostgreSQL/Npgsql with Azure SQL Database Basic, and updates the backend, migrations, workflows, skills, and runbooks to the new identity-based contract."
       }
     },
     {
@@ -501,6 +512,17 @@
       }
     },
     {
+      "id": "none-fixed-release-smoke-test",
+      "type": "fixed",
+      "area": "infrastructure",
+      "breaking": false,
+      "issue": "none",
+      "descriptions": {
+        "it": "Corretto lo smoke test della release: autentica la health Function quando il front-door lo richiede, gestisce redirect e retry limitati e produce diagnostica sicura.",
+        "en": "Fixed the release smoke test to authenticate Function health when required by the front door, handle redirects and bounded retries, and produce safe diagnostics."
+      }
+    },
+    {
       "id": "none-fixed-static-web-app-deployment-token",
       "type": "fixed",
       "area": "infrastructure",
@@ -520,6 +542,17 @@
       "descriptions": {
         "it": "Risolto il test di telemetria che poteva fallire in modo intermittente durante l'esecuzione parallela dei test di integrazione.",
         "en": "Fixed the telemetry test that could intermittently fail while integration tests ran in parallel."
+      }
+    },
+    {
+      "id": "none-security-testcontainers-sshnet",
+      "type": "security",
+      "area": "backend",
+      "breaking": false,
+      "issue": "none",
+      "descriptions": {
+        "it": "Aggiornato Testcontainers.PostgreSql per risolvere la dipendenza SSH.NET vulnerabile rilevata durante il release restore.",
+        "en": "Updated Testcontainers.PostgreSql to resolve the vulnerable SSH.NET dependency detected during the release restore."
       }
     }
   ]

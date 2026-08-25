@@ -9,4 +9,4 @@ description: Recover from missing pages, errors, sign-in problems, or stale cach
 - **Unexpected error:** use Retry; if it continues, record the version, commit, and steps taken.
 - **Sign-in:** verify tenant, client ID, redirect URI, scope, and API consent.
 - **Update not visible:** open Release notes and use Refresh now; avoid repeated manual reloads.
-- **API not ready:** liveness checks the process, while readiness includes PostgreSQL. Check the connection and migrations.
+- **API not ready:** liveness checks the process, while readiness includes the relational database. Check the Azure SQL connection and migrations.

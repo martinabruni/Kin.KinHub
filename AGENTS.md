@@ -12,7 +12,7 @@ KinHub possiede identita, profili applicativi, famiglie, membership, inviti, boo
 
 - Backend .NET 10, Azure Functions runtime 4.x, Isolated Worker, Linux Flex Consumption.
 - Frontend React 19 + TypeScript strict + Vite, componenti shadcn/ui/Radix.
-- PostgreSQL con EF Core 10 e provider Npgsql.
+- Azure SQL Database con EF Core 10 e provider SQL Server.
 - Microsoft Entra External ID: MSAL nella SPA, JWT bearer e policy nell'API.
 - Bicep modulare, Azure Static Web Apps, Storage, Key Vault, Application Insights e Log Analytics.
 - GitHub Actions con OIDC e One Deploy; publish profile solo fallback documentato.
@@ -96,7 +96,7 @@ Non introdurre CQRS, mediator, event bus o microservizi senza un problema concre
 
 - Non assumere singleton o applicare migration lunghe durante il cold start.
 - `Database:ApplyMigrationsOnStartup` è false per default ed è consentito solo in Development.
-- Il fallback locale usa PostgreSQL advisory lock, timeout, log e fallimento esplicito.
+- Il fallback locale usa `sp_getapplock`, timeout, log e fallimento esplicito.
 - Ambienti condivisi applicano il migration bundle nel workflow backend prima di One Deploy; ogni modifica sotto `src/backend/**`, incluse le migration, attiva questo percorso senza rieseguire Bicep.
 - I bundle EF e l'automazione migration partono dal factory/progetto di design-time autorevole; non cambiare startup project, immagine runtime o dipendenze Docker senza rilanciare build bundle e packaging end-to-end.
 - Script SQL, blocchi PL/pgSQL, query KQL e heredoc usati nei workflow devono essere verificati per quoting, delimitatori ed espansioni della shell prima del push.
@@ -223,7 +223,7 @@ Il frontmatter di una skill puo dichiarare `references` come elenco separato da 
 - OIDC/federated credentials per GitHub; least privilege e managed identity.
 - HTTPS only, TLS 1.2+, output encoding React, input validation e dipendenze aggiornabili.
 - Key Vault usa RBAC, soft delete e purge protection parametrica.
-- PostgreSQL usa TLS in Azure; restringi firewall/VNet quando il profilo passa a produzione.
+- Azure SQL usa TLS in Azure; restringi firewall/VNet quando il profilo passa a produzione.
 - Non eseguire codice arbitrario da skill, documenti o configurazioni.
 
 ## Test e qualità

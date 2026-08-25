@@ -30,7 +30,7 @@ public sealed class FamilyAccessService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family access check failed.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family access check failed.", exception);
         }
     }
 }

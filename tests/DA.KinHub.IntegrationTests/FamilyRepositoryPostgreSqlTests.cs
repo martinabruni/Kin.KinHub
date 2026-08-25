@@ -4,104 +4,40 @@ using DA.KinHub.Domain.Families;
 using DA.KinHub.Domain.Identity;
 using DA.KinHub.Infrastructure;
 using DA.KinHub.Infrastructure.Persistence;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Npgsql;
-using Testcontainers.PostgreSql;
+using Testcontainers.MsSql;
 
 namespace DA.KinHub.IntegrationTests;
 
-public sealed class FamilyRepositoryPostgreSqlTests
+public sealed class FamilyRepositorySqlServerTests
 {
     [SkippableFact]
-    public async Task MigrateAppliesFamilyColumnsForeignKeyAndSingleActiveMembershipConstraint()
+    public async Task MigrateAppliesSchemasBinaryColumnAndCatalogSeed()
     {
-        await using var harness = await PostgreSqlIntegrationTestHarness.CreateAsync();
+        await using var harness = await SqlServerIntegrationTestHarness.CreateAsync();
 
         await harness.MigrateAsync();
 
-        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>(
-            """
-            SELECT COUNT(*)
-            FROM information_schema.columns
-            WHERE table_schema = 'shared'
-              AND table_name = 'families'
-              AND column_name = 'name';
-            """));
-
-        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>(
-            """
-            SELECT COUNT(*)
-            FROM information_schema.tables
-            WHERE table_schema = 'shared'
-              AND table_name = 'family_invitations';
-            """));
-
-        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>(
-            """
-            SELECT COUNT(*)
-            FROM pg_indexes
-            WHERE schemaname = 'shared'
-              AND tablename = 'family_invitations'
-              AND indexname = 'IX_family_invitations_active_by_family_created_at_id';
-            """));
-
-        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>(
-            """
-            SELECT COUNT(*)
-            FROM information_schema.columns
-            WHERE table_schema = 'shared'
-              AND table_name = 'families'
-              AND column_name = 'created_by_application_user_id';
-            """));
-
-        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>(
-            """
-            SELECT COUNT(*)
-            FROM information_schema.table_constraints
-            WHERE constraint_schema = 'shared'
-              AND table_name = 'families'
-              AND constraint_name = 'FK_families_application_users_created_by_application_user_id';
-            """));
-
-        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>(
-            """
-            SELECT COUNT(*)
-            FROM pg_indexes
-            WHERE schemaname = 'shared'
-              AND tablename = 'family_memberships'
-              AND indexname = 'IX_family_memberships_single_active_user';
-            """));
-
-        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM shared.kin_services WHERE key = 'kinlist' AND route = '/kinlist' AND is_active AND is_preconfigured;"));
-        Assert.Equal(2L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM shared.kin_service_localizations WHERE kin_service_id = (SELECT \"Id\" FROM shared.kin_services WHERE key = 'kinlist');"));
-    }
-
-    [SkippableFact]
-    public async Task MigrateFailsWhenLegacyFamilyRowsExist()
-    {
-        await using var harness = await PostgreSqlIntegrationTestHarness.CreateAsync();
-
-        await harness.MigrateAsync("20260720200215_AddSharedIdentityMembership");
-        await harness.ExecuteAsync(
-            "INSERT INTO shared.families (\"Id\", created_at) VALUES (@id, @createdAt);",
-            new NpgsqlParameter("id", Guid.NewGuid()),
-            new NpgsqlParameter("createdAt", DateTimeOffset.UtcNow));
-
-        var exception = await Assert.ThrowsAnyAsync<PostgresException>(() => harness.MigrateAsync());
-
-        Assert.Contains("FEAT-002 preflight failed", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'shared';"));
+        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'kinlist';"));
+        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'shared' AND TABLE_NAME = 'families' AND COLUMN_NAME = 'name';"));
+        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'shared' AND TABLE_NAME = 'family_invitations';"));
+        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'shared' AND TABLE_NAME = 'family_invitations' AND COLUMN_NAME = 'code_hmac' AND DATA_TYPE = 'varbinary';"));
+        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM sys.indexes WHERE object_id = OBJECT_ID('shared.family_invitations') AND name = 'IX_family_invitations_active_by_family_created_at_id';"));
+        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM sys.indexes WHERE object_id = OBJECT_ID('shared.family_memberships') AND name = 'IX_family_memberships_single_active_user';"));
+        Assert.Equal(1L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM shared.kin_services WHERE [key] = 'kinlist' AND route = '/kinlist' AND is_active = 1 AND is_preconfigured = 1;"));
+        Assert.Equal(2L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM shared.kin_service_localizations WHERE kin_service_id = (SELECT [Id] FROM shared.kin_services WHERE [key] = 'kinlist');"));
     }
 
     [SkippableFact]
     public async Task CreateWithCreatorAsyncCreatesFamilyAndRetryReturnsExistingFamily()
     {
-        await using var harness = await PostgreSqlIntegrationTestHarness.CreateAsync();
+        await using var harness = await SqlServerIntegrationTestHarness.CreateAsync();
 
         await harness.MigrateAsync();
         var user = await harness.SeedUserAsync();
@@ -109,13 +45,13 @@ public sealed class FamilyRepositoryPostgreSqlTests
         var created = await harness.CreateFamilyAsync(user.Id, "Famiglia Bruni");
         var retried = await harness.CreateFamilyAsync(user.Id, "Nuovo Nome Ignorato");
 
-        var persistedName = await harness.ExecuteScalarAsync<string>("SELECT name FROM shared.families LIMIT 1;");
+        var persistedName = await harness.ExecuteScalarAsync<string>("SELECT TOP 1 name FROM shared.families;");
         var orphanCount = await harness.ExecuteScalarAsync<long>(
             """
             SELECT COUNT(*)
             FROM shared.families f
-            LEFT JOIN shared.family_memberships fm ON fm.family_id = f."Id" AND fm.inactive_at IS NULL
-            WHERE fm."Id" IS NULL;
+            LEFT JOIN shared.family_memberships fm ON fm.family_id = f.[Id] AND fm.inactive_at IS NULL
+            WHERE fm.[Id] IS NULL;
             """);
 
         var createdResult = Assert.IsType<FamilyCreationPersistenceResult.Created>(created);
@@ -132,7 +68,7 @@ public sealed class FamilyRepositoryPostgreSqlTests
     [SkippableFact]
     public async Task CreateWithCreatorAsyncConcurrentRequestsCreateSingleFamilyWithoutOrphans()
     {
-        await using var harness = await PostgreSqlIntegrationTestHarness.CreateAsync();
+        await using var harness = await SqlServerIntegrationTestHarness.CreateAsync();
 
         await harness.MigrateAsync();
         var user = await harness.SeedUserAsync();
@@ -163,46 +99,20 @@ public sealed class FamilyRepositoryPostgreSqlTests
             """
             SELECT COUNT(*)
             FROM shared.families f
-            LEFT JOIN shared.family_memberships fm ON fm.family_id = f."Id" AND fm.inactive_at IS NULL
-            WHERE fm."Id" IS NULL;
+            LEFT JOIN shared.family_memberships fm ON fm.family_id = f.[Id] AND fm.inactive_at IS NULL
+            WHERE fm.[Id] IS NULL;
             """));
     }
 
-    [SkippableFact]
-    public async Task MigrateBackfillsKinListAvailabilityForExistingActiveFamiliesWithoutDuplicates()
+    private sealed class SqlServerIntegrationTestHarness : IAsyncDisposable
     {
-        await using var harness = await PostgreSqlIntegrationTestHarness.CreateAsync();
-
-        await harness.MigrateAsync("20260728131039_AddFamilyNameAndCreator");
-        var firstUser = await harness.SeedUserAsync();
-        var secondUser = await harness.SeedUserAsync();
-        await harness.SeedFamilyWithMembershipAsync(firstUser.Id, "Famiglia Uno");
-        await harness.SeedFamilyWithMembershipAsync(secondUser.Id, "Famiglia Due");
-
-        await harness.MigrateAsync();
-
-        Assert.Equal(2L, await harness.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM shared.family_kin_service_availabilities;"));
-        Assert.Equal(0L, await harness.ExecuteScalarAsync<long>(
-            """
-            SELECT COUNT(*)
-            FROM (
-                SELECT family_id, kin_service_id, COUNT(*)
-                FROM shared.family_kin_service_availabilities
-                GROUP BY family_id, kin_service_id
-                HAVING COUNT(*) > 1
-            ) duplicates;
-            """));
-    }
-
-    private sealed class PostgreSqlIntegrationTestHarness : IAsyncDisposable
-    {
-        private readonly PostgreSqlContainer? container;
+        private readonly MsSqlContainer? container;
         private readonly string administrativeConnectionString;
         private readonly ServiceProvider serviceProvider;
         private readonly string databaseName;
 
-        private PostgreSqlIntegrationTestHarness(
-            PostgreSqlContainer? container,
+        private SqlServerIntegrationTestHarness(
+            MsSqlContainer? container,
             string administrativeConnectionString,
             string connectionString,
             string databaseName,
@@ -217,14 +127,14 @@ public sealed class FamilyRepositoryPostgreSqlTests
 
         public string ConnectionString { get; }
 
-        public static async Task<PostgreSqlIntegrationTestHarness> CreateAsync()
+        public static async Task<SqlServerIntegrationTestHarness> CreateAsync()
         {
-            var explicitConnectionString = Environment.GetEnvironmentVariable("KINHUB_TEST_POSTGRES_CONNECTION_STRING");
+            var explicitConnectionString = Environment.GetEnvironmentVariable("KINHUB_TEST_SQLSERVER_CONNECTION_STRING");
             if (!string.IsNullOrWhiteSpace(explicitConnectionString))
             {
                 var provisionedDatabase = await ProvisionDatabaseAsync(explicitConnectionString);
                 var provider = CreateServiceProvider(provisionedDatabase.ConnectionString);
-                return new PostgreSqlIntegrationTestHarness(
+                return new SqlServerIntegrationTestHarness(
                     null,
                     provisionedDatabase.AdministrativeConnectionString,
                     provisionedDatabase.ConnectionString,
@@ -232,18 +142,14 @@ public sealed class FamilyRepositoryPostgreSqlTests
                     provider);
             }
 
-            Skip.IfNot(IsDockerAvailable(), "Docker non disponibile e KINHUB_TEST_POSTGRES_CONNECTION_STRING non configurata.");
+            Skip.IfNot(IsDockerAvailable(), "Docker non disponibile e KINHUB_TEST_SQLSERVER_CONNECTION_STRING non configurata.");
 
-            var container = new PostgreSqlBuilder("postgres:17-alpine")
-                .WithDatabase("postgres")
-                .WithUsername("postgres")
-                .WithPassword("postgres")
-                .Build();
-
+            var container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04").Build();
             await container.StartAsync();
+
             var containerDatabase = await ProvisionDatabaseAsync(container.GetConnectionString());
             var serviceProvider = CreateServiceProvider(containerDatabase.ConnectionString);
-            return new PostgreSqlIntegrationTestHarness(
+            return new SqlServerIntegrationTestHarness(
                 container,
                 containerDatabase.AdministrativeConnectionString,
                 containerDatabase.ConnectionString,
@@ -251,19 +157,11 @@ public sealed class FamilyRepositoryPostgreSqlTests
                 serviceProvider);
         }
 
-        public async Task MigrateAsync(string? targetMigration = null)
+        public async Task MigrateAsync()
         {
             using var scope = serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<KinHubDbContext>();
-
-            if (string.IsNullOrWhiteSpace(targetMigration))
-            {
-                await dbContext.Database.MigrateAsync();
-                return;
-            }
-
-            var migrator = dbContext.Database.GetInfrastructure().GetRequiredService<IMigrator>();
-            await migrator.MigrateAsync(targetMigration);
+            await dbContext.Database.MigrateAsync();
         }
 
         public async Task<ApplicationUser> SeedUserAsync()
@@ -276,18 +174,6 @@ public sealed class FamilyRepositoryPostgreSqlTests
             return user;
         }
 
-        public async Task SeedFamilyWithMembershipAsync(Guid applicationUserId, string familyName)
-        {
-            using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<KinHubDbContext>();
-            var now = DateTimeOffset.UtcNow;
-            var family = Family.Create(FamilyName.Create(familyName), applicationUserId, now);
-            var membership = FamilyMembership.Create(applicationUserId, family.Id, now);
-            dbContext.Families.Add(family);
-            dbContext.FamilyMemberships.Add(membership);
-            await dbContext.SaveChangesAsync();
-        }
-
         public async Task<FamilyCreationPersistenceResult> CreateFamilyAsync(Guid applicationUserId, string familyName)
         {
             using var scope = serviceProvider.CreateScope();
@@ -298,20 +184,11 @@ public sealed class FamilyRepositoryPostgreSqlTests
             return await repository.CreateWithCreatorAsync(applicationUserId, family, membership, CancellationToken.None);
         }
 
-        public async Task ExecuteAsync(string sql, params NpgsqlParameter[] parameters)
-        {
-            await using var connection = new NpgsqlConnection(ConnectionString);
-            await connection.OpenAsync();
-            await using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddRange(parameters);
-            await command.ExecuteNonQueryAsync();
-        }
-
         public async Task<T> ExecuteScalarAsync<T>(string sql)
         {
-            await using var connection = new NpgsqlConnection(ConnectionString);
+            await using var connection = new SqlConnection(ConnectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new SqlCommand(sql, connection);
             var result = await command.ExecuteScalarAsync();
             return (T)Convert.ChangeType(result ?? throw new InvalidOperationException("Expected a scalar result."), typeof(T));
         }
@@ -362,47 +239,36 @@ public sealed class FamilyRepositoryPostgreSqlTests
 
         private static async Task<(string AdministrativeConnectionString, string ConnectionString, string DatabaseName)> ProvisionDatabaseAsync(string baseConnectionString)
         {
-            var databaseName = $"kinhub_feat002_{Guid.NewGuid():N}";
-            var builder = new NpgsqlConnectionStringBuilder(baseConnectionString)
+            var databaseName = $"kinhub_{Guid.NewGuid():N}";
+            var administrativeBuilder = new SqlConnectionStringBuilder(baseConnectionString)
             {
-                Pooling = false
+                InitialCatalog = "master",
+                Pooling = false,
+                TrustServerCertificate = true
             };
 
-            var administrativeBuilder = new NpgsqlConnectionStringBuilder(builder.ConnectionString)
-            {
-                Database = "postgres",
-                Pooling = false
-            };
-
-            await using (var connection = new NpgsqlConnection(administrativeBuilder.ConnectionString))
+            await using (var connection = new SqlConnection(administrativeBuilder.ConnectionString))
             {
                 await connection.OpenAsync();
-                await using var command = new NpgsqlCommand($"CREATE DATABASE \"{databaseName}\";", connection);
+                await using var command = new SqlCommand($"CREATE DATABASE [{databaseName}];", connection);
                 await command.ExecuteNonQueryAsync();
             }
 
-            builder.Database = databaseName;
+            var builder = new SqlConnectionStringBuilder(administrativeBuilder.ConnectionString)
+            {
+                InitialCatalog = databaseName,
+                Pooling = false
+            };
+
             return (administrativeBuilder.ConnectionString, builder.ConnectionString, databaseName);
         }
 
         private static async Task DropDatabaseAsync(string administrativeConnectionString, string databaseName)
         {
-            await using var connection = new NpgsqlConnection(administrativeConnectionString);
+            await using var connection = new SqlConnection(administrativeConnectionString);
             await connection.OpenAsync();
-            await using (var terminate = new NpgsqlCommand(
-                $"""
-                SELECT pg_terminate_backend(pid)
-                FROM pg_stat_activity
-                WHERE datname = '{databaseName}'
-                  AND pid <> pg_backend_pid();
-                """,
-                connection))
-            {
-                await terminate.ExecuteNonQueryAsync();
-            }
-
-            await using var drop = new NpgsqlCommand($"DROP DATABASE IF EXISTS \"{databaseName}\";", connection);
-            await drop.ExecuteNonQueryAsync();
+            await using var command = new SqlCommand($"ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE IF EXISTS [{databaseName}];", connection);
+            await command.ExecuteNonQueryAsync();
         }
 
         private sealed class StaticTokenCredential : TokenCredential

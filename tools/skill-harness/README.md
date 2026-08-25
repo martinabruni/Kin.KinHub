@@ -19,7 +19,7 @@ La skill `implementation` e obbligatoria per le richieste di implementazione fea
 
 La stessa skill impone guardrail anti-regressione derivati dai fix reali del repository: verifica preventiva di versioni/runtime Azure supportati, grep repository-wide per rename configurativi, controllo dei contratti effettivi dei workflow, uso corretto di `functionAppConfig` su Flex Consumption, connessioni storage identity-based non ambigue, rigenerazione degli artefatti derivati e verifiche live post-deploy quando si toccano deploy o observability.
 
-La validazione infrastrutturale accetta soltanto `ci.yml`, `infrastructure.yml` e `release.yml`, rifiuta `pull_request_target`, richiede SHA completi per le action, controlla l'assenza di `uniqueString`/`namingPrefix`, SKU Standard Static Web Apps, what-if, deployment incremental e concurrency non cancellabile.
+La validazione infrastrutturale accetta soltanto `ci.yml`, `infrastructure.yml` e `release.yml`, rifiuta `pull_request_target`, richiede SHA completi per le action, impone il suffisso deterministico `uniqueString(subscription().id, resourceGroup().id, applicationName, environmentName)`, rifiuta `namingPrefix`, verifica SKU Standard Static Web Apps, what-if, deployment incremental, firewall/output Azure SQL e concurrency non cancellabile.
 
 Una skill puo dichiarare documenti passivi repository-relative nel frontmatter:
 

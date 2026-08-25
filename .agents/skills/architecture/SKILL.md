@@ -1,7 +1,7 @@
 ---
 id: kinhub-architecture
 name: KinHub architecture rules
-version: 0.2.0
+version: 0.3.0
 area: architecture
 description: Confini DDD, decisioni serverless e procedura per nuove convenzioni strutturali.
 references: docs/architecture/overview.md, docs/architecture/http-functions.md
@@ -23,7 +23,7 @@ Non serve per modifiche locali che seguono già una convenzione documentata.
 
 ## Componenti e servizi disponibili
 
-Monolite modulare DDD, SPA/PWA, API serverless, PostgreSQL e tool deterministici. Le HTTP Function usano una pipeline middleware corta e responsabilita esplicite invece di base class o executor generici.
+Monolite modulare DDD, SPA/PWA, API serverless, Azure SQL e tool deterministici. Le HTTP Function usano una pipeline middleware corta e responsabilita esplicite invece di base class o executor generici.
 
 ## API e interfacce
 
@@ -35,7 +35,7 @@ Vedi `docs/architecture/overview.md` e `templates/adr.md`.
 
 ## Dipendenze
 
-.NET, React, PostgreSQL, Azure Functions, Static Web Apps e Bicep.
+.NET, React, Azure SQL, Azure Functions, Static Web Apps e Bicep.
 
 ## Vincoli
 
@@ -50,6 +50,8 @@ Build completa, test dei confini interessati e validazione Bicep/tool.
 Registra decisione, aggiorna AGENTS, diagrammi/documenti, skill, test e change fragment.
 
 ## Changelog
+
+0.3.0: aggiorno il datastore relazionale condiviso ad Azure SQL e allineo i riferimenti architetturali.
 
 0.2.0: documentata la pipeline HTTP Functions centralizzata e sicura per default.
 

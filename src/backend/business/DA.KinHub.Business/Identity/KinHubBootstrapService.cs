@@ -31,7 +31,7 @@ public sealed class KinHubBootstrapService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family context could not be loaded.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family context could not be loaded.", exception);
         }
     }
 }

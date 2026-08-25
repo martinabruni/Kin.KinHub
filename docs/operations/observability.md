@@ -49,7 +49,7 @@ Configurare livelli separati per namespace KinHub e framework. EF Core command l
 Dopo il deploy verificare in Application Insights:
 
 1. request HTTP presenti e correlate;
-2. dependency PostgreSQL/HTTP presenti;
+2. dependency database/HTTP presenti;
 3. trace applicativi collegati allo stesso trace;
 4. metriche custom KinHub con sole dimensioni approvate;
 5. eccezioni tecniche senza dettagli sensibili;
@@ -60,7 +60,7 @@ Per FEAT-004 eseguire inoltre query aggregate per le tre operation famiglia e ve
 
 - ogni richiesta abbia una sola durata e un solo outcome;
 - i bucket `cursor`, `direction`, `hasPrevious` e `hasNext` contengano solo i valori previsti;
-- gli errori di cursore, dipendenza PostgreSQL e stato famiglia siano classificati senza dati funzionali;
+- gli errori di cursore, dipendenza database e stato famiglia siano classificati senza dati funzionali;
 - non siano presenti trace o log che includano il cursore opaco o il codice HMAC dell'invito.
 
 Se l'ingestione fallisce, controllare connection string, modalita `host.json`, credential dell'exporter, ruolo della managed identity e diagnostica dell'exporter. Non riattivare una seconda SDK come fallback permanente: ripristinare il pacchetto N-1 oppure correggere la configurazione e ridistribuire.

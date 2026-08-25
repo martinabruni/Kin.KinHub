@@ -23,9 +23,8 @@ param entraTenantId string
 param entraBackendAudience string
 param entraApiScopeName string
 param environmentName string
-param postgresHost string
-param postgresDatabaseName string
-param postgresRuntimeUsername string = 'kinhub_app'
+param databaseHost string
+param databaseName string
 param allowedOrigins array = []
 param enableVnetIntegration bool = false
 param virtualNetworkSubnetResourceId string = ''
@@ -91,10 +90,9 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         { name: 'Entra__Audience', value: entraBackendAudience }
         { name: 'Entra__Scope', value: entraApiScopeName }
         { name: 'Database__Mode', value: 'ManagedIdentity' }
-        { name: 'Database__Host', value: postgresHost }
-        { name: 'Database__Port', value: '5432' }
-        { name: 'Database__DatabaseName', value: postgresDatabaseName }
-        { name: 'Database__Username', value: postgresRuntimeUsername }
+        { name: 'Database__Host', value: databaseHost }
+        { name: 'Database__Port', value: '1433' }
+        { name: 'Database__DatabaseName', value: databaseName }
         { name: 'Database__RequireSsl', value: 'true' }
         { name: 'Database__ApplyMigrationsOnStartup', value: 'false' }
         { name: 'Storage__AccountUri', value: storageBlobEndpoint }

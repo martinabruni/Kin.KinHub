@@ -109,7 +109,7 @@ public sealed class FunctionContractTests
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Database:Mode"] = "ConnectionString",
-            ["Database:ConnectionString"] = "Host=localhost;Database=kinhub;Username=kinhub;Password=kinhub",
+            ["Database:ConnectionString"] = "Server=localhost,1433;Database=kinhub;User Id=sa;Password=LocalDevPassword123!;TrustServerCertificate=True;Encrypt=False",
             ["Database:ApplyMigrationsOnStartup"] = "false",
             ["Storage:AccountUri"] = "https://kinhubtest.blob.core.windows.net/",
             ["Storage:ContainerName"] = "documents"
@@ -146,7 +146,7 @@ public sealed class FunctionContractTests
             [EntraOptions.SectionName + ":Audience"] = "22222222-2222-2222-2222-222222222222",
             [EntraOptions.SectionName + ":Scope"] = "access_as_user",
             ["Database:Mode"] = "ConnectionString",
-            ["Database:ConnectionString"] = "Host=localhost;Database=kinhub;Username=kinhub;Password=kinhub",
+            ["Database:ConnectionString"] = "Server=localhost,1433;Database=kinhub;User Id=sa;Password=LocalDevPassword123!;TrustServerCertificate=True;Encrypt=False",
             ["Database:ApplyMigrationsOnStartup"] = "false",
             ["Storage:AccountUri"] = "https://kinhubtest.blob.core.windows.net/",
             ["Storage:ContainerName"] = "documents"
@@ -201,7 +201,7 @@ public sealed class FunctionContractTests
         var result = validator.Validate(null, new DA.KinHub.Infrastructure.Persistence.DatabaseOptions
         {
             Mode = "ConnectionString",
-            ConnectionString = "Host=localhost;Database=kinhub;Username=kinhub;Password=kinhub"
+            ConnectionString = "Server=localhost,1433;Database=kinhub;User Id=sa;Password=LocalDevPassword123!;TrustServerCertificate=True;Encrypt=False"
         });
 
         Assert.True(result.Failed);
@@ -215,9 +215,9 @@ public sealed class FunctionContractTests
         var result = validator.Validate(null, new DA.KinHub.Infrastructure.Persistence.DatabaseOptions
         {
             Mode = "ManagedIdentity",
-            Host = "kinhub.postgres.database.azure.com",
+            Host = "kinhub-dev-sql.database.windows.net",
             DatabaseName = "kinhub",
-            Username = "kinhub-runtime",
+            Port = 1433,
             RequireSsl = true
         });
 

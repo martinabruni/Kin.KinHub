@@ -1,6 +1,6 @@
-# Migrazioni PostgreSQL
+# Migrazioni Azure SQL
 
-La Function App può avere più istanze: non applicare migration indiscriminatamente al cold start. In locale la feature flag `Database:ApplyMigrationsOnStartup` abilita l'esecuzione protetta da advisory lock PostgreSQL e timeout esplicito.
+La Function App può avere più istanze: non applicare migration indiscriminatamente al cold start. In locale la feature flag `Database:ApplyMigrationsOnStartup` abilita l'esecuzione protetta da `sp_getapplock` e timeout esplicito.
 
 La slice KinHub FEAT-001 introduce lo schema `shared` con profili applicativi, famiglie e membership. Ogni migration deve quindi verificare sia `__EFMigrationsHistory` sia la presenza di vincoli univoci su identità esterna e membership attiva.
 
@@ -10,11 +10,11 @@ Per ambienti condivisi genera un bundle:
 dotnet ef migrations bundle --project src/backend/infrastructure/DA.KinHub.Infrastructure --configuration Release --force --output artifacts/migrations/kinhub-migrations
 ```
 
-In Azure ogni modifica sotto `src/backend/**`, incluse `Persistence/Migrations`, attiva il workflow backend senza rieseguire Bicep. Il bundle viene eseguito una volta dopo la creazione/verifica dei principal e prima di One Deploy, con una connection string costruita al volo da host/database/username Entra e token `oss-rdbms` come password temporanea. Verifica `__EFMigrationsHistory`, health readiness e log. Il rollback è una migration correttiva versionata; usa `dotnet ef database update <PreviousMigration>` soltanto dopo aver verificato la reversibilità e un backup.
+In Azure ogni modifica sotto `src/backend/**`, incluse `Persistence/Migrations`, attiva il workflow backend senza rieseguire Bicep. Il bundle viene eseguito una volta dopo la creazione/verifica dei principal e prima di One Deploy, con una connection string Azure SQL identity-based (`Authentication=Active Directory Default`). Verifica `__EFMigrationsHistory`, health readiness e log. Il rollback è una migration correttiva versionata; usa `dotnet ef database update <PreviousMigration>` soltanto dopo aver verificato la reversibilità e un backup.
 
 Prima della migration in ambienti condivisi verifica anche:
 
-- Microsoft Entra administrator presente sul server PostgreSQL;
+- Microsoft Entra administrator presente sul logical server Azure SQL;
 - principal database `kinhub_migrator` e `kinhub_app` creati o riallineati;
 - grant runtime sugli schemi applicativi `shared` e `kinlist` applicati dopo il bundle;
 - eventuale firewall rule temporanea del runner rimossa a fine workflow.

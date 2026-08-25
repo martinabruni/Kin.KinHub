@@ -14,8 +14,8 @@ internal sealed class FamilyInvitationConfiguration : IEntityTypeConfiguration<F
             table.HasCheckConstraint("CK_family_invitations_expires_after_created", "expires_at > created_at");
             table.HasCheckConstraint("CK_family_invitations_revoked_after_created", "revoked_at IS NULL OR revoked_at >= created_at");
             table.HasCheckConstraint("CK_family_invitations_consumed_after_created", "consumed_at IS NULL OR consumed_at >= created_at");
-            table.HasCheckConstraint("CK_family_invitations_hmac_non_empty", "octet_length(code_hmac) > 0");
-            table.HasCheckConstraint("CK_family_invitations_hmac_key_version_non_empty", "char_length(hmac_key_version) > 0");
+            table.HasCheckConstraint("CK_family_invitations_hmac_non_empty", "DATALENGTH(code_hmac) > 0");
+            table.HasCheckConstraint("CK_family_invitations_hmac_key_version_non_empty", "LEN(hmac_key_version) > 0");
         });
         builder.HasKey(invitation => invitation.Id);
         builder.Property(invitation => invitation.FamilyId)
@@ -32,7 +32,7 @@ internal sealed class FamilyInvitationConfiguration : IEntityTypeConfiguration<F
             .IsRequired();
         builder.Property(invitation => invitation.CodeHmac)
             .HasColumnName("code_hmac")
-            .HasColumnType("bytea")
+            .HasColumnType("varbinary(32)")
             .IsRequired();
         builder.Property(invitation => invitation.HmacKeyVersion)
             .HasColumnName("hmac_key_version")

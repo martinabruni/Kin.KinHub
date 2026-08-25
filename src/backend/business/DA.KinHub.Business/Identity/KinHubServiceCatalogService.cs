@@ -16,7 +16,7 @@ public sealed class KinHubServiceCatalogService(IKinServiceRepository kinService
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The KinService catalog could not be loaded.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The KinService catalog could not be loaded.", exception);
         }
     }
 

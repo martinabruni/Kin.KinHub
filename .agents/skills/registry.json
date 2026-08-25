@@ -6,14 +6,14 @@
     {
       "id": "kinhub-architecture",
       "name": "KinHub architecture rules",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "area": "architecture",
       "description": "Confini DDD, decisioni serverless e procedura per nuove convenzioni strutturali.",
       "path": ".agents/skills/architecture/SKILL.md",
       "references": [
         {
           "path": "docs/architecture/overview.md",
-          "checksum": "689af398689c278a621a366309d0ee568bf51f9a20deac01155a847c9e493f22"
+          "checksum": "1e4140d2dff315f7c13ce63cfffbdcc7faebe11696dfbee7e16e6feb98939110"
         },
         {
           "path": "docs/architecture/http-functions.md",
@@ -22,12 +22,12 @@
       ],
       "catalog": null,
       "catalogItems": [],
-      "checksum": "c547376ba94650e9edbe9026f1d81f0d654401c00cfa4d99963efe86566b6464"
+      "checksum": "078e89a15edc42829c595cbda6e06944ee6c4dc6f6f63df1c7a9bf7270e50cec"
     },
     {
       "id": "kinhub-backend",
       "name": "KinHub backend patterns",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "area": "backend",
       "description": "Servizi business, contratti DDD, Function endpoint e pattern infrastrutturali riutilizzabili.",
       "path": ".agents/skills/backend/SKILL.md",
@@ -38,7 +38,7 @@
         },
         {
           "path": "docs/operations/observability.md",
-          "checksum": "d05464d5e5f907df6f6d6aba6027bb1bcee0cf9f0a50a85f167fe5b0cfd90b3e"
+          "checksum": "739b52e19f579c605959defd71a5110b23a0084b20642ef792111bf304da4699"
         }
       ],
       "catalog": ".agents/skills/backend/catalog.json",
@@ -69,7 +69,7 @@
           "source": "src/backend/infrastructure/DA.KinHub.Infrastructure/Storage/BlobDocumentStorage.cs"
         }
       ],
-      "checksum": "585531a24f865ed4e9b1800e93333ee2c97c2087d46de416bf36fcd8b6c9840f"
+      "checksum": "c07b86112404e0ed1126f43f401a796e6b42be97bba322460ffa31f85670ca41"
     },
     {
       "id": "kinhub-documentation",
@@ -146,7 +146,7 @@
       "references": [
         {
           "path": "AGENTS.md",
-          "checksum": "e0c6a7e26bb4dcc50747611caec22df17a4fa75abce7c13c8fffeb1054b27b7f"
+          "checksum": "51a4d09491c10d24c8a6fbb5f5ed0670c631f52642bafa9fd493445215712185"
         },
         {
           "path": ".agents/skills/implementation/templates/implementation-progress.md",
@@ -160,7 +160,7 @@
     {
       "id": "kinhub-infrastructure",
       "name": "KinHub infrastructure and delivery patterns",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "area": "infrastructure",
       "description": "Bicep, Azure adoption safety and GitHub Actions delivery for the single dev environment.",
       "path": ".agents/skills/infrastructure/SKILL.md",
@@ -172,7 +172,7 @@
       ],
       "catalog": null,
       "catalogItems": [],
-      "checksum": "dcbfe021ae99b81c11f303a63a443100da0a2d1460ed7296b96e13a9e0c5e609"
+      "checksum": "185bbfe4288eeb2669a4e2a651d0c4700f5b7c456b616c9b0f050d722c3fa98c"
     },
     {
       "id": "kinhub-release",

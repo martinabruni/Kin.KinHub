@@ -8,16 +8,11 @@ param enablePurgeProtection bool = true
 param azureTenantId string
 param entraAdministratorPrincipalName string
 param entraAdministratorObjectId string
-@allowed(['User', 'Group', 'ServicePrincipal'])
-param entraAdministratorPrincipalType string = 'ServicePrincipal'
 param administratorLogin string
 @secure()
 param administratorPassword string
-param postgresName string
+param sqlServerName string
 param databaseName string = 'kinhub'
-param postgresSkuName string = 'Standard_B1ms'
-param postgresStorageSizeGB int = 32
-param postgresVersion string = '16'
 
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName
@@ -74,41 +69,48 @@ resource vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   }
 }
 
-resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
-  name: postgresName
+resource sqlServer 'Microsoft.Sql/servers@2021-11-01' = {
+  name: sqlServerName
   location: location
   tags: tags
-  sku: { name: postgresSkuName, tier: 'Burstable' }
   properties: {
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorPassword
-    version: postgresVersion
-    storage: { storageSizeGB: postgresStorageSizeGB, autoGrow: 'Enabled' }
-    backup: { backupRetentionDays: 7, geoRedundantBackup: 'Disabled' }
-    highAvailability: { mode: 'Disabled' }
-    network: { publicNetworkAccess: 'Enabled' }
-    authConfig: { activeDirectoryAuth: 'Enabled', passwordAuth: 'Disabled', tenantId: azureTenantId }
+    version: '12.0'
+    publicNetworkAccess: 'Enabled'
+    minimalTlsVersion: '1.2'
   }
 }
 
-resource entraAdministrator 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2024-08-01' = if (!empty(entraAdministratorPrincipalName) && !empty(entraAdministratorObjectId)) {
-  parent: postgres
-  name: entraAdministratorObjectId
+resource entraAdministrator 'Microsoft.Sql/servers/administrators@2021-11-01' = if (!empty(entraAdministratorPrincipalName) && !empty(entraAdministratorObjectId)) {
+  parent: sqlServer
+  name: 'ActiveDirectory'
   properties: {
-    principalName: entraAdministratorPrincipalName
-    principalType: entraAdministratorPrincipalType
+    administratorType: 'ActiveDirectory'
+    login: entraAdministratorPrincipalName
+    sid: entraAdministratorObjectId
     tenantId: azureTenantId
   }
 }
 
-resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2024-08-01' = {
-  parent: postgres
+resource database 'Microsoft.Sql/servers/databases@2021-11-01' = {
+  parent: sqlServer
   name: databaseName
-  properties: { charset: 'UTF8', collation: 'en_US.utf8' }
+  location: location
+  sku: {
+    name: 'Basic'
+    tier: 'Basic'
+    capacity: 5
+  }
+  properties: {
+    collation: 'SQL_Latin1_General_CP1_CI_AS'
+    maxSizeBytes: 2147483648
+    zoneRedundant: false
+  }
 }
 
-resource allowAzure 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2024-08-01' = {
-  parent: postgres
+resource allowAzure 'Microsoft.Sql/servers/firewallRules@2021-11-01' = {
+  parent: sqlServer
   name: 'AllowAzureServices'
   properties: { startIpAddress: '0.0.0.0', endIpAddress: '0.0.0.0' }
 }
@@ -120,6 +122,6 @@ output deploymentContainerName string = deploymentContainer.name
 output deploymentContainerUri string = '${storage.properties.primaryEndpoints.blob}${deploymentContainer.name}'
 output applicationContainerName string = applicationContainer.name
 output keyVaultName string = vault.name
-output postgresName string = postgres.name
-output postgresFqdn string = postgres.properties.fullyQualifiedDomainName
-output postgresDatabaseName string = database.name
+output sqlServerName string = sqlServer.name
+output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
+output sqlDatabaseName string = database.name

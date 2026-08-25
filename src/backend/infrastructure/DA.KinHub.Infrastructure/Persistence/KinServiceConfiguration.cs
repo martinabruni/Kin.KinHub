@@ -33,5 +33,16 @@ internal sealed class KinServiceConfiguration : IEntityTypeConfiguration<KinServ
             .IsUnique();
         builder.HasIndex(service => service.Route)
             .IsUnique();
+
+        builder.HasData(new
+        {
+            Id = KinServiceSeedData.KinListServiceId,
+            Key = "kinlist",
+            Route = "/kinlist",
+            IsActive = true,
+            IsPreconfigured = true,
+            CreatedAt = KinServiceSeedData.SeedTimestamp,
+            UpdatedAt = (DateTimeOffset?)null
+        });
     }
 }

@@ -49,8 +49,8 @@ public sealed class KinHubFamilyCreationFunctions(
         }
         catch (BusinessDependencyException)
         {
-            telemetry.RecordSignal(KinHubOperations.FamilyCreation, "postgresql_unavailable", "dependency");
-            operation.Complete("postgresql_unavailable");
+            telemetry.RecordSignal(KinHubOperations.FamilyCreation, "database_unavailable", "dependency");
+            operation.Complete("database_unavailable");
             throw;
         }
     }

@@ -28,17 +28,28 @@ internal sealed class ApplicationUserRepository(KinHubDbContext dbContext) : IAp
         try
         {
             var applicationUser = ApplicationUser.Create(externalIdentity, createdAt);
-            var results = await dbContext.ApplicationUsers
-                .FromSqlInterpolated($"""
-                    INSERT INTO shared.application_users ("Id", external_issuer, external_object_id, created_at, inactive_at)
-                    VALUES ({applicationUser.Id}, {externalIdentity.Issuer}, {externalIdentity.ObjectId}, {createdAt}, {null})
-                    ON CONFLICT (external_issuer, external_object_id)
-                    DO UPDATE SET external_issuer = EXCLUDED.external_issuer
-                    RETURNING "Id", external_issuer, external_object_id, created_at, inactive_at
-                    """)
-                .ToListAsync(cancellationToken);
+            var existing = await dbContext.ApplicationUsers
+                .SingleOrDefaultAsync(
+                    current => current.ExternalIssuer == externalIdentity.Issuer
+                        && current.ExternalObjectId == externalIdentity.ObjectId,
+                    cancellationToken);
 
-            return results.Single();
+            if (existing is not null)
+            {
+                return existing;
+            }
+
+            dbContext.ApplicationUsers.Add(applicationUser);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return applicationUser;
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is Microsoft.Data.SqlClient.SqlException sqlException && (sqlException.Number == 2601 || sqlException.Number == 2627))
+        {
+            return await dbContext.ApplicationUsers
+                .SingleAsync(
+                    current => current.ExternalIssuer == externalIdentity.Issuer
+                        && current.ExternalObjectId == externalIdentity.ObjectId,
+                    cancellationToken);
         }
         catch (Exception exception) when (IsRepositoryUnavailable(exception))
         {

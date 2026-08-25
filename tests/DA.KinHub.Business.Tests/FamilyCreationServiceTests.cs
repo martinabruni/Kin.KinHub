@@ -72,7 +72,7 @@ public sealed class FamilyCreationServiceTests
 
         var exception = await Assert.ThrowsAsync<BusinessDependencyException>(() => service.CreateFamilyAsync(user.ExternalIdentity, "Famiglia Bruni", CancellationToken.None));
 
-        Assert.Equal(BusinessErrorCodes.PostgreSqlUnavailable, exception.Code);
+        Assert.Equal(BusinessErrorCodes.DatabaseUnavailable, exception.Code);
     }
 
     [Fact]

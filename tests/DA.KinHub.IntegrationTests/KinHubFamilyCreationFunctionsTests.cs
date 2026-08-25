@@ -81,13 +81,13 @@ public sealed class KinHubFamilyCreationFunctionsTests
     public async Task CreateFamilyPropagatesDependencyFailure()
     {
         var functions = new KinHubFamilyCreationFunctions(
-            new ThrowingFamilyCreationService(new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "db unavailable")),
+            new ThrowingFamilyCreationService(new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "db unavailable")),
             CreateTelemetry());
         var request = CreateRequest(new { name = "Famiglia Bruni" });
 
         var exception = await Assert.ThrowsAsync<BusinessDependencyException>(() => functions.CreateFamily(request, CancellationToken.None));
 
-        Assert.Equal(BusinessErrorCodes.PostgreSqlUnavailable, exception.Code);
+        Assert.Equal(BusinessErrorCodes.DatabaseUnavailable, exception.Code);
     }
 
     private static KinHubTelemetry CreateTelemetry()

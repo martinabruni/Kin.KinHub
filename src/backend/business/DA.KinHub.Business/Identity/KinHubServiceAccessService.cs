@@ -27,7 +27,7 @@ public sealed class KinHubServiceAccessService(IKinServiceRepository kinServiceR
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The KinService access check failed.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The KinService access check failed.", exception);
         }
     }
 }

@@ -8,9 +8,9 @@ public sealed class KinHubDbContextFactory : IDesignTimeDbContextFactory<KinHubD
     public KinHubDbContext CreateDbContext(string[] args)
     {
         var connectionString = Environment.GetEnvironmentVariable("Database__ConnectionString")
-            ?? "Host=localhost;Port=5432;Database=kinhub;Username=kinhub;Password=kinhub";
+            ?? "Server=localhost,1433;Database=kinhub;User Id=sa;Password=LocalDevPassword123!;TrustServerCertificate=True;Encrypt=False";
         var options = new DbContextOptionsBuilder<KinHubDbContext>()
-            .UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly(typeof(KinHubDbContext).Assembly.FullName))
+            .UseSqlServer(connectionString, sqlServer => sqlServer.MigrationsAssembly(typeof(KinHubDbContext).Assembly.FullName))
             .Options;
         return new KinHubDbContext(options);
     }

@@ -51,7 +51,7 @@
         "locale": "it",
         "title": "Risoluzione dei problemi",
         "description": "Recuperare da pagine mancanti, errori, problemi di accesso o cache.",
-        "content": "- **Pagina non trovata:** torna alla Home e verifica l'indirizzo.\n- **Errore inatteso:** usa Riprova; se continua, annota versione, commit e passaggi eseguiti.\n- **Accesso:** verifica tenant, client ID, redirect URI, scope e consenso dell'API.\n- **Aggiornamento non visibile:** apri Note di rilascio e usa Aggiorna ora; evita refresh ripetuti manuali.\n- **API non pronta:** liveness verifica il processo, readiness include PostgreSQL. Controlla connessione e migration.",
+        "content": "- **Pagina non trovata:** torna alla Home e verifica l'indirizzo.\n- **Errore inatteso:** usa Riprova; se continua, annota versione, commit e passaggi eseguiti.\n- **Accesso:** verifica tenant, client ID, redirect URI, scope e consenso dell'API.\n- **Aggiornamento non visibile:** apri Note di rilascio e usa Aggiorna ora; evita refresh ripetuti manuali.\n- **API non pronta:** liveness verifica il processo, readiness include il database relazionale. Controlla connessione Azure SQL e migration.",
         "source": "docs/user-guide/it/troubleshooting.md"
       },
       {
@@ -109,7 +109,7 @@
         "locale": "en",
         "title": "Troubleshooting",
         "description": "Recover from missing pages, errors, sign-in problems, or stale caches.",
-        "content": "- **Page not found:** return Home and check the address.\n- **Unexpected error:** use Retry; if it continues, record the version, commit, and steps taken.\n- **Sign-in:** verify tenant, client ID, redirect URI, scope, and API consent.\n- **Update not visible:** open Release notes and use Refresh now; avoid repeated manual reloads.\n- **API not ready:** liveness checks the process, while readiness includes PostgreSQL. Check the connection and migrations.",
+        "content": "- **Page not found:** return Home and check the address.\n- **Unexpected error:** use Retry; if it continues, record the version, commit, and steps taken.\n- **Sign-in:** verify tenant, client ID, redirect URI, scope, and API consent.\n- **Update not visible:** open Release notes and use Refresh now; avoid repeated manual reloads.\n- **API not ready:** liveness checks the process, while readiness includes the relational database. Check the Azure SQL connection and migrations.",
         "source": "docs/user-guide/en/troubleshooting.md"
       },
       {

@@ -12,7 +12,7 @@ public static class BusinessErrorCodes
     public const string FamilyStateInconsistent = "family.stateInconsistent";
     public const string PaginationPageSizeInvalid = "pagination.pageSizeInvalid";
     public const string PaginationCursorInvalid = "pagination.cursorInvalid";
-    public const string PostgreSqlUnavailable = "dependency.postgresqlUnavailable";
+    public const string DatabaseUnavailable = "dependency.databaseUnavailable";
     public const string StorageUnavailable = "dependency.storageUnavailable";
     public const string ServiceAccessDenied = "service.accessDenied";
 }

@@ -17,7 +17,7 @@ Creare due app registration nel tenant External ID.
 3. Aggiungi il permesso delegato allo scope KinHub API e concedi il consenso richiesto.
 4. Configura `VITE_ENTRA_TENANT_ID`, `VITE_ENTRA_FRONTEND_CLIENT_ID`, `VITE_ENTRA_API_SCOPE`, `VITE_ENTRA_AUTHORITY` e `VITE_ENTRA_REDIRECT_URI` in fase build.
 
-Il tenant clienti External ID e distinto dal tenant Azure usato da OIDC e PostgreSQL. Configura `ENTRA_TENANT_ID` con il Directory (tenant) ID del tenant External ID e `ENTRA_INSTANCE`/`VITE_ENTRA_AUTHORITY` con `https://<tenant-subdomain>.ciamlogin.com/`. Il backend confronta il claim `scp` con il solo nome `access_as_user`; lo scope completo `api://<API_CLIENT_ID>/access_as_user` resta il valore richiesto dal frontend e da Postman.
+Il tenant clienti External ID e distinto dal tenant Azure usato da OIDC e Azure SQL. Configura `ENTRA_TENANT_ID` con il Directory (tenant) ID del tenant External ID e `ENTRA_INSTANCE`/`VITE_ENTRA_AUTHORITY` con `https://<tenant-subdomain>.ciamlogin.com/`. Il backend confronta il claim `scp` con il solo nome `access_as_user`; lo scope completo `api://<API_CLIENT_ID>/access_as_user` resta il valore richiesto dal frontend e da Postman.
 
 Per Postman crea una app registration separata `KinHub Postman`: non riusare `KinHub Web` e non aggiungere secret alla SPA. Associa il nuovo client allo stesso user flow, registra `https://oauth.pstmn.io/v1/callback` come redirect URI di tipo **Web**, aggiungi il permesso delegato `access_as_user`, concedi admin consent e crea un client secret limitato all'ambiente di sviluppo. Conserva il secret nel Postman Vault o in una variabile sensibile e non inserirlo nel repository o nei log.
 

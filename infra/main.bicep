@@ -1,17 +1,10 @@
 targetScope = 'resourceGroup'
 
+param applicationName string = 'kinhub'
 @allowed(['dev', 'test', 'prod'])
 param environmentName string = 'dev'
 param location string = 'italynorth'
 param staticWebAppLocation string = 'westeurope'
-param storageAccountName string
-param keyVaultName string
-param logAnalyticsName string
-param applicationInsightsName string
-param postgresServerName string
-param functionAppName string
-param functionPlanName string
-param staticWebAppName string
 @allowed(['dotnet-isolated'])
 param runtimeName string = 'dotnet-isolated'
 param runtimeVersion string = '10.0'
@@ -28,13 +21,11 @@ param entraInstance string
 param entraTenantId string
 param entraBackendAudience string
 param entraApiScopeName string = 'access_as_user'
-param postgresEntraAdministratorName string
-param postgresEntraAdministratorObjectId string
-@allowed(['User', 'Group', 'ServicePrincipal'])
-param postgresEntraAdministratorPrincipalType string = 'ServicePrincipal'
-param postgresAdminUsername string
+param sqlEntraAdministratorName string
+param sqlEntraAdministratorObjectId string
+param sqlAdministratorLogin string
 @secure()
-param postgresAdminPassword string
+param sqlAdministratorPassword string
 param allowedOrigins array = ['http://localhost:5173']
 param enableVnetIntegration bool = false
 param virtualNetworkSubnetResourceId string = ''
@@ -49,6 +40,21 @@ param tags object = {
   owner: 'martinabruni'
   costClassification: 'personal-low-cost'
 }
+
+var resourceNameSuffix = uniqueString(
+  subscription().id,
+  resourceGroup().id,
+  applicationName,
+  environmentName
+)
+var storageAccountName = toLower('${applicationName}${environmentName}${resourceNameSuffix}')
+var keyVaultName = toLower('${applicationName}-${environmentName}${resourceNameSuffix}')
+var logAnalyticsName = toLower('${applicationName}-${environmentName}-${resourceNameSuffix}-log')
+var applicationInsightsName = toLower('${applicationName}-${environmentName}-${resourceNameSuffix}-appi')
+var sqlServerName = toLower('${applicationName}-${environmentName}-${resourceNameSuffix}-sql')
+var functionAppName = toLower('${applicationName}-${environmentName}-${resourceNameSuffix}-func')
+var functionPlanName = toLower('${applicationName}-${environmentName}-${resourceNameSuffix}-fc')
+var staticWebAppName = toLower('${applicationName}-${environmentName}-${resourceNameSuffix}-web')
 
 module monitoring './modules/monitoring.bicep' = {
   name: 'monitoring'
@@ -69,14 +75,13 @@ module dataSecurity './modules/data-security.bicep' = {
     storageAccountName: storageAccountName
     keyVaultName: keyVaultName
     deploymentContainerName: deploymentBlobContainerName
-    postgresName: postgresServerName
+    sqlServerName: sqlServerName
     enablePurgeProtection: enablePurgeProtection
     azureTenantId: azureTenantId
-    entraAdministratorPrincipalName: postgresEntraAdministratorName
-    entraAdministratorObjectId: postgresEntraAdministratorObjectId
-    entraAdministratorPrincipalType: postgresEntraAdministratorPrincipalType
-    administratorLogin: postgresAdminUsername
-    administratorPassword: postgresAdminPassword
+    entraAdministratorPrincipalName: sqlEntraAdministratorName
+    entraAdministratorObjectId: sqlEntraAdministratorObjectId
+    administratorLogin: sqlAdministratorLogin
+    administratorPassword: sqlAdministratorPassword
     tags: tags
   }
 }
@@ -105,8 +110,8 @@ module functions './modules/functions.bicep' = {
     entraBackendAudience: entraBackendAudience
     entraApiScopeName: entraApiScopeName
     environmentName: environmentName
-    postgresHost: dataSecurity.outputs.postgresFqdn
-    postgresDatabaseName: dataSecurity.outputs.postgresDatabaseName
+    databaseHost: dataSecurity.outputs.sqlServerFqdn
+    databaseName: dataSecurity.outputs.sqlDatabaseName
     allowedOrigins: allowedOrigins
     enableVnetIntegration: enableVnetIntegration
     virtualNetworkSubnetResourceId: virtualNetworkSubnetResourceId
@@ -135,7 +140,7 @@ output deploymentContainerName string = dataSecurity.outputs.deploymentContainer
 output deploymentContainerUri string = dataSecurity.outputs.deploymentContainerUri
 output staticWebAppName string = staticWebApp.outputs.name
 output staticWebAppHostname string = staticWebApp.outputs.defaultHostname
-output postgresServerName string = dataSecurity.outputs.postgresName
-output postgresServerFqdn string = dataSecurity.outputs.postgresFqdn
-output postgresDatabaseName string = dataSecurity.outputs.postgresDatabaseName
+output sqlServerName string = dataSecurity.outputs.sqlServerName
+output sqlServerFqdn string = dataSecurity.outputs.sqlServerFqdn
+output sqlDatabaseName string = dataSecurity.outputs.sqlDatabaseName
 output keyVaultName string = dataSecurity.outputs.keyVaultName

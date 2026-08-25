@@ -170,12 +170,15 @@ function validateInfrastructureContracts() {
 
   const bicepFiles = walk(infrastructureRoot).filter((path) => path.endsWith(".bicep"));
   const bicep = bicepFiles.map((path) => normalizeText(readFileSync(path, "utf8"))).join("\n");
-  if (/uniqueString\s*\(/.test(bicep)) throw new Error("Bicep non deve usare uniqueString");
   if (/namingPrefix/.test(bicep)) throw new Error("Bicep non deve usare namingPrefix");
+  if (!/uniqueString\s*\(\s*subscription\(\)\.id,\s*resourceGroup\(\)\.id,\s*applicationName,\s*environmentName/s.test(normalizeText(readFileSync(join(infrastructureRoot, "main.bicep"), "utf8")))) {
+    throw new Error("infra/main.bicep deve derivare il suffisso deterministico con uniqueString(subscription().id, resourceGroup().id, applicationName, environmentName)");
+  }
   const staticWebApp = normalizeText(readFileSync(join(infrastructureRoot, "modules/static-web-app.bicep"), "utf8"));
   if (!/sku:\s*\{\s*name:\s*'Standard',\s*tier:\s*'Standard'/s.test(staticWebApp)) throw new Error("Static Web Apps deve usare SKU Standard");
   const infrastructure = normalizeText(readFileSync(join(workflowsRoot, "infrastructure.yml"), "utf8"));
   if (!/what-if/.test(infrastructure) || !/--mode\s+Incremental/.test(infrastructure)) throw new Error("Infrastructure workflow deve eseguire what-if e deployment incremental");
+  if (!/Microsoft\\.Sql/.test(infrastructure)) throw new Error("Infrastructure workflow deve bloccare anche modifiche distruttive su Microsoft.Sql");
   for (const file of ["infrastructure.yml", "release.yml"]) {
     const content = normalizeText(readFileSync(join(workflowsRoot, file), "utf8"));
     if (!/^concurrency:\s*$/m.test(content) || !/cancel-in-progress:\s*false/.test(content)) throw new Error(`${file}: concurrency senza cancel-in-progress false`);
@@ -189,6 +192,9 @@ function validateInfrastructureContracts() {
   }
   if (!/az staticwebapp secrets list/.test(release) || !/steps\.static_web_app_token\.outputs\.deployment_token/.test(release)) {
     throw new Error("Release workflow deve recuperare il token Static Web Apps tramite Azure OIDC");
+  }
+  if (!/sqlServerName/.test(release) || !/Authentication=Active Directory Default/.test(release) || !/Microsoft\.Sql\/servers/.test(release)) {
+    throw new Error("Release workflow deve usare output Azure SQL deterministici, firewall Microsoft.Sql e migration bundle identity-based");
   }
 }
 

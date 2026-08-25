@@ -134,7 +134,7 @@ public sealed class ActiveItemsPageService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The active items page could not be loaded.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The active items page could not be loaded.", exception);
         }
     }
 }

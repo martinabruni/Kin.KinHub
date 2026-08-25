@@ -8,7 +8,7 @@
     "Entra__Enabled": "false",
     "Database__Mode": "ConnectionString",
     "Database__ApplyMigrationsOnStartup": "false",
-    "Database__ConnectionString": "Host=localhost;Port=5432;Database=kinhub;Username=kinhub;Password=kinhub",
+    "Database__ConnectionString": "Server=localhost,1433;Database=kinhub;User Id=sa;Password=LocalDevPassword123!;TrustServerCertificate=True;Encrypt=False",
     "Storage__ConnectionString": "UseDevelopmentStorage=true",
     "Storage__ContainerName": "documents",
     "Pagination__ReadMax": "5000",

@@ -3,17 +3,17 @@ using System;
 using DA.KinHub.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace DA.KinHub.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(KinHubDbContext))]
-    [Migration("20260730202708_AddFamilyInvitations")]
-    partial class AddFamilyInvitations
+    [Migration("20260825103350_InitialSqlServerBaseline")]
+    partial class InitialSqlServerBaseline
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,32 +21,32 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("DA.KinHub.Domain.Families.Family", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedByApplicationUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by_application_user_id");
 
                     b.Property<DateTimeOffset?>("InactiveAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("inactive_at");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
@@ -60,41 +60,41 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<byte[]>("CodeHmac")
                         .IsRequired()
-                        .HasColumnType("bytea")
+                        .HasColumnType("varbinary(32)")
                         .HasColumnName("code_hmac");
 
                     b.Property<DateTimeOffset?>("ConsumedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("consumed_at");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedByApplicationUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by_application_user_id");
 
                     b.Property<DateTimeOffset>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("expires_at");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("family_id");
 
                     b.Property<string>("HmacKeyVersion")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("nvarchar(64)")
                         .HasColumnName("hmac_key_version");
 
                     b.Property<DateTimeOffset?>("RevokedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("revoked_at");
 
                     b.HasKey("Id");
@@ -111,9 +111,9 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("CK_family_invitations_expires_after_created", "expires_at > created_at");
 
-                            t.HasCheckConstraint("CK_family_invitations_hmac_key_version_non_empty", "char_length(hmac_key_version) > 0");
+                            t.HasCheckConstraint("CK_family_invitations_hmac_key_version_non_empty", "LEN(hmac_key_version) > 0");
 
-                            t.HasCheckConstraint("CK_family_invitations_hmac_non_empty", "octet_length(code_hmac) > 0");
+                            t.HasCheckConstraint("CK_family_invitations_hmac_non_empty", "DATALENGTH(code_hmac) > 0");
 
                             t.HasCheckConstraint("CK_family_invitations_revoked_after_created", "revoked_at IS NULL OR revoked_at >= created_at");
                         });
@@ -123,22 +123,22 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ApplicationUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("application_user_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("family_id");
 
                     b.Property<DateTimeOffset?>("InactiveAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("inactive_at");
 
                     b.HasKey("Id");
@@ -162,24 +162,24 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<string>("ExternalIssuer")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
+                        .HasColumnType("nvarchar(256)")
                         .HasColumnName("external_issuer");
 
                     b.Property<Guid>("ExternalObjectId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("external_object_id");
 
                     b.Property<DateTimeOffset?>("InactiveAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("inactive_at");
 
                     b.HasKey("Id");
@@ -193,32 +193,32 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("DA.KinHub.Domain.KinList.KinListCategory", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedByApplicationUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by_application_user_id");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("family_id");
 
                     b.Property<DateTimeOffset?>("InactiveAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("inactive_at");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("name");
 
                     b.Property<string>("NormalizedName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("normalized_name");
 
                     b.HasKey("Id");
@@ -235,47 +235,47 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("DA.KinHub.Domain.KinList.KinListItem", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("completed_at");
 
                     b.Property<Guid?>("CompletedByApplicationUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("completed_by_application_user_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("family_id");
 
                     b.Property<DateTimeOffset?>("InactiveAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("inactive_at");
 
                     b.Property<Guid?>("ModifiedByApplicationUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("modified_by_application_user_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("name");
 
                     b.Property<Guid>("OwnerApplicationUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("owner_application_user_id");
 
                     b.Property<int>("PositionInGroup")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("position_in_group");
 
                     b.Property<Guid>("RegistrationGroupId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("registration_group_id");
 
                     b.Property<long>("Revision")
@@ -285,16 +285,16 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<string>("Visibility")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("visibility");
 
                     b.HasKey("Id");
@@ -333,15 +333,15 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("DA.KinHub.Domain.KinList.KinListItemCategory", b =>
                 {
                     b.Property<Guid>("ItemId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("item_id");
 
                     b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("category_id");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("family_id");
 
                     b.HasKey("ItemId", "CategoryId");
@@ -360,26 +360,26 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("DA.KinHub.Domain.KinList.RegistrationGroup", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedByApplicationUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by_application_user_id");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("family_id");
 
                     b.Property<DateTimeOffset?>("InactiveAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("inactive_at");
 
                     b.Property<Guid>("RecordingId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("recording_id");
 
                     b.HasKey("Id");
@@ -399,26 +399,26 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("family_id");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("bit")
                         .HasColumnName("is_active");
 
                     b.Property<Guid>("KinServiceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("kin_service_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -437,34 +437,34 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("bit")
                         .HasColumnName("is_active");
 
                     b.Property<bool>("IsPreconfigured")
-                        .HasColumnType("boolean")
+                        .HasColumnType("bit")
                         .HasColumnName("is_preconfigured");
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
+                        .HasColumnType("nvarchar(128)")
                         .HasColumnName("key");
 
                     b.Property<string>("Route")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
+                        .HasColumnType("nvarchar(256)")
                         .HasColumnName("route");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -476,42 +476,53 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("kin_services", "shared");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a5f1cb74-e8f7-4cdc-8d95-f1ad39090d18"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 7, 30, 12, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsPreconfigured = true,
+                            Key = "kinlist",
+                            Route = "/kinlist"
+                        });
                 });
 
             modelBuilder.Entity("DA.KinHub.Domain.KinServices.KinServiceLocalization", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
+                        .HasColumnType("nvarchar(1000)")
                         .HasColumnName("description");
 
                     b.Property<Guid>("KinServiceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("kin_service_id");
 
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasMaxLength(8)
-                        .HasColumnType("character varying(8)")
+                        .HasColumnType("nvarchar(8)")
                         .HasColumnName("language");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -520,6 +531,26 @@ namespace DA.KinHub.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("kin_service_localizations", "shared");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("fc4db75e-7813-4ee7-92b5-2ce17fd90518"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 7, 30, 12, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Description = "Lista condivisa della famiglia.",
+                            KinServiceId = new Guid("a5f1cb74-e8f7-4cdc-8d95-f1ad39090d18"),
+                            Language = "it",
+                            Name = "KinList"
+                        },
+                        new
+                        {
+                            Id = new Guid("8ec4ca56-9097-4d4d-8c88-cc9224d1e0d0"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 7, 30, 12, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Description = "Shared list for the family.",
+                            KinServiceId = new Guid("a5f1cb74-e8f7-4cdc-8d95-f1ad39090d18"),
+                            Language = "en",
+                            Name = "KinList"
+                        });
                 });
 
             modelBuilder.Entity("DA.KinHub.Domain.Families.Family", b =>

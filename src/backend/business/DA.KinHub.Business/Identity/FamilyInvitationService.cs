@@ -44,7 +44,7 @@ public sealed class FamilyInvitationService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family invitation could not be created.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family invitation could not be created.", exception);
         }
     }
 
@@ -69,7 +69,7 @@ public sealed class FamilyInvitationService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family invitation could not be revoked.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family invitation could not be revoked.", exception);
         }
     }
 
@@ -110,7 +110,7 @@ public sealed class FamilyInvitationService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family invitation could not be consumed.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family invitation could not be consumed.", exception);
         }
         catch (DomainException exception)
         {

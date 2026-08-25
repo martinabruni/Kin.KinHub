@@ -9,4 +9,4 @@ description: Recuperare da pagine mancanti, errori, problemi di accesso o cache.
 - **Errore inatteso:** usa Riprova; se continua, annota versione, commit e passaggi eseguiti.
 - **Accesso:** verifica tenant, client ID, redirect URI, scope e consenso dell'API.
 - **Aggiornamento non visibile:** apri Note di rilascio e usa Aggiorna ora; evita refresh ripetuti manuali.
-- **API non pronta:** liveness verifica il processo, readiness include PostgreSQL. Controlla connessione e migration.
+- **API non pronta:** liveness verifica il processo, readiness include il database relazionale. Controlla connessione Azure SQL e migration.

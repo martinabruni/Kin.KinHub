@@ -51,7 +51,7 @@ public sealed class FamilyAccessServiceTests
 
         var exception = await Assert.ThrowsAsync<BusinessDependencyException>(() => service.CheckAccessAsync(new ExternalIdentity("https://issuer", Guid.NewGuid()), Guid.NewGuid(), CancellationToken.None));
 
-        Assert.Equal(BusinessErrorCodes.PostgreSqlUnavailable, exception.Code);
+        Assert.Equal(BusinessErrorCodes.DatabaseUnavailable, exception.Code);
     }
 
     [Fact]

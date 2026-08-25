@@ -39,7 +39,7 @@ public sealed class FamilyCreationService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family could not be created.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family could not be created.", exception);
         }
     }
 

@@ -10,11 +10,9 @@ public sealed class DatabaseOptions
 
     public string? Host { get; init; }
 
-    public int Port { get; init; } = 5432;
+    public int Port { get; init; } = 1433;
 
     public string? DatabaseName { get; init; }
-
-    public string? Username { get; init; }
 
     public bool RequireSsl { get; init; } = true;
 

@@ -47,7 +47,7 @@ public sealed class DatabaseOptionsValidator(IHostEnvironment environment) : IVa
 
         if (HasManagedIdentityFields(options))
         {
-            return ValidateOptionsResult.Fail("Database:Host, DatabaseName and Username must not be set when Database:Mode=ConnectionString.");
+            return ValidateOptionsResult.Fail("Database:Host, DatabaseName and Port must not be set when Database:Mode=ConnectionString.");
         }
 
         return ValidateOptionsResult.Success;
@@ -63,11 +63,6 @@ public sealed class DatabaseOptionsValidator(IHostEnvironment environment) : IVa
         if (string.IsNullOrWhiteSpace(options.DatabaseName) || options.DatabaseName.Contains('<', StringComparison.Ordinal))
         {
             return ValidateOptionsResult.Fail("Database:DatabaseName must contain a real value when Database:Mode=ManagedIdentity.");
-        }
-
-        if (string.IsNullOrWhiteSpace(options.Username) || options.Username.Contains('<', StringComparison.Ordinal))
-        {
-            return ValidateOptionsResult.Fail("Database:Username must contain a real value when Database:Mode=ManagedIdentity.");
         }
 
         if (!string.IsNullOrWhiteSpace(options.ConnectionString))
@@ -86,5 +81,5 @@ public sealed class DatabaseOptionsValidator(IHostEnvironment environment) : IVa
     private static bool HasManagedIdentityFields(DatabaseOptions options) =>
         !string.IsNullOrWhiteSpace(options.Host)
         || !string.IsNullOrWhiteSpace(options.DatabaseName)
-        || !string.IsNullOrWhiteSpace(options.Username);
+        || options.Port != 1433;
 }

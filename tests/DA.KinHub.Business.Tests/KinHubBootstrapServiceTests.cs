@@ -52,7 +52,7 @@ public sealed class KinHubBootstrapServiceTests
 
         var exception = await Assert.ThrowsAsync<BusinessDependencyException>(() => service.GetBootstrapAsync(new ExternalIdentity("https://issuer", Guid.NewGuid()), CancellationToken.None));
 
-        Assert.Equal(BusinessErrorCodes.PostgreSqlUnavailable, exception.Code);
+        Assert.Equal(BusinessErrorCodes.DatabaseUnavailable, exception.Code);
     }
 
     [Fact]

@@ -1,7 +1,7 @@
 ---
 id: kinhub-backend
 name: KinHub backend patterns
-version: 0.3.0
+version: 0.4.0
 area: backend
 description: Servizi business, contratti DDD, Function endpoint e pattern infrastrutturali riutilizzabili.
 catalog: catalog.json
@@ -42,7 +42,7 @@ Vedi `examples/DocumentStorage.example.cs`, `docs/architecture/http-functions.md
 
 ## Dipendenze
 
-.NET 10, Azure Functions Isolated 4.x, EF Core 10, Npgsql, Azure Blob Storage, OpenTelemetry e Azure Monitor.
+.NET 10, Azure Functions Isolated 4.x, EF Core 10 SQL Server, Azure Blob Storage, OpenTelemetry e Azure Monitor.
 
 ## Vincoli
 
@@ -65,6 +65,8 @@ Regola di dominio, validazione business, DI, configurazione critica, endpoint me
 Implementa nel layer corretto, applica prima la pipeline condivisa, aggiungi test/esempio, aggiorna catalogo e documentazione, crea fragment e rigenera registry. Se una nuova esigenza trasversale induce codice identico in piu endpoint, valuta un middleware o una factory mirata prima di aggiungere helper locali; non generalizzare un solo caso.
 
 ## Changelog
+
+0.4.0: aggiorno i riferimenti di persistenza dal provider Npgsql ad Azure SQL/SQL Server.
 
 0.3.0: aggiunti catalogo e riferimenti ai componenti riusabili della pipeline HTTP centralizzata e della factory Problem Details.
 

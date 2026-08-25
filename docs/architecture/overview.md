@@ -1,10 +1,10 @@
 # Architettura KinHub
 
-KinHub usa un monolite modulare pragmatico: una SPA React/PWA comunica via HTTPS con una Function App .NET 10 Isolated. Il backend separa dominio, business, infrastruttura e applicazione. PostgreSQL è l'unico datastore iniziale.
+KinHub usa un monolite modulare pragmatico: una SPA React/PWA comunica via HTTPS con una Function App .NET 10 Isolated. Il backend separa dominio, business, infrastruttura e applicazione. Azure SQL Database e il datastore relazionale condiviso.
 
 Il dominio non dipende da framework. Il business orchestra use case e contratti. Infrastructure contiene EF Core e integrazioni tecniche. Applications espone trigger HTTP e composition root.
 
-Azure usa una Function App per piano Flex Consumption, Static Web Apps per il frontend, PostgreSQL Flexible Server, Storage identity-based, Key Vault, Application Insights e Log Analytics. Il deploy del codice è separato dal deploy infrastrutturale.
+Azure usa una Function App per piano Flex Consumption, Static Web Apps per il frontend, Azure SQL Database Basic, Storage identity-based, Key Vault, Application Insights e Log Analytics. Il deploy del codice è separato dal deploy infrastrutturale.
 
 ## Decisioni
 

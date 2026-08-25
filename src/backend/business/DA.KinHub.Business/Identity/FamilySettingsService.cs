@@ -38,7 +38,7 @@ public sealed class FamilySettingsService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family details could not be loaded.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family details could not be loaded.", exception);
         }
     }
 
@@ -107,7 +107,7 @@ public sealed class FamilySettingsService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family members page could not be loaded.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family members page could not be loaded.", exception);
         }
         catch (FamilyPageCursorInvalidException exception)
         {
@@ -173,7 +173,7 @@ public sealed class FamilySettingsService(
         }
         catch (RepositoryUnavailableException exception)
         {
-            throw new BusinessDependencyException(BusinessErrorCodes.PostgreSqlUnavailable, "The family invitations page could not be loaded.", exception);
+            throw new BusinessDependencyException(BusinessErrorCodes.DatabaseUnavailable, "The family invitations page could not be loaded.", exception);
         }
         catch (FamilyPageCursorInvalidException exception)
         {

@@ -36,5 +36,27 @@ internal sealed class KinServiceLocalizationConfiguration : IEntityTypeConfigura
             .WithMany()
             .HasForeignKey(localization => localization.KinServiceId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasData(
+            new
+            {
+                Id = KinServiceSeedData.KinListLocalizationItId,
+                KinServiceId = KinServiceSeedData.KinListServiceId,
+                Language = "it",
+                Name = "KinList",
+                Description = "Lista condivisa della famiglia.",
+                CreatedAt = KinServiceSeedData.SeedTimestamp,
+                UpdatedAt = (DateTimeOffset?)null
+            },
+            new
+            {
+                Id = KinServiceSeedData.KinListLocalizationEnId,
+                KinServiceId = KinServiceSeedData.KinListServiceId,
+                Language = "en",
+                Name = "KinList",
+                Description = "Shared list for the family.",
+                CreatedAt = KinServiceSeedData.SeedTimestamp,
+                UpdatedAt = (DateTimeOffset?)null
+            });
     }
 }

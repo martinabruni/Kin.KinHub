@@ -1,18 +1,18 @@
 ---
-status: In review
+status: In progress
 ---
 
 # FEAT-016 - Riallineare infrastruttura e delivery dell'ambiente dev
 
 - **Codice**: `riallineamento-infrastruttura-dev`
 - **Tipo**: `operational`
-- **Readiness**: `blocked`
+- **Readiness**: `ready`
 - **Wave**: 5
 - **Risultato**: il repository adotta un provisioning dev esplicito, incrementale e verificabile con pipeline CI, infrastructure e release coerenti, senza discovery euristica o deploy distruttivi.
 
 ## Contesto autonomo
 
-Il repository aveva un entry point Bicep generativo, workflow di deploy separati e riferimenti distribuiti che non riflettevano piu i nomi Azure approvati per `dev`, la strategia build-once deploy-many e i controlli di sicurezza richiesti per un repository pubblico. Il refactor approvato consolida i moduli Bicep, sostituisce le pipeline GitHub Actions con tre workflow stabili, rende espliciti i nomi delle risorse esistenti e aggiorna harness e documentazione. La modifica e gia stata implementata nel repository, ma la validazione live su Azure resta bloccata finche la subscription approvata non e accessibile dalla pipeline OIDC e dalla sessione autorizzata per inventory e what-if.
+Il repository aveva un entry point Bicep generativo, workflow di deploy separati e riferimenti distribuiti che non riflettevano piu i nomi Azure approvati per `dev`, la strategia build-once deploy-many e i controlli di sicurezza richiesti per un repository pubblico. Il refactor approvato consolida i moduli Bicep, sostituisce le pipeline GitHub Actions con tre workflow stabili, rende espliciti i nomi delle risorse esistenti e aggiorna harness e documentazione. La baseline e gia stata implementata, ma la feature e riaperta dalla CR `cr-deterministic-naming-azure-sql.md`: il nuovo target e una subscription con resource group vuoto, i nomi completi espliciti devono essere sostituiti da un suffisso deterministico e PostgreSQL/Npgsql devono essere sostituiti da Azure SQL Database Basic/EF Core SQL Server. La CR e la fonte piu recente per naming e provider; piano e linee guida originari restano storico autorevole per i vincoli non sostituiti.
 
 ## Scope
 
@@ -26,6 +26,7 @@ Il repository aveva un entry point Bicep generativo, workflow di deploy separati
 - Skill `infrastructure`, aggiornamento della skill `implementation`, validazioni harness estese e rigenerazione del registry.
 - Aggiornamento di prompt, README, documentazione operativa e riferimenti repository-wide ai nuovi file autorevoli.
 - Conservazione del piano operativo in `feature.plan.md` e delle linee guida infrastrutturali nella cartella della feature come fonte backlog dedicata.
+- Applicazione della CR `cr-deterministic-naming-azure-sql.md`, che sostituisce i nomi completi adottati, il divieto di `uniqueString` e la scelta PostgreSQL/Npgsql con naming deterministico e Azure SQL Database Basic.
 
 ### Escluso
 
@@ -55,7 +56,9 @@ Il repository aveva un entry point Bicep generativo, workflow di deploy separati
 
 | ID | Stato | Impatto | Evidenza per chiudere |
 |---|---|---|---|
-| GATE-003 | open | Senza accesso alla subscription `a148a62f-0509-4dd5-a61f-0043b182d5f1` non si possono completare inventory live, validate, what-if e smoke test Azure | Sessione o pipeline OIDC con accesso alla subscription, artifact what-if del workflow `infrastructure.yml`, verifica live di runtime, `health/live`, `/api/version` e telemetria |
+| GATE-003 | closed | L'accesso OIDC al target Azure non era ancora confermato | La responsabile conferma che l'accesso al target e consentito; l'implementazione deve verificarlo con Infrastructure e Release live |
+| GATE-005 | closed | La strategia dati tra vecchia subscription PostgreSQL e nuovo Azure SQL non era ancora definita | La responsabile approva un nuovo database `dev` vuoto, senza migrazione dati dalla subscription precedente |
+| GATE-006 | closed | La compatibilita del codice pubblico di indisponibilita database non era ancora definita | La responsabile approva la rinomina coordinata a `dependency.databaseUnavailable` |
 
 ### Parallelismo consentito
 
@@ -74,7 +77,7 @@ Nessuno. La feature modifica file autorevoli condivisi in `infra/`, `.github/wor
 ### Touchpoint previsti
 
 - **Dominio/business**: Non pertinente salvo preservare i contratti applicativi gia esposti dal backend condiviso.
-- **Persistenza/migration**: `src/backend/infrastructure/DA.KinHub.Infrastructure/Persistence`, migration bundle, `docs/operations/database-migrations.md` e grant PostgreSQL identity-based usati dalla release.
+- **Persistenza/migration**: `src/backend/infrastructure/DA.KinHub.Infrastructure/Persistence`, migration bundle, `docs/operations/database-migrations.md` e grant Azure SQL identity-based usati dalla release.
 - **API/integrazioni**: `src/backend/applications/DA.KinHub.Functions/OpenApi/OpenApiDocumentProvider.cs`, `openapi.yaml`, smoke test `health/live` e `/api/version`, collegamento Static Web Apps `/api`.
 - **Frontend/UX**: `src/frontend/public/staticwebapp.config.json`, shell pubblicata da `release.yml`, nessuna nuova UX di prodotto.
 - **Infrastruttura/configurazione**: `infra/main.bicep`, `infra/environments/dev.bicepparam`, `infra/modules/*`, `.github/workflows/ci.yml`, `.github/workflows/infrastructure.yml`, `.github/workflows/release.yml`, `.github/CODEOWNERS`, `scripts/package-backend.*`, `tools/skill-harness/index.mjs`.
@@ -83,11 +86,13 @@ Nessuno. La feature modifica file autorevoli condivisi in `infra/`, `.github/wor
 ### Errori, sicurezza e osservabilita
 
 - Le pull request non devono usare `pull_request_target`, secret Azure o action non fissate a SHA completo.
-- Il provisioning blocca `Delete`, replacement e cambi distruttivi su PostgreSQL o rete e non espone valori sensibili negli output Bicep.
+- Il provisioning blocca `Delete`, replacement e cambi distruttivi su Azure SQL o rete e non espone valori sensibili negli output Bicep.
 - Release e workflow loggano solo metadati tecnici a bassa cardinalita; non registrano token, secret, PII, codici o hostname scoperti euristicamente.
 - Le verifiche finali devono distinguere esplicitamente cio che e stato validato localmente da cio che resta bloccato in assenza di accesso Azure.
 
 ## Criteri di accettazione
+
+I criteri AC-091-AC-096 descrivono la baseline originaria. Per naming e provider database sono sostituiti dai criteri AC-CR-001-AC-CR-010 di `cr-deterministic-naming-azure-sql.md`; restano applicabili per struttura workflow, deployment incrementale, build-once deploy-many, documentazione e verifiche non contraddette dalla CR.
 
 ### AC-091 - Struttura Bicep esplicita e incrementale
 
@@ -128,7 +133,7 @@ Nessuno. La feature modifica file autorevoli condivisi in `infra/`, `.github/wor
 
 - **Dato** la feature implementata e portata in review
 - **Quando** si valuta la chiusura della feature
-- **Allora** inventory live, validate Azure, what-if, smoke test `health/live` e `/api/version` via Static Web Apps e verifica telemetria devono risultare eseguiti con credenziali corrette; in assenza di accesso alla subscription la feature resta `blocked` e non puo essere marcata `Completed`
+- **Allora** inventory live, validate Azure, what-if, smoke test `health/live` e `/api/version` via Static Web Apps e verifica telemetria devono risultare eseguiti con credenziali corrette; l'esito live resta obbligatorio prima di `Completed`
 - **Fonte**: piano sezione 11; linee guida sezioni 11 e 14; regole backlog sugli stati
 
 ## Strategia di verifica
@@ -143,9 +148,9 @@ Nessuno. La feature modifica file autorevoli condivisi in `infra/`, `.github/wor
 
 ## Definition of Done
 
-- Tutti i criteri di accettazione sono verificati o, se bloccati da GATE-003, la feature resta esplicitamente `blocked` e `In review`.
+- I gate della CR sono chiusi e tutti i criteri di accettazione della baseline e della CR sono verificati prima del passaggio a `In review`.
 - I workflow dichiarati sono gli unici presenti sotto `.github/workflows/` e i consumer dei file rinominati sono aggiornati repository-wide.
 - Bicep, packaging, harness, registry, documentazione operativa e change fragment bilingue sono aggiornati e coerenti con i file autorevoli del refactor.
 - Build, test, bundle migration, package backend, validatori repository e verifiche Bicep applicabili sono eseguiti e riportati.
 - Non sono introdotti nuovi elementi out of scope, secret, risorse Azure non approvate o dipendenze architetturali vietate.
-- La feature non puo essere marcata `Completed` senza una verifica live su Azure della subscription target e senza comando esplicito della responsabile umana.
+- La feature non puo essere marcata `Completed` senza una verifica live sulla nuova subscription target, completamento della CR e comando esplicito della responsabile umana.

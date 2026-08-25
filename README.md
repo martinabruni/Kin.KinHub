@@ -17,7 +17,7 @@ Versione corrente: `0.1.0`. Lingua predefinita: italiano; lingua supportata e fa
 
 ## Stack
 
-Backend .NET 10, Azure Functions 4.x Isolated Worker Linux Flex Consumption, EF Core e PostgreSQL. Frontend React 19, TypeScript strict, Vite, shadcn/ui/Radix, i18next e MSAL. Infrastruttura Bicep; pipeline GitHub Actions; Azure Static Web Apps, Storage, Key Vault, Application Insights e Log Analytics.
+Backend .NET 10, Azure Functions 4.x Isolated Worker Linux Flex Consumption, EF Core e Azure SQL Database. Frontend React 19, TypeScript strict, Vite, shadcn/ui/Radix, i18next e MSAL. Infrastruttura Bicep; pipeline GitHub Actions; Azure Static Web Apps, Storage, Key Vault, Application Insights e Log Analytics.
 
 ## Architettura e repository
 
@@ -41,7 +41,7 @@ Consulta [AGENTS.md](AGENTS.md) prima di modificare il repository e [l'overview]
 
 - .NET 10 SDK
 - Node.js 22 e npm 10+
-- PostgreSQL 16+
+- SQL Server 2022 o Azure SQL Edge compatibile per sviluppo locale
 - Azure Functions Core Tools 4
 - Azurite per `AzureWebJobsStorage` locale
 - Azure CLI con Bicep CLI
@@ -51,13 +51,13 @@ Consulta [AGENTS.md](AGENTS.md) prima di modificare il repository e [l'overview]
 
 ### Database
 
-Crea database e utente locali `kinhub`; la password di esempio è esclusivamente locale. Copia il file impostazioni:
+Crea un database SQL Server locale `kinhub`; la password di esempio è esclusivamente locale. Copia il file impostazioni:
 
 ```powershell
 Copy-Item src/backend/applications/DA.KinHub.Functions/local.settings.json.example src/backend/applications/DA.KinHub.Functions/local.settings.json
 ```
 
-Avvia Azurite e PostgreSQL, quindi applica le migration:
+Avvia Azurite e SQL Server locale, quindi applica le migration:
 
 ```bash
 dotnet tool install --global dotnet-ef --version 10.*
@@ -190,7 +190,7 @@ Il frontend usa popup con selezione account; il backend convalida JWT e scope. N
 
 - piano `FC1/FlexConsumption` dedicato e Function App Linux .NET 10 isolated;
 - Storage LRS e container One Deploy privato;
-- PostgreSQL Flexible Server Burstable `Standard_B1ms`, 32 GiB, con Microsoft Entra admin e autenticazione passwordless per runtime/migration;
+- Azure SQL logical server con database singolo `Basic` DTU, Microsoft Entra admin e autenticazione identity-based per runtime/migration;
 - Key Vault RBAC, Application Insights e Log Analytics;
 - Static Web Apps Standard in `westeurope`, collegata alla Function tramite `/api`.
 
@@ -202,7 +202,7 @@ Validazione/deploy manuale:
 az bicep build --file infra/main.bicep
 mkdir -p artifacts/infra
 az bicep build-params --file infra/environments/dev.bicepparam --outfile artifacts/infra/dev.parameters.json
-az deployment group validate --resource-group rg-kinhub-dev --template-file infra/main.bicep --parameters @artifacts/infra/dev.parameters.json postgresAdminUsername='<VALUE>' postgresAdminPassword='<VALUE>' azureTenantId='<AZURE_TENANT_ID>' entraInstance='https://<TENANT_SUBDOMAIN>.ciamlogin.com/' entraTenantId='<ENTRA_TENANT_ID>' entraBackendAudience='<ENTRA_BACKEND_CLIENT_ID>' postgresEntraAdministratorName='<POSTGRES_ENTRA_ADMIN_NAME>' postgresEntraAdministratorObjectId='<POSTGRES_ENTRA_ADMIN_OBJECT_ID>'
+az deployment group validate --resource-group rg-kinhub-dev --template-file infra/main.bicep --parameters @artifacts/infra/dev.parameters.json sqlAdministratorLogin='<VALUE>' sqlAdministratorPassword='<VALUE>' azureTenantId='<AZURE_TENANT_ID>' entraInstance='https://<TENANT_SUBDOMAIN>.ciamlogin.com/' entraTenantId='<ENTRA_TENANT_ID>' entraBackendAudience='<ENTRA_BACKEND_CLIENT_ID>' sqlEntraAdministratorName='<SQL_ENTRA_ADMIN_NAME>' sqlEntraAdministratorObjectId='<SQL_ENTRA_ADMIN_OBJECT_ID>'
 az deployment group what-if --name kinhub-dev-infrastructure --resource-group rg-kinhub-dev --template-file infra/main.bicep --parameters @artifacts/infra/dev.parameters.json
 ```
 
@@ -225,8 +225,8 @@ Azure login usa federated credential OIDC. Il workflow recupera il token Static 
 | `AZURE_CLIENT_ID` | OIDC service principal/client | configurazione manuale/federated credential |
 | `AZURE_TENANT_ID` | tenant Azure | configurazione manuale |
 | `AZURE_SUBSCRIPTION_ID` | subscription target | configurazione manuale |
-| `POSTGRES_ADMIN_USERNAME` | bootstrap del server PostgreSQL Flexible Server | scelto manualmente; usato solo in provisioning infrastrutturale |
-| `POSTGRES_ADMIN_PASSWORD` | bootstrap del server PostgreSQL Flexible Server | generata e conservata come secret; non usata dal runtime applicativo |
+| `SQL_ADMIN_LOGIN` | bootstrap del logical server Azure SQL | scelto manualmente; usato solo in provisioning infrastrutturale |
+| `SQL_ADMIN_PASSWORD` | bootstrap del logical server Azure SQL | generata e conservata come secret; non usata dal runtime applicativo |
 | `ENTRA_TENANT_ID` | tenant clienti External ID, distinto dal tenant Azure | app registration External ID |
 | `ENTRA_FRONTEND_CLIENT_ID` | build SPA | app registration frontend |
 | `ENTRA_BACKEND_AUDIENCE` | Application (client) ID GUID dell'API, uguale al claim `aud` v2 | app registration API |
@@ -251,8 +251,8 @@ Non creare Variables per memoria, scala, concorrenza o always-ready: appartengon
 gh secret set AZURE_CLIENT_ID --body "<VALUE>"
 gh secret set AZURE_TENANT_ID --body "<VALUE>"
 gh secret set AZURE_SUBSCRIPTION_ID --body "<VALUE>"
-gh secret set POSTGRES_ADMIN_USERNAME --body "<VALUE>"
-gh secret set POSTGRES_ADMIN_PASSWORD --body "<VALUE>"
+gh secret set SQL_ADMIN_LOGIN --body "<VALUE>"
+gh secret set SQL_ADMIN_PASSWORD --body "<VALUE>"
 gh secret set ENTRA_TENANT_ID --body "<VALUE>"
 gh secret set ENTRA_FRONTEND_CLIENT_ID --body "<VALUE>"
 gh secret set ENTRA_BACKEND_AUDIENCE --body "<VALUE>"
@@ -270,14 +270,14 @@ gh variable set ENTRA_INSTANCE --body "https://<TENANT_SUBDOMAIN>.ciamlogin.com/
 
 ## Costi, cold start e troubleshooting
 
-Flex scala a zero e non usa always-ready in dev. PostgreSQL Burstable è il costo persistente principale e può essere arrestato quando non usato. Mantieni startup leggero e telemetria campionata.
+Flex scala a zero e non usa always-ready in dev. Azure SQL Basic e il costo persistente principale; mantieni startup leggero e telemetria campionata.
 
-- Startup fallisce: controlla `DOTNET_ENVIRONMENT`, placeholder Entra e impostazioni `Database__Mode`/`Database__Host`/`Database__Username`.
+- Startup fallisce: controlla `DOTNET_ENVIRONMENT`, placeholder Entra e impostazioni `Database__Mode`/`Database__Host`/`Database__DatabaseName`.
 - `host.json` non trovato: ricrea il package con lo script e non zippare la cartella padre.
 - Storage 403: verifica managed identity, ruolo Blob Data Owner, container privato e propagazione RBAC.
 - Function non scala/provisiona: verifica `italynorth`, quota Flex e registrazione provider.
 - Frontend su F5 restituisce 404: verifica che `staticwebapp.config.json` sia nel `dist`.
-- Readiness 503: controlla PostgreSQL, principal Entra, grant runtime e migration.
+- Readiness 503: controlla Azure SQL, principal Entra, grant runtime e migration.
 
 ## Passaggi manuali
 

@@ -2,8 +2,8 @@ using System.Data.Common;
 using DA.KinHub.Domain.Common;
 using DA.KinHub.Domain.Families;
 using DA.KinHub.Domain.KinServices;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 
 namespace DA.KinHub.Infrastructure.Persistence;
 
@@ -85,7 +85,7 @@ internal sealed class FamilyRepository(KinHubDbContext dbContext) : IFamilyRepos
     private Task LockApplicationUserAsync(Guid applicationUserId, CancellationToken cancellationToken)
     {
         return dbContext.ApplicationUsers
-            .FromSqlInterpolated($"SELECT * FROM shared.application_users WHERE \"Id\" = {applicationUserId} FOR UPDATE")
+            .FromSqlInterpolated($"SELECT * FROM shared.application_users WITH (UPDLOCK, ROWLOCK) WHERE [Id] = {applicationUserId}")
             .SingleAsync(cancellationToken);
     }
 
@@ -102,9 +102,9 @@ internal sealed class FamilyRepository(KinHubDbContext dbContext) : IFamilyRepos
     }
 
     private static bool IsExpectedConcurrentConflict(DbUpdateException exception)
-        => exception.InnerException is PostgresException postgresException
-           && postgresException.SqlState == PostgresErrorCodes.UniqueViolation
-           && string.Equals(postgresException.ConstraintName, SingleActiveMembershipConstraint, StringComparison.Ordinal);
+        => exception.InnerException is SqlException sqlException
+           && (sqlException.Number == 2601 || sqlException.Number == 2627)
+           && sqlException.Message.Contains(SingleActiveMembershipConstraint, StringComparison.Ordinal);
 
     private static bool IsRepositoryUnavailable(Exception exception) =>
         exception is TimeoutException

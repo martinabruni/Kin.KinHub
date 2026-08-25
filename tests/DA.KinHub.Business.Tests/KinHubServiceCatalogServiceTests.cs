@@ -26,7 +26,7 @@ public sealed class KinHubServiceCatalogServiceTests
 
         var exception = await Assert.ThrowsAsync<BusinessDependencyException>(() => service.GetCatalogAsync(Guid.NewGuid(), "it", CancellationToken.None));
 
-        Assert.Equal(BusinessErrorCodes.PostgreSqlUnavailable, exception.Code);
+        Assert.Equal(BusinessErrorCodes.DatabaseUnavailable, exception.Code);
     }
 
     private sealed class StubKinServiceRepository : IKinServiceRepository

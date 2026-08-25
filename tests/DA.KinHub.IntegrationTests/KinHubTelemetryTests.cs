@@ -135,7 +135,7 @@ public sealed class KinHubTelemetryTests
         using var telemetry = new KinHubTelemetry(new BuildInfoProvider(Options.Create(new RuntimeOptions { AppName = "KinHub", ApiVersion = "1.0", Environment = "Test" })));
         telemetry.RecordSignal(KinHubOperations.FamilyCreation, "attempt");
         telemetry.RecordSignal(KinHubOperations.FamilyCreation, "concurrent_conflict", "concurrency");
-        telemetry.RecordSignal(KinHubOperations.FamilyCreation, "postgresql_unavailable", "dependency");
+        telemetry.RecordSignal(KinHubOperations.FamilyCreation, "database_unavailable", "dependency");
 
         var measurements = Snapshot(longMeasurements, measurementsLock);
         Assert.Contains(measurements, measurement => measurement.Instrument == "kinhub.signals"
@@ -148,7 +148,7 @@ public sealed class KinHubTelemetryTests
             && measurement.ErrorCategory == "concurrency");
         Assert.Contains(measurements, measurement => measurement.Instrument == "kinhub.signals"
             && measurement.Operation == KinHubOperations.FamilyCreation
-            && measurement.Outcome == "postgresql_unavailable"
+            && measurement.Outcome == "database_unavailable"
             && measurement.ErrorCategory == "dependency");
     }
 
